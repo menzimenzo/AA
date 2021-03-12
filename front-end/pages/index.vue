@@ -85,15 +85,10 @@ export default {
             this.loading = false
         })
     },
+    // Fonction permettant d'afficher dynamiquement la partie Login
     SeLoguer: function(e) {
-      if (e === "AS")
-      {
-        this.b_MN = false;
-      }
-      if (e === "MN")
-      {
-        this.b_AS = false;
-      }
+      if (e === "AS")  {this.b_MN = false;}
+      if (e === "MN")  {this.b_AS = false;}
     }
 
   },
