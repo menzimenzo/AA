@@ -1,17 +1,21 @@
 <template>
-  <b-container>
-    <b-row class="text-center">
-      <b-col cols="3">
-        <b-img :src="require('assets/image_gauche.png')" style="width: 100%;  margin:15% 0; "/>
+  <b-container >
+    <b-row style="
+    margin-top:1%">
+      <b-col  class="col-12 col-md-4">
+        <b-img :src="require('assets/MainAisAqua.png')" width="365%"/>
+
       </b-col>
-      <b-col cols="6">
-        <p class="srav-welcome-title">Je suis Intervenant Savoir Rouler à Vélo, <br>je m’identifie et renseigne<br>mes interventions</p>
-      </b-col>
-      <b-col cols="3">
-        <b-img :src="require('assets/‎image_droite.png')" style="width: 100%;margin:15% 0;" />
+      <b-col   class="col-8 col-md-4" >
+        <b-row >
+          <p class="aa-bouton-connexion" >▷ Je suis maître nageur/formateur<br>Je m’identifie et renseigne mes données<br><br></p>
+        </b-row>
+        <b-row >
+          <p class="aa-bouton-connexion" >▷ J'appartiens à une structure actrice du dispositif AAQ<br><br></p>
+        </b-row>
       </b-col>
     </b-row>
-
+  
     <b-row class="text-center">
       <b-col cols="12">
         <b-img class="fcBtn" @click="connexionutilisateur()"  fluid  :src="require('assets/FCboutons-10.png')" border="0" style="size: 100%;" />
@@ -33,12 +37,6 @@
     <b-row>
       <b-col cols="8" offset-md="2">
         <connectionForm @submit="login"/>
-      </b-col>
-    </b-row>
-
-    <b-row class="mt-3">
-      <b-col cols="12" class="text-center" >      
-        <b-img :src="require('assets/infographie.png')" style="width:75%" />    
       </b-col>
     </b-row>
   </b-container>
@@ -113,12 +111,26 @@ export default {
   cursor: pointer;
   margin-bottom: 10px;
 }
-.srav-welcome-title {
-  margin-top: 5vw;
-  font-size: 150%;
-  text-transform: uppercase;
+.aa-welcome-title {
+  margin-top: 0vw;
+  font-size: 3em;
+  font:bold;
+  font-family: Arial ;
+  --text-transform: uppercase;
   color: rgb(0,0,128)
 }
+.aa-bouton-connexion {
+  cursor: pointer;
+  padding-left: 1vw;
+  width: 50em;
+  padding-right: 1vw;
+  font-size: 100%;
+  font-family: sans-serif ;
+  text-align: left;
+  background-color: #104F9F;
+  color:white
+}
+
 .link-alignement {
   min-width: 80%;
   min-height: 56px;
@@ -144,7 +156,7 @@ export default {
   margin-left: 20px;
 }
 @media screen and (min-width: 2000px) {
-  .srav-welcome-title {
+  .aa-welcome-title {
     margin-top: 100px;
   }
 }
