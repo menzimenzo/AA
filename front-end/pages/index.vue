@@ -8,14 +8,14 @@
       </b-col>
       <b-col   class="col-8 col-md-4" >
         <b-row >
-          <p class="aa-bouton-connexion"  v-if="this.b_MN==='true'" @click="SeLoguer('MN')">▷ Je suis maître nageur/formateur<br>Je m’identifie et renseigne mes données<br><br></p>
+          <p class="aa-bouton-connexion"  v-if="this.b_MN" @click="SeLoguer('MN')">▷ Je suis maître nageur/formateur<br>Je m’identifie et renseigne mes données<br><br></p>
         </b-row>
         <b-row >
-          <p class="aa-bouton-connexion" v-if="this.b_AS==='true'" @click="SeLoguer('AS')">▷ J'appartiens à une structure actrice du dispositif AAQ<br><br></p>
+          <p class="aa-bouton-connexion" v-if="this.b_AS" @click="SeLoguer('AS')">▷ J'appartiens à une structure actrice du dispositif AAQ<br><br></p>
         </b-row>
       </b-col>
     </b-row>
-    <div v-if="this.b_SeLoguer==='true'">
+    <div v-if="b_MN^b_AS">
       <b-row>
         <b-col cols="8" offset-md="2">
           <connectionForm @submit="login"/>
@@ -50,11 +50,9 @@ export default {
   data() {
     return {
       // Booleen Maitre nageur
-      b_MN: "true",
+      b_MN: true,
       // Booleen agent de structure
-      b_AS: "true",
-      // Boolean pour se logguer 
-      b_SeLoguer: "false"
+      b_AS: true
     };
   },
 //
@@ -88,14 +86,13 @@ export default {
         })
     },
     SeLoguer: function(e) {
-      this.b_SeLoguer = "true";
       if (e === "AS")
       {
-        this.b_MN = "false";
+        this.b_MN = false;
       }
       if (e === "MN")
       {
-        this.b_AS = "false";
+        this.b_AS = false;
       }
     }
 
