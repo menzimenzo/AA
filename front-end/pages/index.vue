@@ -8,37 +8,36 @@
       </b-col>
       <b-col   class="col-8 col-md-4" >
         <b-row >
-          <p class="aa-bouton-connexion" >▷ Je suis maître nageur/formateur<br>Je m’identifie et renseigne mes données<br><br></p>
+          <p class="aa-bouton-connexion"  v-if="this.b_MN==='true'" @click="SeLoguer('MN')">▷ Je suis maître nageur/formateur<br>Je m’identifie et renseigne mes données<br><br></p>
         </b-row>
         <b-row >
-          <p class="aa-bouton-connexion" >▷ J'appartiens à une structure actrice du dispositif AAQ<br><br></p>
+          <p class="aa-bouton-connexion" v-if="this.b_AS==='true'" @click="SeLoguer('AS')">▷ J'appartiens à une structure actrice du dispositif AAQ<br><br></p>
         </b-row>
       </b-col>
     </b-row>
-  
-    <b-row class="text-center">
-      <b-col cols="12">
-        <b-img class="fcBtn" @click="connexionutilisateur()"  fluid  :src="require('assets/FCboutons-10.png')" border="0" style="size: 100%;" />
-        <br>
-        <a
-          href="https://franceconnect.gouv.fr/"
-          target="_blank"
-          style="text-align:center;" 
-          >A propos de FranceConnect</a>
-      </b-col>
-    </b-row>
-
-    <b-row class="text-center">
-      <b-col cols="12">
-        <span class="otherConnexion">Ou</span>
-      </b-col>
-    </b-row>
-
-    <b-row>
-      <b-col cols="8" offset-md="2">
-        <connectionForm @submit="login"/>
-      </b-col>
-    </b-row>
+    <div v-if="this.b_SeLoguer==='true'">
+      <b-row>
+        <b-col cols="8" offset-md="2">
+          <connectionForm @submit="login"/>
+        </b-col>
+      </b-row>
+      <b-row class="text-center">
+        <b-col cols="12">
+          <span class="otherConnexion">Ou</span>
+        </b-col>
+      </b-row>
+      <b-row class="text-center" >
+        <b-col cols="12">
+          <b-img class="fcBtn" @click="connexionutilisateur()"  fluid  :src="require('assets/FCboutons-10.png')" border="0" style="size: 100%;" />
+          <br>
+          <a
+            href="https://franceconnect.gouv.fr/"
+            target="_blank"
+            style="text-align:center;" 
+            >A propos de FranceConnect</a>
+        </b-col>
+      </b-row>
+    </div>
   </b-container>
 </template>
 
@@ -50,6 +49,12 @@ export default {
   },
   data() {
     return {
+      // Booleen Maitre nageur
+      b_MN: "true",
+      // Booleen agent de structure
+      b_AS: "true",
+      // Boolean pour se logguer 
+      b_SeLoguer: "false"
     };
   },
 //
@@ -81,6 +86,17 @@ export default {
         .finally(() => {
             this.loading = false
         })
+    },
+    SeLoguer: function(e) {
+      this.b_SeLoguer = "true";
+      if (e === "AS")
+      {
+        this.b_MN = "false";
+      }
+      if (e === "MN")
+      {
+        this.b_AS = "false";
+      }
     }
 
   },
