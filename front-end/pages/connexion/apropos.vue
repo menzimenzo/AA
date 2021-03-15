@@ -9,7 +9,7 @@
 
 
       <h1>CECI N'EST QU'UNE PAGE DE TEST</h1>
-      <img  border="0" alt="Connexion France Connect" src="~assets/savoirrouleravelo_p.png">
+      <img  border="0" alt="Connexion France Connect" src="~assets/Gouvernement_PiloteMS.jpg">
       <a href="/interventions"><br>
         <img border="0" alt="Connexion France Connect" src="~assets/FCboutons-10.png">
       </a>
