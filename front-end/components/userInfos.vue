@@ -2,12 +2,6 @@
   <div>
     <b-card class="mb-3">
       <b-form>
-        <b-form-group label="Prénom :">
-          <b-form-input type="text" v-model="user.prenom" :disabled="isUserRegisteredViaPwd" />
-        </b-form-group>
-        <b-form-group label="Nom :">
-          <b-form-input type="text" v-model="user.nom" :disabled="isUserRegisteredViaPwd" />
-        </b-form-group>
         <b-form-group
           id="emailInputGroup"
           label="Courriel :"
@@ -33,14 +27,80 @@
             valide.</b-form-invalid-feedback
           >
         </b-form-group>
-
+        <b-form-group label="Prénom :">
+          <b-form-input
+            type="text"
+            v-model="user.prenom"
+            :disabled="isUserRegisteredViaPwd"
+          />
+        </b-form-group>
+        <b-form-group label="Nom :">
+          <b-form-input
+            type="text"
+            v-model="user.nom"
+            :disabled="isUserRegisteredViaPwd"
+          />
+        </b-form-group>
+        <b-form-group label="Numéro de carte professionnelle :">
+          <b-form-input
+            type="text"
+            v-model="user.eaps"
+          />
+        </b-form-group>
+      </b-form>
+    </b-card>
+    <b-card class="mb-3">
+      <b-form>
+      <b-form-group id="legalCheckGroup" v-if="checkLegal">
+          <b-form-checkbox-group
+            v-model="isLegalChecked"
+            id="legalCheck"
+            :state="validateState('legalCheck')"
+            aria-describedby="legalFeedback"
+            name="legalCheck"
+          >
+            <b-form-checkbox value="true">Je veux voir ma tronche sur la carte             
+              <span style="color: red">*</span>
+            </b-form-checkbox>
+          </b-form-checkbox-group>
+          <b-form-invalid-feedback id="legalFeedback"
+            >Il est obligatoire de valider les conditions
+            légales.</b-form-invalid-feedback
+          >
+        </b-form-group>
+            
+        <b-form-group label="Site Web de contact :">
+          <b-form-input
+            type="text"
+            v-model="user.sitewebcontact"
+          />
+        </b-form-group>
+        <b-form-group label="Adresse de contact :">
+          <b-form-input
+            type="text"
+            v-model="user.mailcontact"
+          />
+        </b-form-group>
+        <b-form-group label="Téléphone de contact :">
+          <b-form-input
+            type="text"
+            v-model="user.mailcontact"
+          />
+        </b-form-group>
+        <b-form-group label="CP de contact :">
+          <b-form-input
+            type="text"
+            v-model="user.com_cp_contact"
+          />
+        </b-form-group>
+        <!--
         <b-form-group
           required
           id="structNationaleGroup"
           label="Structure nationale :"
           label-for="structNatSelect"
         >
-          <!--Mantis 68055 : min_value: 1-->
+         
           <b-form-select
             id="structNatSelect"
             v-model="user.structureId"
@@ -51,7 +111,6 @@
             :disabled="!checkLegal"
             @change="emitUser"
           >
-            <!--Mantis 68055 value = 0 -->
             <option :value="0">Veuillez choisir votre structure...</option>
             <option :value="99999">Collectivités territoriales</option>
             <option
@@ -67,9 +126,6 @@
             structure.</b-form-invalid-feedback
           >
         </b-form-group>
-        <!-- Cas d'une structure non collectivite territoriale
-            le champ structureLocale ne doit apparaitre que si la structure n'est pas une collectivité
-             quand Création de compte, ce qui définit une structure de type collectivité c'est user.structureId == 99999-> -->
         <div v-if="user.structureId != 99999">
           <b-form-group
             id="structLocaleGroup"
@@ -93,8 +149,6 @@
             >
           </b-form-group>
         </div>
-        <!-- FIN Cas d'une structure non collectivite territoriale-->
-        <!-- Cas d'une collectivite territoriale-->
         <div v-else>
           <b-form-group
             required
@@ -125,7 +179,6 @@
               collectivité.</b-form-invalid-feedback
             >
           </b-form-group>
-          <!-- DEPARTEMENT -->
           <div v-if="user.typeCollectivite == 2">
             <b-form-group
               id="Departement"
@@ -139,7 +192,7 @@
                 v-model="user.libelleCollectivite"
                 v-validate="{ required: true }"
                 name="departement"
-                  :state="validateState('departement')"
+                :state="validateState('departement')"
                 aria-describedby="departementFeedback"
               >
                 <option
@@ -155,8 +208,6 @@
               >
             </b-form-group>
           </div>
-          <!-- FIN DEPARTEMENT -->
-          <!-- COMMUNE -->
           <div v-if="user.typeCollectivite == 1">
             <b-form-group id="CodePostal" label="Code Postal :" label-for="cp">
               <b-form-input
@@ -201,8 +252,6 @@
               >
             </b-form-group>
           </div>
-          <!-- FIN COMMUNE -->
-          <!-- EPCI -->
           <div v-if="user.typeCollectivite == 3">
             <b-form-group
               id="CodePostalEpci"
@@ -253,35 +302,11 @@
                 Aucun EPCI correspondant</b-form-group
               >
             </div>
-          </div>
-          <!-- FIN EPCI-->
+          </div>>
         </div>
-        <!-- FIN Cas d'une collectivite territoriale-->
-
-        <b-form-group id="legalCheckGroup" v-if="checkLegal">
-          <b-form-checkbox-group
-            v-model="isLegalChecked"
-            id="legalCheck"
-            :state="validateState('legalCheck')"
-            aria-describedby="legalFeedback"
-            v-validate="{ is: 'true' }"
-            name="legalCheck"
-          >
-            <b-form-checkbox value="true">
-              « Intervenant du
-              <b>Savoir Rouler à Vélo</b>, je m’engage à construire et réaliser
-              mes sessions d’apprentissage sur la base du socle commun
-              <b>Savoir Rouler à Vélo</b> et à vérifier l’acquisition de
-              l’ensemble des compétences attendues du bloc 1, 2 et 3 pour
-              délivrer l’attestation <b>Savoir Rouler à Vélo</b>».
-              <span style="color: red">*</span>
-            </b-form-checkbox>
-          </b-form-checkbox-group>
-          <b-form-invalid-feedback id="legalFeedback"
-            >Il est obligatoire de valider les conditions
-            légales.</b-form-invalid-feedback
-          >
-        </b-form-group>
+  
+-->
+        
 
         <b-form-group>
           <span style="color: red">*</span> : Champ obligatoire
@@ -291,7 +316,7 @@
             @click="submit"
             variant="success"
             :disabled="
-              errors.any() || (isLegalChecked == 'false' && !user.validated)
+              errors.any() 
             "
             >{{ submitTxt }}</b-button
           >
@@ -306,9 +331,10 @@ import { mapState, mapMutations } from "vuex";
 export default {
   data() {
     return {
-      cp: null,
+      //cp: null,
       isLegalChecked: "false",
-      listtypecol: [
+      isPubliChecked:"false",
+      /*listtypecol: [
         { text: "Commune", value: 1 },
         { text: "Conseil Général", value: 2 },
         { text: "EPCI", value: 3 },
@@ -325,7 +351,7 @@ export default {
           cp: null,
           codedep: null,
         },
-      ],
+      ],*/
     };
   },
   props: ["submitTxt", "user", "checkLegal"],
@@ -333,7 +359,10 @@ export default {
     submit: function () {
       this.$validator.validateAll().then((isValid) => {
         if (isValid) {
-          this.$store.dispatch('set_state_element',{ key:'utilisateurCourant', value: this.user })
+          this.$store.dispatch("set_state_element", {
+            key: "utilisateurCourant",
+            value: this.user,
+          });
           return this.$emit("submit");
         }
       });
@@ -351,7 +380,7 @@ export default {
 
       return null;
     },
-    // true si la structure sélectiontypeCollectivitenée est une fédération
+    /* true si la structure sélectiontypeCollectivitenée est une fédération
     isFederation(id) {
       var structure = this.structures.find((str) => {
         return str.str_id == id;
@@ -383,9 +412,8 @@ export default {
       if (this.cp.length === 5) {
         // Le code postal fait bien 5 caractères
         console.info("Recherche de la commune");
-        this.user.cp = this.cp
-        const url =
-          process.env.API_URL + "/listecommune?codepostal=" + this.cp;
+        this.user.cp = this.cp;
+        const url = process.env.API_URL + "/listecommune?codepostal=" + this.cp;
         console.info(url);
         return this.$axios
           .$get(url)
@@ -431,39 +459,33 @@ export default {
         this.listepci = ["Veuillez saisir un code postal"];
         return Promise.resolve(null);
       }
-    },
-    emitUser: function() {
-      return this.$store.dispatch('set_state_element',{ key:'utilisateurCourant', value: this.user }) 
-    }
-  },
-  watch: {
-    cp() {
-      this.recherchecommune();
-    },
-    cpEpci() {
-      this.rechercheepci();
+    },*/
+    emitUser: function () {
+      return this.$store.dispatch("set_state_element", {
+        key: "utilisateurCourant",
+        value: this.user,
+      });
     },
   },
   async mounted() {
-    // Mantis 68055
-    if (!this.user.validated) {
-      this.user.structureId = 0;
-    }
     await this.$store.dispatch("get_structures");
-    this.getDepartements().then((res) => {});
+    //this.getDepartements().then((res) => {});
   },
   computed: {
     ...mapState(["structures"]),
     mail: {
       get() {
-        return this.$store.state.utilisateurCourant.mail
+        return this.$store.state.utilisateurCourant.mail;
       },
       set(value) {
-        return this.$store.dispatch('set_state_element',{ key:'utilisateurCourant.mail', value })
-      }
+        return this.$store.dispatch("set_state_element", {
+          key: "utilisateurCourant.mail",
+          value,
+        });
+      },
     },
     isUserRegisteredViaPwd() {
-      return this.user && this.user.tokenFc
+      return this.user && this.user.tokenFc;
     },
     listeStructures() {
       var liste = this.structures;
@@ -481,7 +503,7 @@ export default {
               (String(str.str_libellecourt) != "COM");
             return isMatch;
           });
-        } 
+        }
         return liste;
       }
     },

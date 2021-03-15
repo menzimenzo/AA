@@ -16,7 +16,7 @@ drop index IF EXISTS IDX_DEP_NUM CASCADE;
 drop table IF EXISTS DEPARTEMENT CASCADE;
 drop table IF EXISTS DOCUMENT CASCADE;
 drop table IF EXISTS INTERVENTION CASCADE;
-drop table IF EXISTS ROLE CASCADE;
+drop table IF EXISTS PROFIL CASCADE;
 drop table IF EXISTS REGION CASCADE;
 drop table IF EXISTS STATUT_INTERVENTION CASCADE;
 drop table IF EXISTS STATUT_UTILISATEUR CASCADE;
@@ -130,9 +130,9 @@ create table INTERVENTION (
 );
 
 /*==============================================================*/
-/* Table : ROLE                                                 */
+/* Table : PROFIL                                         */
 /*==============================================================*/
-create table ROLE (
+create table PROFIL (
    ROL_ID               BIGINT               not null,
    ROL_LIBELLE          VARCHAR(50)          not null,
    ROL_ORDRE            INT                  not null,
@@ -216,7 +216,7 @@ create table UTI_PIS (
 /*==============================================================*/
 /* Table : REF_EAPS                                             */
 /*==============================================================*/
-create table EAPS        (
+create table REF_EAPS        (
    EAP_NUMERO           BIGINT               not null,
    EAP_DATEMAJ          timestamp            not null,
    constraint PK_E primary key (EAP_NUMERO)
@@ -271,13 +271,13 @@ create table INT_ENF (
 /* Table : user_sessions                                        */
 /* Stockage des sessions des utilisateurs                       */
 /*==============================================================*/
-CREATE TABLE "USER_SESSIONS" (
+CREATE TABLE USER_SESSIONS (
   "sid" varchar NOT NULL COLLATE "default",
 	"sess" json NOT NULL,
 	"expire" timestamp(6) NOT NULL
 )
 WITH (OIDS=FALSE);
-ALTER TABLE "USER_SESSIONS" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE USER_SESSIONS ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
 
 alter table ATTESTATION
    add constraint FK_ATTESTAT_REFERENCE_INTERVEN foreign key (INT_ID)
@@ -341,12 +341,5 @@ create  index IDX_CPI_CODEPOSTAL on CODEPOSTAL_INSEE (
 CPI_CODEPOSTAL
 );
 
-/*==============================================================*/
-/* Index : IDX_COM_DEP_NUM                                      */
-/*==============================================================*/
-create  index IDX_COM_DEP_NUM on COMMUNE (
-DEP_NUM
-);
-
 /* Enable Encryption */
-CREATE EXTENSION pgcrypto;
+/*CREATE EXTENSION pgcrypto;*/

@@ -35,7 +35,7 @@ module.exports = {
             nom: utilisateur.uti_nom,
             prenom: utilisateur.uti_prenom,
             tokenFc: utilisateur.uti_tockenfranceconnect,
-            validated: utilisateur.uti_alidated
+            validated: utilisateur.uti_validated
       }
     } else { 
       return {

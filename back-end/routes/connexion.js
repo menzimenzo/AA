@@ -89,7 +89,7 @@ router.post('/verify', async (req,res) => {
 
     log.d('::verify - Mise à jour de l\'utilisateur existant')        
     const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true \
-    WHERE uti_id = $6 RETURNING *", 
+    WHERE uti_id = $4 RETURNING *", 
     [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_id]).catch(err => {
         console.log(err)
         throw err
