@@ -1,10 +1,11 @@
 <template>
   <b-container>
-
-        <b-row class="text-center">
-      <b-col cols="2">
-        <b-img fluid :src="require('assets/Gouvernement_PiloteMS.jpg')" blank-color="rgba(0,0,0,0.5)" />
-      </b-col>
+      <b-row class="text-center">
+        <b-col cols="2">
+          <nuxt-link to="/" title="Afficher la page d'accueil" style="text-decoration: none" >
+            <b-img fluid :src="require('assets/Gouvernement_PiloteMS.jpg')" blank-color="rgba(0,0,0,0.5)" />
+          </nuxt-link>
+        </b-col>
       <b-col cols="6">
         <p class="aa-welcome-title"> SI Aisance Aquatique</p>
       </b-col>
