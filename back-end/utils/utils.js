@@ -29,33 +29,26 @@ module.exports = {
       return {
             id: utilisateur.uti_id,
             authId: utilisateur.uti_authid,
-            profilId: utilisateur.pro_id,
-            structureId: utilisateur.str_id,
+            roleId: utilisateur.rol_id,
             statutId: utilisateur.stu_id,
             mail: utilisateur.uti_mail,
             nom: utilisateur.uti_nom,
             prenom: utilisateur.uti_prenom,
-            structureLocale: utilisateur.uti_structurelocale,
             tokenFc: utilisateur.uti_tockenfranceconnect,
-            validated: utilisateur.validated,
-            typeCollectivite: utilisateur.str_typecollectivite,
-            libelleCollectivite: utilisateur.str_libelle
+            validated: utilisateur.uti_alidated
       }
     } else { 
       return {
             uti_id : utilisateur.id ,
-            uti_authid: utilisateur._id ,
-            pro_id : utilisateur.profilId ,
-            str_id : utilisateur.structureId ,
+            uti_authid: utilisateur.uti_authid ,
+            rol_id : utilisateur.profilId ,
             stu_id : utilisateur.statutId ,
             uti_mail : utilisateur.mail && utilisateur.mail.toLowerCase() ,
             uti_nom : utilisateur.nom ,
             uti_prenom : utilisateur.prenom ,
             uti_structurelocale : utilisateur.structureLocale ,
             uti_tockenfranceconnect : utilisateur.tokenFc ,
-            validated: utilisateur.validated,
-            typeCollectivite: utilisateur.typeCollectivite,
-            libelleCollectivite: utilisateur.libelleCollectivite
+            validated: utilisateur.uti_validated
         }
     }
 }

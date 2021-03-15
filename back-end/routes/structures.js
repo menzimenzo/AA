@@ -32,7 +32,7 @@ router.get('/',
         log.i('::list - In')
         // La méthode get est appelée sans paramètre : On retourne la liste
         pgPool.query(
-            `SELECT *, replace(replace(str_actif::text,'true','Oui'),'false','Non') as str_actif_on, replace(replace(str_federation::text,'true','Oui'),'false','Non') as str_federation_on FROM structure order by str_libellecourt`,
+            `SELECT *, replace(replace(str_actif::text,'true','Oui'),'false','Non') as str_actif_on FROM structure order by str_libellecourt`,
             function (err, result) {
                 if (err) {
                     log.w('::list - Erreur lors de la requete', { requete, erreur: err.stack })

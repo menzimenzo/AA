@@ -13,9 +13,6 @@ const formatIntervention = intervention => {
 
     var result = {
         id: intervention.int_id,
-        cai: intervention.cai_id,
-        blocId: intervention.blo_id,
-        sinId: intervention.sin_id,
         utiId: intervention.uti_id,
         cp: intervention.int_com_codepostal,
         commune: {
@@ -25,17 +22,10 @@ const formatIntervention = intervention => {
             reg_num: intervention.int_reg_num
         },
         nbEnfants: intervention.int_nombreenfant,
-        nbFilles: intervention.int_nombrefille,
-        nbGarcons: intervention.int_nombregarcon,
-        nbmoinssix:intervention.int_nombremoinssix,
-        nbsixhuit:intervention.int_nombresixhuit,
-        nbneufdix:intervention.int_nombreneufdix,
-        nbplusdix:intervention.int_nombreplusdix,
         dateIntervention: new Date(intervention.int_dateintervention),
         dateCreation: new Date(intervention.int_datecreation),
         dateMaj: intervention.int_datemaj,
         commentaire: intervention.int_commentaire,
-        siteintervention: intervention.int_siteintervention,
         departement:intervention.int_dep_num
     }
 
@@ -43,14 +33,6 @@ const formatIntervention = intervention => {
         result.nom = intervention.uti_prenom + ' ' + intervention.uti_nom
         result.structure = intervention.str_libellecourt
         result.structureId = intervention.str_id
-    }
-
-    if(intervention.blo_libelle){
-        result.blocLib = intervention.blo_libelle
-    }
-
-    if(intervention.cai_libelle){
-        result.caiLib = intervention.cai_libelle
     }
 
     result.structureCode = intervention.str_libellecourt;
@@ -115,8 +97,6 @@ router.get('/csv/:utilisateurId', async function (req, res) {
     }
     // Remplacement Clause Where en remplacant utilisateur par clause dynamique
     const requete =`SELECT * from intervention 
-    INNER JOIN bloc ON bloc.blo_id = intervention.blo_id 
-    INNER JOIN cadreintervention ON cadreintervention.cai_id = intervention.cai_id 
     INNER JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id 
     ${whereClause} 
     INNER JOIN structure ON structure.str_id = utilisateur.str_id 
@@ -170,46 +150,6 @@ router.get('/csv/:utilisateurId', async function (req, res) {
         }
     })
 });
-
-/* Séparation de la partie de recherche commentaire qui interfère avec l'écran "Mes interventions" initialement pas prévu */
-/* On ajoute donc cette partie pour répondre à l'affichage des commentaires en Admin et Partenaire sans effet de bord sur l'écran d'intervention  */
-/* Correction MANTIS 68438  */
-/*router.get('/commentaires/', async function (req, res) {
-    if(!req.session.user){ 
-        return res.sendStatus(403) 
-    }
-
-    const user = req.session.user
-    const utilisateurId = user.uti_id
-
-    // Get subset of interventions depending on user profile
-    var whereClause = ""
-    // Utilisateur est partenaire => intervention de la structure
-    if(user.pro_id == 2){
-        whereClause += `INNER JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id INNER JOIN structure on structure.str_id = utilisateur.str_id where utilisateur.str_id=${user.str_id} and int_commentaire is not null and int_commentaire <> '' `
-    // Utilisateur Administrateur : Exclusion des interventions sans commentaires
-    } else if(user.pro_id == 1){
-        whereClause += `INNER JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id INNER JOIN structure on structure.str_id = utilisateur.str_id WHERE int_commentaire is not null and int_commentaire <> ''`
-    } else if(user.pro_id == 3){
-        // Cet url ne doit pas être appelée par ce type de profil
-        whereClause += `INNER JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id INNER JOIN structure on structure.str_id = utilisateur.str_id `
-    }
-
-    const requete = `SELECT * from intervention  ${whereClause}  order by int_dateintervention desc`;
-    console.log(requete)
-
-    pgPool.query(requete, (err, result) => {
-        if (err) {
-            console.log(err.stack);
-            return res.status(400).json('erreur lors de la récupération des interventions');
-        }
-        else {
-            console.info(result.rows)
-            const interventions = result.rows.map(formatIntervention);
-            res.json({ interventions });
-        }
-    })
-});*/
 
 router.get('/:id', async function (req, res) {
     log.i('::get - In')
@@ -294,17 +234,17 @@ router.put('/:id', async function (req, res) {
     const id = req.params.id
     log.i('::update - In', { id })
 
-    let { nbEnfants, nbGarcons, nbFilles, commune, cai, blocId, dateIntervention, 
+    let { nbEnfants, commune, dateIntervention, 
         commentaire, cp, utilisateurId,siteintervention,
         nbmoinssix, nbsixhuit, nbneufdix, nbplusdix  } = intervention
-
+/*
     if (nbGarcons == '') { nbGarcons = null }
     if (nbFilles == '') { nbFilles = null }
     if (nbmoinssix == '') { nbmoinssix = null }
     if (nbsixhuit == '') { nbsixhuit = null }
     if (nbneufdix == '') { nbneufdix = null }
     if (nbplusdix == '') { nbplusdix = null }
-
+*/
     //insert dans la table intervention
     const requete = `UPDATE intervention 
         SET cai_id = $1,
@@ -313,18 +253,12 @@ router.put('/:id', async function (req, res) {
         int_com_codepostal = $4,
         int_com_libelle = $5,
         int_nombreenfant = $6,
-        int_nombregarcon = $7,
-        int_nombrefille = $8, 
-        INT_NOMBREMOINSSIX = $9, 
-        INT_NOMBRESIXHUIT = $10, 
-        INT_NOMBRENEUFDIX = $11, 
-        INT_NOMBREPLUSDIX = $12, 
-        int_dateintervention = $13,
+        int_dateintervention = $7,
         int_datemaj = now(),
-        int_commentaire = $14,
-        int_dep_num = $15,
-        int_reg_num = $16,
-        int_siteintervention = $17
+        int_commentaire = $8,
+        int_dep_num = $9,
+        int_reg_num = $10,
+        int_siteintervention = $11
         WHERE int_id = ${id}
         RETURNING *
         ;`    
@@ -336,12 +270,6 @@ router.put('/:id', async function (req, res) {
         cp,
         commune.com_libellemaj,
         nbEnfants,
-        nbGarcons,
-        nbFilles, 
-        nbmoinssix, 
-        nbsixhuit, 
-        nbneufdix, 
-        nbplusdix, 
         dateIntervention,
         commentaire,
         commune.dep_num,
@@ -367,30 +295,29 @@ router.post('/', function (req, res) {
     log.i('::post - In')
     const intervention = req.body.intervention
 
-    let { nbEnfants,  nbGarcons, nbFilles, commune, cai, blocId, dateIntervention,
+    let { nbEnfants,  commune, dateIntervention,
          commentaire, cp, utilisateurId, siteintervention,
          nbmoinssix, nbsixhuit, nbneufdix, nbplusdix } = intervention
-    
+  /*  
     if (nbGarcons == '') { nbGarcons = null }
     if (nbFilles == '') { nbFilles = null }
     if (nbmoinssix == '') { nbmoinssix = null }
     if (nbsixhuit == '') { nbsixhuit = null }
     if (nbneufdix == '') { nbneufdix = null }
     if (nbplusdix == '') { nbplusdix = null }
-
+*/
     //insert dans la table intervention
     const requete = `insert into intervention 
-                    (cai_id,blo_id,uti_id,int_com_codeinsee,int_com_codepostal,int_com_libelle,
-                        int_nombreenfant,int_nombregarcon,int_nombrefille,int_dateintervention,
+                    (uti_id,int_com_codeinsee,int_com_codepostal,int_com_libelle,
+                        int_nombreenfant,int_dateintervention,
                         int_datecreation,int_datemaj,int_commentaire,
-                        int_dep_num,int_reg_num,int_siteintervention,
-                        INT_NOMBREMOINSSIX, INT_NOMBRESIXHUIT, INT_NOMBRENEUFDIX, INT_NOMBREPLUSDIX) 
-                    values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20 ) RETURNING *`;
+                        int_dep_num,int_reg_num,int_siteintervention) 
+                    values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12 ) RETURNING *`;
     
     log.d('::post - requete',{ requete });
-    pgPool.query(requete, [cai,blocId,utilisateurId,commune.cpi_codeinsee,cp,commune.com_libellemaj,
-    nbEnfants, nbGarcons, nbFilles,dateIntervention,new Date().toISOString(),new Date().toISOString(),commentaire, 
-    commune.dep_num, commune.reg_num,siteintervention,nbmoinssix, nbsixhuit, nbneufdix, nbplusdix],(err, result) => {
+    pgPool.query(requete, [utilisateurId,commune.cpi_codeinsee,cp,commune.com_libellemaj,
+    nbEnfants,dateIntervention,new Date().toISOString(),new Date().toISOString(),commentaire, 
+    commune.dep_num, commune.reg_num,siteintervention],(err, result) => {
         if (err) {
             log.w('::post - Erreur lors de la requête.',err.stack);
             return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
@@ -398,9 +325,9 @@ router.post('/', function (req, res) {
         else {
             log.i('::post - Done', { rows: result.rows })
             // generation du pdf (synchrone)
-            if (blocId == 3) {
+            //if (blocId == 3) {
               myPdf.generate(result.rows.map(formatIntervention)[0].id,nbEnfants,dateIntervention);
-            }
+            //}
             return res.status(200).json({ intervention: result.rows.map(formatIntervention)[0] });
         }
     })
