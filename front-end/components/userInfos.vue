@@ -43,7 +43,9 @@
         </b-form-group>
         <b-form-group label="Numéro de carte professionnelle :">
           <b-form-input
-            type="text"
+            type="number"
+            required
+             :state="validateState('number')"
             v-model="user.eaps"
           />
         </b-form-group>
@@ -51,21 +53,18 @@
     </b-card>
     <b-card class="mb-3">
       <b-form>
-      <b-form-group id="legalCheckGroup" v-if="checkLegal">
+      <b-form-group id="publiCheckGroup" v-if="checkPubli">
           <b-form-checkbox-group
-            v-model="isLegalChecked"
-            id="legalCheck"
-            :state="validateState('legalCheck')"
-            aria-describedby="legalFeedback"
-            name="legalCheck"
+            v-model="isPubliChecked"
+            id="publiCheck"
+            :state="validateState('publiCheck')"
+            name="publiCheck"
           >
             <b-form-checkbox value="true">Je veux voir ma tronche sur la carte             
               <span style="color: red">*</span>
             </b-form-checkbox>
           </b-form-checkbox-group>
-          <b-form-invalid-feedback id="legalFeedback"
-            >Il est obligatoire de valider les conditions
-            légales.</b-form-invalid-feedback
+         
           >
         </b-form-group>
             
@@ -332,8 +331,8 @@ export default {
   data() {
     return {
       //cp: null,
-      isLegalChecked: "false",
       isPubliChecked:"false",
+      eaps:null,
       /*listtypecol: [
         { text: "Commune", value: 1 },
         { text: "Conseil Général", value: 2 },
@@ -389,24 +388,9 @@ export default {
         return false;
       }
       return structure.str_federation;
-    },
-    getDepartements: function () {
-      console.info("recupération de la liste des départements");
-      const url = process.env.API_URL + "/listedepartement";
-      console.info(url);
-      return this.$axios
-        .$get(url)
-        .then((response) => {
-          this.listdepartement = response.departements;
-        })
-        .catch((error) => {
-          console.error(
-            "Une erreur est survenue lors de la récupération des départements",
-            error
-          );
-        });
-    },
-
+    },*/
+   
+    /*
     // Get liste des communes correspondant au code postal
     recherchecommune: function () {
       if (this.cp.length === 5) {
@@ -469,7 +453,6 @@ export default {
   },
   async mounted() {
     await this.$store.dispatch("get_structures");
-    //this.getDepartements().then((res) => {});
   },
   computed: {
     ...mapState(["structures"]),

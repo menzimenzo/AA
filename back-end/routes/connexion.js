@@ -37,6 +37,7 @@ router.post('/verify', async (req,res) => {
     var wasValidated = req.body.validated
     const tokenFc = req.body.tokenFc
     var user = formatUtilisateur(req.body, false)
+
     /*
     if (user.str_id == 99999) {
         // La structure spécifiée n'existe peut être pas encore
@@ -86,6 +87,20 @@ router.post('/verify', async (req,res) => {
         log.w('Vérifications complémentaires nécessaires avant ajout en base. ')
         return res.status(200).json({ existingUser: formatUtilisateur(mailExistenceQuery.rows[0]) })
     } 
+
+    // Pour un maitre nageur, vérifier si le numéro EAPS est présent dans la table ref_eaps
+    console.log(user)
+    if (user.eaps != '') {
+        log.d('::verify - Recherche numéro EAPS') 
+        const eapslExistenceQuery = await pgPool.query(`SELECT eap_numero FROM ref_eaps WHERE eap_numero='${user.uti_eaps}'`).catch(err => {
+            log.w(err)
+            throw err
+
+        })
+        if (eapslExistenceQuery.rowCount == 0) {
+            return res.status(200).json({nonAuthorizedUser: 'Vous n\'êtes pas autorisés à vous créer un compte'})
+        }
+    }
 
     log.d('::verify - Mise à jour de l\'utilisateur existant')        
     const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true \

@@ -46,6 +46,11 @@ export default {
             return 
           }
 
+          if (response.nonAuthorizedUser){
+            this.$toast.error(response.nonAuthorizedUser)
+            return
+          }
+
           await this.$store.dispatch('set_utilisateur', response.user);
           this.$router.push('/interventions')
           this.$toast.success('Inscription validée.')

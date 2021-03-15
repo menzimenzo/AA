@@ -403,10 +403,10 @@ export default {
   //  CHARGEMENT ASYNCHRONE DES INTERVENTIONS
   //
   async mounted() {
-    await Promise.all([
-      this.$store.dispatch("get_interventions"),
-      this.$store.dispatch("get_documents")
-    ]);
+    //await Promise.all([
+    //  this.$store.dispatch("get_interventions"),
+    //  this.$store.dispatch("get_documents")
+    //]);
     //console.info("mounted", { interventions: this.interventions});
     // on supprime les interventions ne relevant pas de la structure si prod_id = 2 (partenaire)
     /*if (this.utilisateurCourant.profilId == 2) {
