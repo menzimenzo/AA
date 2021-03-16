@@ -37,7 +37,15 @@ module.exports = {
             tokenFc: utilisateur.uti_tockenfranceconnect,
             validated: utilisateur.uti_validated,
             eaps: utilisateur.uti_eaps,
-            publicontact: utilisateur.uti_publicontact
+            publicontact: utilisateur.uti_publicontact,
+            mailcontact: utilisateur.uti_mailcontact,            
+            sitewebcontact: utilisateur.uti_sitewebcontact,
+            adrcontact: utilisateur.uti_adrcontact,
+            compadrecontact: utilisateur.uti_compadrcontact,
+            cp: utilisateur.uti_com_cp_contact,
+            codeinsee: utilisateur.uti_com_codeinseecontact,
+            commune : utilisateur.uti_com_libellecontact
+            
 
       }
     } else { 
@@ -53,7 +61,15 @@ module.exports = {
             uti_tockenfranceconnect : utilisateur.tokenFc ,
             uti_validated: utilisateur.validated,
             uti_eaps: utilisateur.eaps,
-            uti_publicontact: utilisateur.publicontact
+            uti_publicontact: utilisateur.publicontact,
+            uti_mailcontact: utilisateur.mailcontact,
+            uti_sitewebcontact: utilisateur.sitewebcontact,
+            uti_adrcontact : utilisateur.adrcontact,
+            uti_compadrcontact : utilisateur.compadrecontact,
+            uti_com_cp_contact: utilisateur.cp,
+            uti_com_codeinseecontact: utilisateur.codeinsee,
+            uti_com_libellecontact: utilisateur.commune
+
         }
     }
 }

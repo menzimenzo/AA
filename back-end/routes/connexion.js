@@ -90,6 +90,8 @@ router.post('/verify', async (req,res) => {
 
     // Pour un maitre nageur, vérifier si le numéro EAPS est présent dans la table ref_eaps
     console.log(user)
+    console.log(user.uti_eaps)
+    console.log(user.uti_mailcontact)
     if (user.eaps != '') {
         log.d('::verify - Recherche numéro EAPS') 
         const eapslExistenceQuery = await pgPool.query(`SELECT eap_numero FROM ref_eaps WHERE eap_numero='${user.uti_eaps}'`).catch(err => {
@@ -103,9 +105,20 @@ router.post('/verify', async (req,res) => {
     }
 
     log.d('::verify - Mise à jour de l\'utilisateur existant')   
+    /*
     const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true, \
-    uti_eaps = $4, uti_publicontact = $5 WHERE uti_id = $6 RETURNING *", 
-    [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id]).catch(err => {
+    uti_eaps = $4, uti_publicontact = $5, UTI_SITEWEBCONTACT = $6 WHERE uti_id = $6 RETURNING *", 
+    [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.sitewebcontact]).catch(err => {
+        console.log(err)
+        throw err
+    })
+    */
+    console.log(user.uti_mailcontact)
+
+    log.i('::verify : user.mailcontact' + user.uti_mailcontact)
+    const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true, \
+    uti_eaps = $4, uti_publicontact = $5, uti_mailcontact = $7, uti_sitewebcontact = $8, uti_adrcontact = $9, uti_compadrcontact = $10 WHERE uti_id = $6 RETURNING *", 
+    [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.uti_mailcontact,user.uti_sitewebcontact,user.uti_adrcontact, user.uti_compadrcontact]).catch(err => {
         console.log(err)
         throw err
     })
