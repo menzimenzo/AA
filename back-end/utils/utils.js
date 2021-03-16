@@ -36,7 +36,9 @@ module.exports = {
             prenom: utilisateur.uti_prenom,
             tokenFc: utilisateur.uti_tockenfranceconnect,
             validated: utilisateur.uti_validated,
-            eaps: utilisateur.uti_eaps
+            eaps: utilisateur.uti_eaps,
+            publicontact: utilisateur.uti_publicontact
+
       }
     } else { 
       return {
@@ -50,7 +52,8 @@ module.exports = {
             uti_structurelocale : utilisateur.structureLocale ,
             uti_tockenfranceconnect : utilisateur.tokenFc ,
             uti_validated: utilisateur.validated,
-            uti_eaps: utilisateur.eaps
+            uti_eaps: utilisateur.eaps,
+            uti_publicontact: utilisateur.publicontact
         }
     }
 }

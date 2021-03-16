@@ -27,47 +27,88 @@
             valide.</b-form-invalid-feedback
           >
         </b-form-group>
-        <b-form-group label="Prénom :">
+        <b-form-group 
+          label="Prénom :"
+          id="prenomInputGroup"
+          label-for="prenomInput"
+          required
+          >
           <b-form-input
+            id="prenomInput"
             type="text"
             v-model="user.prenom"
-            :disabled="isUserRegisteredViaPwd"
+            name="prenom"
+            key="prenom-input"
+            v-validate="{ required: true, alpha: true }"
+            aria-describedby="prenomFeedback"
+            placeholder="Prénom"
+            :state="validateState('prenom')"
           />
+           <b-form-invalid-feedback id="prenomFeedback"
+            >Le prénom est obligatoire.</b-form-invalid-feedback
+          >
         </b-form-group>
-        <b-form-group label="Nom :">
+        <b-form-group 
+          label="Nom :"
+          id="nomInputGroup"
+          label-for="nomInput"
+          required
+          >
           <b-form-input
+            id="nomInput"
             type="text"
             v-model="user.nom"
-            :disabled="isUserRegisteredViaPwd"
+            name="nom"
+            key="nom-input"
+            v-validate="{ required: true, alpha: true  }"
+            aria-describedby="nomFeedback"
+            placeholder="Nom"
+            :state="validateState('nom')"
           />
+           <b-form-invalid-feedback id="nomFeedback"
+            >Le nom est obligatoire.</b-form-invalid-feedback
+          >
         </b-form-group>
-        <b-form-group label="Numéro de carte professionnelle :">
+        <b-form-group 
+          label="Numéro de carte professionnelle :"
+          id="eapsInputGroup"
+          label-for="eapsInput"
+          required
+          >
           <b-form-input
-            type="number"
-            required
-             :state="validateState('number')"
+            id="eapsInput"
+            type="text"
             v-model="user.eaps"
+            name="eaps"
+            key="eaps-input"
+            v-validate="{ required: true, numeric: true }"
+            aria-describedby="eapsFeedback"
+            placeholder="Numéro de carte professionnelle"
+            :state="validateState('eaps')"
           />
+           <b-form-invalid-feedback id="prenomFeedback"
+            >Le numéro de carte professionnelle est obligatoire.</b-form-invalid-feedback
+          >
         </b-form-group>
       </b-form>
     </b-card>
     <b-card class="mb-3">
       <b-form>
-      <b-form-group id="publiCheckGroup" v-if="checkPubli">
+      <b-form-group id="publiCheckGroup" >
           <b-form-checkbox-group
-            v-model="isPubliChecked"
+            
             id="publiCheck"
             :state="validateState('publiCheck')"
             name="publiCheck"
           >
-            <b-form-checkbox value="true">Je veux voir ma tronche sur la carte             
+            <b-form-checkbox 
+            v-model="user.publicontact">Je veux voir ma tronche sur la carte             
               <span style="color: red">*</span>
             </b-form-checkbox>
           </b-form-checkbox-group>
-         
-          >
         </b-form-group>
-            
+      </b-form>
+      <b-form v-if="!user.publicontact">
         <b-form-group label="Site Web de contact :">
           <b-form-input
             type="text"
@@ -302,11 +343,7 @@
               >
             </div>
           </div>>
-        </div>
-  
--->
-        
-
+        </div>-->
         <b-form-group>
           <span style="color: red">*</span> : Champ obligatoire
         </b-form-group>
@@ -332,7 +369,6 @@ export default {
     return {
       //cp: null,
       isPubliChecked:"false",
-      eaps:null,
       /*listtypecol: [
         { text: "Commune", value: 1 },
         { text: "Conseil Général", value: 2 },
@@ -451,6 +487,9 @@ export default {
       });
     },
   },
+ watch: {
+  
+ },
   async mounted() {
     await this.$store.dispatch("get_structures");
   },
