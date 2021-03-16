@@ -42,6 +42,7 @@
             v-validate="{ required: true, alpha: true }"
             aria-describedby="prenomFeedback"
             placeholder="Prénom"
+            :disabled="isUserRegisteredViaPwd"
             :state="validateState('prenom')"
           />
            <b-form-invalid-feedback id="prenomFeedback"
@@ -63,6 +64,7 @@
             v-validate="{ required: true, alpha: true  }"
             aria-describedby="nomFeedback"
             placeholder="Nom"
+            :disabled="isUserRegisteredViaPwd"
             :state="validateState('nom')"
           />
            <b-form-invalid-feedback id="nomFeedback"
@@ -113,6 +115,7 @@
           <b-form-input
             type="text"
             v-model="user.sitewebcontact"
+            placeholder="http:// ou https://"
           />
         </b-form-group>
         <b-form-group label="Adresse de contact :">
