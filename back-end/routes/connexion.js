@@ -114,6 +114,10 @@ router.post('/verify', async (req,res) => {
     })
     */
     console.log(user.uti_mailcontact)
+    console.log(user.uti_compadrcontact)
+    console.log(user.uti_com_codeinseecontact)
+    console.log(user.uti_com_cp_contact)
+    console.log(user.uti_com_libellecontact)
 
     log.i('::verify : user.mailcontact' + user.uti_mailcontact)
     const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true, \
@@ -130,7 +134,7 @@ router.post('/verify', async (req,res) => {
             to: user.uti_mail,
             subject: 'création compte savoir rouler à vélo',
             body: `<p>Bonjour,</p>
-                <p>Votre compte « Intervenant Savoir Rouler à Vélo » a bien été créé. <br/><br/>
+                <p>Votre compte « Aisance Aquatique » a bien été créé. <br/><br/>
                 Nous vous invitons à y renseigner les informations relatives à la mise en œuvre de chacun des 3 blocs du socle commun du SRAV.<br/>
                 Le site <a href="www.savoirrouleravelo.fr">www.savoirrouleravelo.fr</a> est à votre disposition pour toute information sur le programme Savoir Rouler à Vélo.<br/></p>`
         })

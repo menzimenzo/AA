@@ -177,7 +177,7 @@
             label="Commune">
               <b-form-select 
                 class="liste-deroulante"
-                v-model="user.commune">
+                v-model="selectedCommune">
                 <option :value="null">-- Choix de la commune --</option>
                 <option
                   v-for="commune in listecommune"
@@ -593,6 +593,13 @@ export default {
     }
   
  },
+  mounted() {
+    this.recherchecommune().then(res => {
+      if (this.user && this.user.commune) {
+        this.selectedCommune = this.user.commune.cpi_codeinsee;
+      }
+    });
+  },
   async mounted() {
     await this.$store.dispatch("get_structures");
   },

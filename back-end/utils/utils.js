@@ -41,7 +41,7 @@ module.exports = {
             mailcontact: utilisateur.uti_mailcontact,            
             sitewebcontact: utilisateur.uti_sitewebcontact,
             adrcontact: utilisateur.uti_adrcontact,
-            compadrecontact: utilisateur.uti_compadrcontact,
+            compadrcontact: utilisateur.uti_compadrcontact,
             cp: utilisateur.uti_com_cp_contact,
             codeinsee: utilisateur.uti_com_codeinseecontact,
             commune : utilisateur.uti_com_libellecontact
@@ -65,7 +65,7 @@ module.exports = {
             uti_mailcontact: utilisateur.mailcontact,
             uti_sitewebcontact: utilisateur.sitewebcontact,
             uti_adrcontact : utilisateur.adrcontact,
-            uti_compadrcontact : utilisateur.compadrecontact,
+            uti_compadrcontact : utilisateur.compadrcontact,
             uti_com_cp_contact: utilisateur.cp,
             uti_com_codeinseecontact: utilisateur.codeinsee,
             uti_com_libellecontact: utilisateur.commune
