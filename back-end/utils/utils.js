@@ -42,11 +42,12 @@ module.exports = {
             sitewebcontact: utilisateur.uti_sitewebcontact,
             adrcontact: utilisateur.uti_adrcontact,
             compadrcontact: utilisateur.uti_compadrcontact,
+            commune : {
+              com_libellemaj: utilisateur.uti_com_libellecontact,
+              cpi_codeinsee: utilisateur.uti_com_codeinseecontact,
+            },
             cp: utilisateur.uti_com_cp_contact,
-            codeinsee: utilisateur.uti_com_codeinseecontact,
-            commune : utilisateur.uti_com_libellecontact
-            
-
+            telephonecontact: utilisateur.uti_telephonecontact
       }
     } else { 
       return {
@@ -67,9 +68,8 @@ module.exports = {
             uti_adrcontact : utilisateur.adrcontact,
             uti_compadrcontact : utilisateur.compadrcontact,
             uti_com_cp_contact: utilisateur.cp,
-            uti_com_codeinseecontact: utilisateur.codeinsee,
-            uti_com_libellecontact: utilisateur.commune
-
+            uti_com_libellecontact: utilisateur.commune,
+            uti_telephonecontact: utilisateur.telephonecontact
         }
     }
 }

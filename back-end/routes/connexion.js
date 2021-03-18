@@ -38,45 +38,7 @@ router.post('/verify', async (req,res) => {
     const tokenFc = req.body.tokenFc
     var user = formatUtilisateur(req.body, false)
 
-    /*
-    if (user.str_id == 99999) {
-        // La structure spécifiée n'existe peut être pas encore
-        const selectRes = await pgPool.query("SELECT str_id from structure where  is not null and str_libelle = $1",
-            [user.libelleCollectivite]).catch(err => {
-                console.log(err)
-                throw err
-            })
-
-        var libelleCourt = ''
-        if (!selectRes.rows[0]) {
-            // Si la structure n'existe pas on la créé
-            log.d('::verify - structure a créer')
-            if (user.typeCollectivite == 1) {
-                libelleCourt = 'COM'
-            }
-            if (user.typeCollectivite == 2) {
-                libelleCourt = 'DEP'
-            }
-            if (user.typeCollectivite == 3) {
-                libelleCourt = 'EPCI'
-            }
-            const insertRes = await pgPool.query("INSERT INTO structure (str_libellecourt,str_libelle,str_actif,str_federation,str_typecollectivite) \
-         VALUES ($1,$2,'true','false',$3) RETURNING *",
-                [libelleCourt,user.libelleCollectivite, user.typeCollectivite]).catch(err => {
-                    console.log(err)
-                    throw err
-                })
-                user.str_id = insertRes.rows[0].str_id
-            log.d('::verify - structure créée. Str_id : '+user.str_id );
-        }
-        else {
-            user.str_id = selectRes.rows[0].str_id
-            log.d('::verify - structure déjà existante. Str_id : '+user.str_id );
-        }
-        user.uti_structurelocale = user.libelleCollectivite
-    }
-    */
-
+   
     // Vérifier si l'email est déjà utilisé en base.
     const mailExistenceQuery = await pgPool.query(`SELECT uti_mail,uti_pwd, uti_tockenfranceconnect FROM utilisateur WHERE uti_mail='${user.uti_mail}'`).catch(err => {
         log.w(err)
@@ -105,24 +67,17 @@ router.post('/verify', async (req,res) => {
     }
 
     log.d('::verify - Mise à jour de l\'utilisateur existant')   
-    /*
-    const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true, \
-    uti_eaps = $4, uti_publicontact = $5, UTI_SITEWEBCONTACT = $6 WHERE uti_id = $6 RETURNING *", 
-    [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.sitewebcontact]).catch(err => {
-        console.log(err)
-        throw err
-    })
-    */
+/*
     console.log(user.uti_mailcontact)
     console.log(user.uti_compadrcontact)
-    console.log(user.uti_com_codeinseecontact)
-    console.log(user.uti_com_cp_contact)
-    console.log(user.uti_com_libellecontact)
-
+    console.log('cp' + user.uti_com_cp_contact)
+    console.log('commune : ' +user.uti_com_libellecontact.com_libellemaj)
+    console.log('insee : ' +user.uti_com_libellecontact.cpi_codeinsee)
+    */
     log.i('::verify : user.mailcontact' + user.uti_mailcontact)
     const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true, \
-    uti_eaps = $4, uti_publicontact = $5, uti_mailcontact = $7, uti_sitewebcontact = $8, uti_adrcontact = $9, uti_compadrcontact = $10 WHERE uti_id = $6 RETURNING *", 
-    [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.uti_mailcontact,user.uti_sitewebcontact,user.uti_adrcontact, user.uti_compadrcontact]).catch(err => {
+    uti_eaps = $4, uti_publicontact = $5, uti_mailcontact = $7, uti_sitewebcontact = $8, uti_adrcontact = $9, uti_compadrcontact = $10, uti_telephonecontact = $11, uti_com_libellecontact = $12, uti_com_codeinseecontact = $13, uti_com_cp_contact = $14 WHERE uti_id = $6 RETURNING *", 
+    [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.uti_mailcontact,user.uti_sitewebcontact,user.uti_adrcontact, user.uti_compadrcontact,user.uti_telephonecontact, user.uti_com_libellecontact.com_libellemaj , user.uti_com_libellecontact.cpi_codeinsee, user.uti_com_cp_contact]).catch(err => {
         console.log(err)
         throw err
     })
