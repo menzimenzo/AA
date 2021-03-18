@@ -37,9 +37,11 @@ router.post('/verify', async (req,res) => {
     var wasValidated = req.body.validated
     const tokenFc = req.body.tokenFc
     var user = formatUtilisateur(req.body, false)
+
+    /*
     if (user.str_id == 99999) {
         // La structure spécifiée n'existe peut être pas encore
-        const selectRes = await pgPool.query("SELECT str_id from structure where str_typecollectivite is not null and str_libelle = $1",
+        const selectRes = await pgPool.query("SELECT str_id from structure where  is not null and str_libelle = $1",
             [user.libelleCollectivite]).catch(err => {
                 console.log(err)
                 throw err
@@ -73,6 +75,7 @@ router.post('/verify', async (req,res) => {
         }
         user.uti_structurelocale = user.libelleCollectivite
     }
+    */
 
     // Vérifier si l'email est déjà utilisé en base.
     const mailExistenceQuery = await pgPool.query(`SELECT uti_mail,uti_pwd, uti_tockenfranceconnect FROM utilisateur WHERE uti_mail='${user.uti_mail}'`).catch(err => {
@@ -85,10 +88,41 @@ router.post('/verify', async (req,res) => {
         return res.status(200).json({ existingUser: formatUtilisateur(mailExistenceQuery.rows[0]) })
     } 
 
-    log.d('::verify - Mise à jour de l\'utilisateur existant')        
-    const bddRes = await pgPool.query("UPDATE utilisateur SET str_id = $1, uti_mail = $2, uti_structurelocale = $3, uti_nom = $4, uti_prenom = $5, validated = true \
-    WHERE uti_id = $6 RETURNING *", 
-    [user.str_id, user.uti_mail, user.uti_structurelocale, user.uti_nom, user.uti_prenom, user.uti_id]).catch(err => {
+    // Pour un maitre nageur, vérifier si le numéro EAPS est présent dans la table ref_eaps
+    console.log(user)
+    console.log(user.uti_eaps)
+    console.log(user.uti_mailcontact)
+    if (user.eaps != '') {
+        log.d('::verify - Recherche numéro EAPS') 
+        const eapslExistenceQuery = await pgPool.query(`SELECT eap_numero FROM ref_eaps WHERE eap_numero='${user.uti_eaps}'`).catch(err => {
+            log.w(err)
+            throw err
+
+        })
+        if (eapslExistenceQuery.rowCount == 0) {
+            return res.status(200).json({nonAuthorizedUser: 'Vous n\'êtes pas autorisés à vous créer un compte'})
+        }
+    }
+
+    log.d('::verify - Mise à jour de l\'utilisateur existant')   
+    /*
+    const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true, \
+    uti_eaps = $4, uti_publicontact = $5, UTI_SITEWEBCONTACT = $6 WHERE uti_id = $6 RETURNING *", 
+    [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.sitewebcontact]).catch(err => {
+        console.log(err)
+        throw err
+    })
+    */
+    console.log(user.uti_mailcontact)
+    console.log(user.uti_compadrcontact)
+    console.log(user.uti_com_codeinseecontact)
+    console.log(user.uti_com_cp_contact)
+    console.log(user.uti_com_libellecontact)
+
+    log.i('::verify : user.mailcontact' + user.uti_mailcontact)
+    const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true, \
+    uti_eaps = $4, uti_publicontact = $5, uti_mailcontact = $7, uti_sitewebcontact = $8, uti_adrcontact = $9, uti_compadrcontact = $10 WHERE uti_id = $6 RETURNING *", 
+    [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.uti_mailcontact,user.uti_sitewebcontact,user.uti_adrcontact, user.uti_compadrcontact]).catch(err => {
         console.log(err)
         throw err
     })
@@ -100,7 +134,7 @@ router.post('/verify', async (req,res) => {
             to: user.uti_mail,
             subject: 'création compte savoir rouler à vélo',
             body: `<p>Bonjour,</p>
-                <p>Votre compte « Intervenant Savoir Rouler à Vélo » a bien été créé. <br/><br/>
+                <p>Votre compte « Aisance Aquatique » a bien été créé. <br/><br/>
                 Nous vous invitons à y renseigner les informations relatives à la mise en œuvre de chacun des 3 blocs du socle commun du SRAV.<br/>
                 Le site <a href="www.savoirrouleravelo.fr">www.savoirrouleravelo.fr</a> est à votre disposition pour toute information sur le programme Savoir Rouler à Vélo.<br/></p>`
         })
@@ -189,7 +223,7 @@ router.post('/create-account-pwd', async (req, res) => {
         log.d('::create-account-pwd - Nouveau user, authentifié via password, à ajouter en base')
         confirmInscription = true    
         bddRes = await pgPool.query(
-            'INSERT INTO utilisateur(pro_id, stu_id, uti_mail, validated, uti_pwd)\
+            'INSERT INTO utilisateur(rol_id, stu_id, uti_mail, uti_validated, uti_pwd)\
             VALUES($1, $2, $3, $4, $5) RETURNING *'
             , [3, 1, formatedMail, false, crypted ]
           ).catch(err => {

@@ -52,7 +52,7 @@
                     variant="success"
                     :disabled="errors.any()"
                   >Inscription</b-button>
-                  {{ coucou }}
+                  {{ mail }}
                 </div>
               </b-form>
           </b-card>

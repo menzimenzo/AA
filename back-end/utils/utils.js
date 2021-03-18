@@ -29,33 +29,47 @@ module.exports = {
       return {
             id: utilisateur.uti_id,
             authId: utilisateur.uti_authid,
-            profilId: utilisateur.pro_id,
-            structureId: utilisateur.str_id,
+            roleId: utilisateur.rol_id,
             statutId: utilisateur.stu_id,
             mail: utilisateur.uti_mail,
             nom: utilisateur.uti_nom,
             prenom: utilisateur.uti_prenom,
-            structureLocale: utilisateur.uti_structurelocale,
             tokenFc: utilisateur.uti_tockenfranceconnect,
-            validated: utilisateur.validated,
-            typeCollectivite: utilisateur.str_typecollectivite,
-            libelleCollectivite: utilisateur.str_libelle
+            validated: utilisateur.uti_validated,
+            eaps: utilisateur.uti_eaps,
+            publicontact: utilisateur.uti_publicontact,
+            mailcontact: utilisateur.uti_mailcontact,            
+            sitewebcontact: utilisateur.uti_sitewebcontact,
+            adrcontact: utilisateur.uti_adrcontact,
+            compadrcontact: utilisateur.uti_compadrcontact,
+            cp: utilisateur.uti_com_cp_contact,
+            codeinsee: utilisateur.uti_com_codeinseecontact,
+            commune : utilisateur.uti_com_libellecontact
+            
+
       }
     } else { 
       return {
             uti_id : utilisateur.id ,
-            uti_authid: utilisateur._id ,
-            pro_id : utilisateur.profilId ,
-            str_id : utilisateur.structureId ,
+            uti_authid: utilisateur.uti_authid ,
+            rol_id : utilisateur.profilId ,
             stu_id : utilisateur.statutId ,
             uti_mail : utilisateur.mail && utilisateur.mail.toLowerCase() ,
             uti_nom : utilisateur.nom ,
             uti_prenom : utilisateur.prenom ,
             uti_structurelocale : utilisateur.structureLocale ,
             uti_tockenfranceconnect : utilisateur.tokenFc ,
-            validated: utilisateur.validated,
-            typeCollectivite: utilisateur.typeCollectivite,
-            libelleCollectivite: utilisateur.libelleCollectivite
+            uti_validated: utilisateur.validated,
+            uti_eaps: utilisateur.eaps,
+            uti_publicontact: utilisateur.publicontact,
+            uti_mailcontact: utilisateur.mailcontact,
+            uti_sitewebcontact: utilisateur.sitewebcontact,
+            uti_adrcontact : utilisateur.adrcontact,
+            uti_compadrcontact : utilisateur.compadrcontact,
+            uti_com_cp_contact: utilisateur.cp,
+            uti_com_codeinseecontact: utilisateur.codeinsee,
+            uti_com_libellecontact: utilisateur.commune
+
         }
     }
 }

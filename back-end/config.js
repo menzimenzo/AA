@@ -1,17 +1,10 @@
 module.exports = {
   postgres: {
-    user: process.env.POSTGRES_URL || "u_srv_dev",
+    user: process.env.POSTGRES_URL || "u_aaq_dev",
     host: process.env.POSTGRES_HOST || "pg",
-    database: process.env.POSTGRES_DB || "srv_dev",
-    password: process.env.POSTGRES_PWD ||"Sr4v3l0!",
+    database: process.env.POSTGRES_DB || "aaq_dev",
+    password: process.env.POSTGRES_PWD ||"A@kou@t1k!",
     port: process.env.POSTGRES_PORT ||5432
-    /* Config Laurent
-    user: process.env.POSTGRES_URL || "io_integ",
-    host: process.env.POSTGRES_HOST || "ac000941",
-    database: process.env.POSTGRES_DB || "postgres",
-    password: process.env.POSTGRES_PWD ||"SIAO@paris75",
-    port: process.env.POSTGRES_PORT ||52002
-    */
   },
   // les watchers ("normal" et nuxt) ne semblent pas fonctionner sous windows
   watch: true,
@@ -25,7 +18,7 @@ module.exports = {
   PATH_SUPERVISION_BATCH: process.env.PATH_SUPERVISION_BATCH || "/var/tmp/",
   MAIL_URL: process.env.MAIL_URL,
   URL_PREFIX: process.env.URL_PREFIX || '/api',
-  SENDER_EMAIL: process.env.SENDER_EMAIL || 'nepasrepondresrav@sports.gouv.fr',
+  SENDER_EMAIL: process.env.SENDER_EMAIL || 'nepasrepondreaaq@sports.gouv.fr',
   FRONT_DOMAIN: process.env.FRONT_DOMAIN || 'localhost', 
   // FRANCE CONNECT
   franceConnect: {
