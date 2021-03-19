@@ -132,7 +132,7 @@
               v-model="user.mailcontact"
               name="mailcontact"
               key="email-input"
-              v-validate="{ required: true, email: true }"
+              v-validate="{ email: true }"
               aria-describedby="emailcontactFeedback"
               placeholder="Courriel contact"
               :state="validateState('mail')"
