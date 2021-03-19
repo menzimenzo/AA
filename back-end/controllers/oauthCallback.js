@@ -109,7 +109,7 @@ const oauthCallback = async (req, res, next) => {
             // -- fin 68472
 
             // Account was never validated so is considered as new user
-            if(!utilisateur.validated){
+            if(!utilisateur.uti_validated){
               url = "/connexion/inscription"
             // User access the app
             } else {
