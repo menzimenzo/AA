@@ -193,7 +193,7 @@ create table UTILISATEUR (
    UTI_COMPADRCONTACT   VARCHAR(50)          null,
    UTI_COM_CP_CONTACT       VARCHAR(5)       null,
    UTI_COM_CODEINSEECONTACT VARCHAR(5)       null,
-   UTI_COM_LIBELLECONTACT   VARCHAR(50)      null,
+   UTI_TELEPHONECONTACT VARCHAR(50)          null,
    constraint PK_UTILISATEUR primary key (UTI_ID)
 );
 
