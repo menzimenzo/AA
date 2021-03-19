@@ -68,16 +68,17 @@ router.post('/verify', async (req,res) => {
 
     log.d('::verify - Mise à jour de l\'utilisateur existant')   
 /*
-    console.log(user.uti_mailcontact)
+    console.log(user)
     console.log(user.uti_compadrcontact)
     console.log('cp' + user.uti_com_cp_contact)
     console.log('commune : ' +user.uti_com_libellecontact.com_libellemaj)
-    console.log('insee : ' +user.uti_com_libellecontact.cpi_codeinsee)
-    */
+        */
+    console.log('insee : ' +user.uti_com_codeinseecontact)
+
     log.i('::verify : user.mailcontact' + user.uti_mailcontact)
     const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true, \
-    uti_eaps = $4, uti_publicontact = $5, uti_mailcontact = $7, uti_sitewebcontact = $8, uti_adrcontact = $9, uti_compadrcontact = $10, uti_telephonecontact = $11, uti_com_libellecontact = $12, uti_com_codeinseecontact = $13, uti_com_cp_contact = $14 WHERE uti_id = $6 RETURNING *", 
-    [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.uti_mailcontact,user.uti_sitewebcontact,user.uti_adrcontact, user.uti_compadrcontact,user.uti_telephonecontact, user.uti_com_libellecontact.com_libellemaj , user.uti_com_libellecontact.cpi_codeinsee, user.uti_com_cp_contact]).catch(err => {
+    uti_eaps = $4, uti_publicontact = $5, uti_mailcontact = $7, uti_sitewebcontact = $8, uti_adrcontact = $9, uti_compadrcontact = $10, uti_telephonecontact = $11,  uti_com_codeinseecontact = $12, uti_com_cp_contact = $13 WHERE uti_id = $6 RETURNING *", 
+    [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.uti_mailcontact,user.uti_sitewebcontact,user.uti_adrcontact, user.uti_compadrcontact,user.uti_telephonecontact , user.uti_com_codeinseecontact, user.uti_com_cp_contact]).catch(err => {
         console.log(err)
         throw err
     })

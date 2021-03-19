@@ -167,14 +167,7 @@
               v-model="user.compadrcontact"
             />
           </b-form-group>
-          <b-form-group label="CP BIS :">
-            
-            <b-form-input
-              type="text"
-              v-model="user.cp"
-            />
-          </b-form-group>
-          <p>{{ user.cp }}</p>
+
           <b-form-group id="CodePostal" label="Code Postal :" label-for="cp">
             <b-form-input
               v-model="cp"
@@ -255,6 +248,7 @@ export default {
           codedep: null
         },
       ],
+      //communeselectionne: {},
       selectedCommune: null
     };
   },
@@ -329,23 +323,34 @@ export default {
       this.recherchecommune();
     },
     selectedCommune() {
-      console.log("selectedCommune() {")
-      this.user.commune = this.listecommune.find(commune => {
+      console.log("this.selectedCommune" + this.selectedCommune)
+      this.user.cpi_codeinsee 
+        console.log("this.user.cpi_codeinsee " + this.user.cpi_codeinsee )
+      this.communeselectionne = this.listecommune.find(commune => {
         return commune.cpi_codeinsee == this.selectedCommune;
       });
+        console.log("###########" +this.communeselectionne)
+      this.user.cpi_codeinsee = this.communeselectionne.cpi_codeinsee
+
     }
   
  },
   mounted() {
+    
 
-    this.recherchecommune().then(res => {
-      if (this.user && this.user.commune) {
-        this.selectedCommune = this.user.commune.cpi_codeinsee;
-      }
-    });
+    
   },
   async mounted() {
     await this.$store.dispatch("get_structures");
+    /*
+    if (this.user.cp) {
+      this.cp = this.user.cp;
+      console.log(this.user.cpi_codeinsee)
+      this.recherchecommune();
+      this.selectedCommune = this.user.cpi_codeinsee;
+              console.log(this.selectedCommune)
+    }
+    */
   },
   computed: {
     ...mapState(["structures"]),
@@ -361,7 +366,7 @@ export default {
       },
     },
     isUserRegisteredViaPwd() {
-      return this.user && this.user.tokenFc;
+      return Boolean(this.user && this.user.tokenFc);
     },
     listeStructures() {
       var liste = this.structures;
