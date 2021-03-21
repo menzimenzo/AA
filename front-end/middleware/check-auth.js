@@ -42,10 +42,12 @@ export default async function({ env, route, store, req, res, redirect, app, isSe
                 return redirect('/interventions')
             }
         }
-
+        // Route pour les Maîtres nagueurs MN
+        // route utilisée pour une connexion FC déjà
         if(partenaireRoutes.indexOf(route.path) > -1){
             if(store.state.utilisateurCourant.profilId != 2){
-                return redirect('/interventions')
+                console.log("route accueilMN check-auth")
+                return redirect('/accueilMN')
             }
         }
 

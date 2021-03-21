@@ -296,6 +296,7 @@ export const actions = {
       });
   },
   async put_structure({ commit, state }, structureSelectionnee) {
+    
     const url = process.env.API_URL + "/structures/" + structureSelectionnee.str_id;
     console.info('url put:' + url)
     var structureIndex = state.structures.findIndex(structure=> {
@@ -318,8 +319,10 @@ export const actions = {
           error
         );
       });
+      
   }, 
   async post_structure({ commit, state }, structure) {
+    
     const url  = process.env.API_URL + "/structures";
           
     return await this.$axios.$post(url, { structure }).then(({ structure }) => {
@@ -339,6 +342,7 @@ export const actions = {
     }).catch(err => {
       console.log(err)
     })
+    
   },
   login({ commit }, { mail, password }) {
     log.i('actions::login - In', mail)
@@ -378,7 +382,10 @@ export const actions = {
               path= '/connexion/inscription'
             } else {
               log.d('actions::register - User already use FC')
-              path = '/interventions'
+              // Route pour les Maîtres nagueurs MN
+              //path = '/interventions'
+              console.log("route accueilMN index")
+              path = '/accueilMN'
               this.$toast.success(`Bienvenue ${user.prenom}`)
               this.$toast.info(`Vous pouvez maintenant vous connecter via France Connect et via mot de passe!`)
             }

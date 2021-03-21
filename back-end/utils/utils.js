@@ -29,7 +29,7 @@ module.exports = {
       return {
             id: utilisateur.uti_id,
             authId: utilisateur.uti_authid,
-            roleId: utilisateur.rol_id,
+            profilId: utilisateur.rol_id,
             statutId: utilisateur.stu_id,
             mail: utilisateur.uti_mail,
             nom: utilisateur.uti_nom,
