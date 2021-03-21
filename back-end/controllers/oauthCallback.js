@@ -113,12 +113,23 @@ const oauthCallback = async (req, res, next) => {
               url = "/connexion/inscription"
             // User access the app
             } else {
-              if(utilisateur.pro_id == 1){
+              if(utilisateur.rol_id == 1){
                 url = "/admin"
-              } else if(utilisateur.pro_id == 2) {
+              } else if(utilisateur.rol_id == 2) {
+                // Structure
+                url = "/partenaire"
+              } else if(utilisateur.rol_id == 3) {
+                // FormateurAAQ
+                url = "/partenaire"
+              } else if(utilisateur.rol_id == 4) {
+                // MaitreNageurAAQ
                 url = "/partenaire"
               } else {
-                url = "/interventions"
+                // MaitreNageur
+                console.log("Route accueilMN oauthallBack")
+                console.log(utilisateur.rol_id)
+                //log.d('Route accueilMN oauthallBack')
+                url = "/accueilMN"
               }
             }
           }

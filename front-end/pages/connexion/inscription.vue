@@ -52,7 +52,10 @@ export default {
           }
 
           await this.$store.dispatch('set_utilisateur', response.user);
-          this.$router.push('/interventions')
+          // Route pour les Maîtres nagueurs MN
+          //this.$router.push('/interventions')
+          console.log("route accueilMN inscription 1")
+          this.$router.push('/accueilMN')
           this.$toast.success('Inscription validée.')
         }).catch(error => {
           console.log(error)
@@ -66,7 +69,11 @@ export default {
       return this.$axios.$put(url, {user})
         .then(async user => {
           await this.$store.dispatch('set_utilisateur', user)
-          this.$router.push('/interventions')
+          // Route pour les Maîtres nagueurs MN
+          //this.$router.push('/interventions')
+          console.log("route accueilMN inscription 2")
+          this.$router.push('/accueilMN')
+
           this.$toast.success(`Bienvenue ${user.prenom}`)
           this.$toast.info(`Vous pouvez maintenant vous connecter via France Connect et via mot de passe!`)
         }).catch(error => {

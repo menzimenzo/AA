@@ -141,7 +141,8 @@ router.get('/', async function (req, res) {
         // si on est admin, on affiche tous les utilisateurs
         requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,str.str_libellecourt,pro.pro_libelle
         from utilisateur uti 
-        join structure str on str.str_id = uti.str_id 
+        join uti_str ust on ust.uti_id = uti.uti_id
+        join structure str on str.str_id = ust.str_id 
         join profil pro on pro.pro_id = uti.pro_id
         order by uti_id asc`;
     }
@@ -151,7 +152,8 @@ router.get('/', async function (req, res) {
         // Sauf les Admin créés sur structure
         requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,str.str_libellecourt,pro.pro_libelle
         from utilisateur uti 
-        join structure str on str.str_id = uti.str_id 
+        join uti_str ust on ust.uti_id = uti.uti_id
+        join structure str on str.str_id = ust.str_id 
         join profil pro on pro.pro_id = uti.pro_id and pro.pro_id <> 1
         where uti.str_id=${utilisateurCourant.str_id} order by uti_id asc  `;
     }
