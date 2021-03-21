@@ -217,9 +217,9 @@ create table UTI_PIS (
 /* Table : REF_EAPS                                             */
 /*==============================================================*/
 create table REF_EAPS        (
-   EAP_NUMERO           BIGINT               not null,
+   EAP_NUMERO           VARCHAR(12)               not null,
    EAP_DATEMAJ          timestamp            not null,
-   constraint PK_E primary key (EAP_NUMERO)
+   constraint PK_EAP_NUMERO primary key (EAP_NUMERO)
 );
 
 

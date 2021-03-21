@@ -83,7 +83,7 @@
             v-model="user.eaps"
             name="eaps"
             key="eaps-input"
-            v-validate="{ required: true, numeric: true }"
+            v-validate="{ required: true, numeric: false }"
             aria-describedby="eapsFeedback"
             placeholder="Numéro de carte professionnelle"
             :state="validateState('eaps')"
