@@ -1,15 +1,26 @@
 <template>
   <b-container class="accueilMN">
-    <p>Page pour les MN</p>
+        <b-row style="
+    margin-top:1%">
+      <b-col  class="col-12 col-md-4">
+        <b-img :src="require('assets/MainAisAqua.png')" width="365%"/>
 
-    
+      </b-col>
+      <b-col   class="col-4 col-md-8" >
+        <b-row >
+          <p class="InfoMN" ><b>Vous êtes connecté avec un rôle "Maître Nageur"</b><br><br>
+          Vous pouvez modifier les informations de votre compte<br>
+          Des formations de qualification Maître Nageur Aisance Aquatique sont disponibles sur le site : <br><a href="https://www.sports.gouv.fr/accueil-du-site/actualites/Lancement-du-plan-aisance-aquatique">Formations aisance aquatique</a><br></p>
+        </b-row>
+      </b-col>
+    </b-row>
   </b-container>
 </template>
 
 <script>
-import Intervention from "~/components/Intervention.vue";
+//import Intervention from "~/components/Intervention.vue";
 import { mapState } from "vuex";
-import Editable from "~/components/editable/index.vue";
+//import Editable from "~/components/editable/index.vue";
 
 export default {
   components: {
@@ -280,4 +291,18 @@ a:not(.collapsed) .accordion-chevron {
   transform: rotate(90deg);
   -moz-transform: rotate(90deg);
 }
+
+.InfoMN {
+  cursor: default;
+  padding-left: 1vw;
+  width: 50em;
+  padding-right: 1vw;
+  border-block-color: rgb(0, 0, 0);
+  font-size: 100%;
+  font-family: sans-serif ;
+  text-align: left;
+  background-color: #ffffff;
+  color:rgb(0, 0, 0)
+}
+
 </style>
