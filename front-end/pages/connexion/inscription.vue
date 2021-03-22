@@ -49,14 +49,15 @@ export default {
           if (response.nonAuthorizedUser){
             this.$toast.error(response.nonAuthorizedUser)
             return
-          }
-
-          await this.$store.dispatch('set_utilisateur', response.user);
-          // Route pour les Maîtres nagueurs MN
-          //this.$router.push('/interventions')
-          console.log("route accueilMN inscription 1")
-          this.$router.push('/accueilMN')
-          this.$toast.success('Inscription validée.')
+          } else if (!response.isPwdConfirmed && !response.user.tokenFc) {
+            this.$toast.info("Un email de confirmation d'inscription vous a été envoyé. Veuillez cliquer sur le lien contenu dans ce mail.")
+            await this.$store.dispatch('set_utilisateur', null);            
+            return this.$router.push('/')
+           } else {
+            await this.$store.dispatch('set_utilisateur', response.user);
+            this.$toast.success('Inscription validée.')
+            return this.$router.push('/accueilMN')
+           }
         }).catch(error => {
           console.log(error)
           this.$toast.error(error)

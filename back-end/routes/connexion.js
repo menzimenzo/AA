@@ -7,7 +7,7 @@ const log = logger(module.filename)
 
 const pgPool = require('../pgpool').getPool();
 const config = require('../config');
-const {sendEmail} = require('../utils/mail-service')
+const {sendEmail, sendValidationMail } = require('../utils/mail-service')
 const {getAuthorizationUrl, getLogoutUrl, formatUtilisateur} = require('../utils/utils')
 const bodyParser = require('body-parser');
 var moment = require('moment');
@@ -37,6 +37,42 @@ router.post('/verify', async (req,res) => {
     var wasValidated = req.body.validated
     const tokenFc = req.body.tokenFc
     var user = formatUtilisateur(req.body, false)
+    if (user.str_id == 99999) {
+        // La structure spécifiée n'existe peut être pas encore
+        const selectRes = await pgPool.query("SELECT str_id from structure where str_typecollectivite is not null and str_libelle = $1",
+            [user.libelleCollectivite]).catch(err => {
+                log.w(err)
+                throw err
+            })
+
+        var libelleCourt = ''
+        if (!selectRes.rows[0]) {
+            // Si la structure n'existe pas on la créé
+            log.d('::verify - structure a créer')
+            if (user.typeCollectivite == 1) {
+                libelleCourt = 'COM'
+            }
+            if (user.typeCollectivite == 2) {
+                libelleCourt = 'DEP'
+            }
+            if (user.typeCollectivite == 3) {
+                libelleCourt = 'EPCI'
+            }
+            const insertRes = await pgPool.query("INSERT INTO structure (str_libellecourt,str_libelle,str_actif,str_federation,str_typecollectivite) \
+         VALUES ($1,$2,'true','false',$3) RETURNING *",
+                [libelleCourt,user.libelleCollectivite, user.typeCollectivite]).catch(err => {
+                    log.w(err)
+                    throw err
+                })
+                user.str_id = insertRes.rows[0].str_id
+            log.d('::verify - structure créée. Str_id : '+user.str_id );
+        }
+        else {
+            user.str_id = selectRes.rows[0].str_id
+            log.d('::verify - structure déjà existante. Str_id : '+user.str_id );
+        }
+        user.uti_structurelocale = user.libelleCollectivite
+    }
 
    
     // Vérifier si l'email est déjà utilisé en base.
@@ -51,9 +87,6 @@ router.post('/verify', async (req,res) => {
     } 
 
     // Pour un maitre nageur, vérifier si le numéro EAPS est présent dans la table ref_eaps
-    console.log(user)
-    console.log(user.uti_eaps)
-    console.log(user.uti_mailcontact)
     if (user.eaps != '') {
         log.d('::verify - Recherche numéro EAPS') 
         const eapslExistenceQuery = await pgPool.query(`SELECT eap_numero FROM ref_eaps WHERE eap_numero='${user.uti_eaps}'`).catch(err => {
@@ -66,22 +99,18 @@ router.post('/verify', async (req,res) => {
         }
     }
 
-    log.d('::verify - Mise à jour de l\'utilisateur existant')   
-/*
-    console.log(user)
-    console.log(user.uti_compadrcontact)
-    console.log('cp' + user.uti_com_cp_contact)
-    console.log('commune : ' +user.uti_com_libellecontact.com_libellemaj)
-        */
-    console.log('insee : ' +user.uti_com_codeinseecontact)
-
-    log.i('::verify : user.mailcontact' + user.uti_mailcontact)
+    log.d('::verify - Mise à jour de l\'utilisateur existant', { insee: user.uti_com_codeinseecontact, mailcontact: user.uti_mailcontact })   
     const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true, \
     uti_eaps = $4, uti_publicontact = $5, uti_mailcontact = $7, uti_sitewebcontact = $8, uti_adrcontact = $9, uti_compadrcontact = $10, uti_telephonecontact = $11,  uti_com_codeinseecontact = $12, uti_com_cp_contact = $13 WHERE uti_id = $6 RETURNING *", 
     [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.uti_mailcontact,user.uti_sitewebcontact,user.uti_adrcontact, user.uti_compadrcontact,user.uti_telephonecontact , user.uti_com_codeinseecontact, user.uti_com_cp_contact]).catch(err => {
         console.log(err)
         throw err
     })
+
+    //
+    // Adresse ud site à changer !
+    // SCRIPT MODIFIE, à vérifier si c'est OK.
+    //
     
     // Envoie de l'email de confirmation
     if(!wasValidated){
@@ -93,13 +122,34 @@ router.post('/verify', async (req,res) => {
                 <p>Votre compte « Aisance Aquatique » a bien été créé. <br/><br/>
                 Nous vous invitons à y renseigner les informations relatives à la mise en œuvre de chacun des 3 blocs du socle commun du SRAV.<br/>
                 Le site <a href="www.savoirrouleravelo.fr">www.savoirrouleravelo.fr</a> est à votre disposition pour toute information sur le programme Savoir Rouler à Vélo.<br/></p>`
+            })
+        }
+        
+    user = formatUtilisateur(bddRes.rows[0])
+    req.session.user = bddRes.rows[0]
+    
+    const isPwdConfirmed = bddRes.rows[0] && bddRes.rows[0].uti_pwd && bddRes.rows[0].pwd_validated
+    if(!isPwdConfirmed && !user.tokenFc) {
+        log.d('::verify - mot de passe à valider.')
+        await sendValidationMail({
+            email: bddRes.rows[0].uti_mail,
+            pwd: bddRes.rows[0].uti_pwd,
+            id: bddRes.rows[0].uti_id,
+            siteName: 'Savoir Rouler à Vélo',
+            url: `${config.FRONT_DOMAIN}`,
+        })
+        .then(() => {
+            log.d('Mail de confirmation envoyé')
+            req.session.user = null
+        })
+        .catch(err => {
+            log.w(err)
+            throw err
         })
     }
 
-    req.session.user = bddRes.rows[0]
-    user = formatUtilisateur(bddRes.rows[0])
     log.i('::verify - Done')
-    return res.send({user})
+    return res.send({user, isPwdConfirmed })
 })
 
 // Nouveur user FC mais qui a déjà une connexion via mot de passe.
@@ -162,16 +212,24 @@ router.post('/create-account-pwd', async (req, res) => {
     if(mailExistenceQuery && mailExistenceQuery.rowCount > 0) {
         if(mailExistenceQuery.rows[0].uti_tockenfranceconnect && !mailExistenceQuery.rows[0].pwd) {
             log.d('::create-account-pwd - Utilisateur déjà connecté via FC.')
-        // ENVOI MAIL ???????
-        //
-        //
-        //
             confirmInscription = false
             bddRes = await pgPool.query(`UPDATE utilisateur SET uti_pwd= $1 WHERE uti_id= $2 RETURNING *`, [ crypted, mailExistenceQuery.rows[0].uti_id]
                 ).catch(err => {
-                    console.log(err)
+                    log.w(err)
                     throw err
                 })
+            await sendValidationMail({
+                email: mailExistenceQuery.rows[0].uti_mail,
+                pwd: crypted,
+                id: mailExistenceQuery.rows[0].uti_id,
+                siteName: 'Savoir Rouler à Vélo',
+                url: `${config.FRONT_DOMAIN}`,
+            })
+            .then(() => log.d('Mail de confirmation envoyé'))
+            .catch(err => {
+                log.w(err)
+                throw err
+            })
         } else {
             return res.status(400).json({message: 'Veuillez contacter l\'assistance.'});        
         }
@@ -183,7 +241,7 @@ router.post('/create-account-pwd', async (req, res) => {
             VALUES($1, $2, $3, $4, $5) RETURNING *'
             , [3, 1, formatedMail, false, crypted ]
           ).catch(err => {
-            console.log(err)
+            log.w(err)
             throw err
           })
     }
@@ -231,6 +289,51 @@ router.put('/edit-mon-compte/:id', async function (req, res) {
     })
 })
 
+// Validation du mot de passe.
+router.get('/enable-mail/:pwd/user/:id', async function(req, res) {
+    const id = req.params.id
+    const pwd = req.params.pwd
+    
+    log.i('::enable-mail - In', { id })
+    if(!id) {
+        return res.status(400).json('Aucun ID fournit pour  identifier l\'utilisateur.');
+    }
+
+    const userQuery = await pgPool.query(`SELECT * FROM utilisateur WHERE uti_id='${id}'`).catch(err => {
+        log.w(err)
+        throw err
+    })
+    const user= userQuery.rowCount === 1 && userQuery.rows[0]
+
+    if(!user) {
+        return res.status(404).json({message: "L'utilisateur n'existe pas."});        
+    }
+
+    log.d('::enable-mail - user found', { user })
+    if(user.uti_pwd === pwd && !user.pwd_validated) {
+        const requete = `UPDATE utilisateur 
+            SET pwd_validated = $1
+            WHERE uti_id = $2
+            RETURNING *
+            ;`    
+        pgPool.query(requete,[true, id], (err, result) => {
+            if (err) {
+                log.w('::enable-mail - erreur lors de l\'update', {requete, erreur: err.stack});
+                return res.status(400).json('erreur lors de la sauvegarde de l\'utilisateur');
+            }
+            else {
+                log.i('::enable-mail - Done, pwd has been validated.')
+                req.session.user = result.rows[0]
+                req.accessToken = result.rows[0].uti_pwd;
+                req.session.accessToken = result.rows[0].uti_pwd;
+                return res.status(200).json({ user: formatUtilisateur(result.rows[0])});
+            }
+        })
+    } else {
+        log.w('::enable-mail - erreur concernant le user à valider.')
+        return res.status(400).json('L\'utilisateur a déjà validé son mot de passe ou le mot de passe fournit est incorrecte.');
+    }    
+})
 
 // Envoie l'url FC pour se déconnecter
 router.get('/logout', async(req, res) => {
