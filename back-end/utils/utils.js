@@ -70,5 +70,6 @@ module.exports = {
             uti_telephonecontact: utilisateur.telephonecontact
         }
     }
-}
+  }
+  , formatEmail: mail => mail && mail.trim().toLowerCase()
 }

@@ -77,7 +77,6 @@ export default {
             this.formErrors = []
             this.$modal.hide('connexionForm')
             // Route pour les Maîtres nagueurs MN
-            //return this.$router.push('/interventions')
             console.log("route accueilMN index racine page")
             return this.$router.push('/accueilMN')
         })
