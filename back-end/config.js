@@ -28,16 +28,16 @@ module.exports = {
 
 // Clés Aisance aquatique
 
-/*
+///*
     "CLIENT_ID": process.env.CLIENT_ID || "6825c95ac3be9a12b2791283c3f02aee22d5cf687d4c5c0b13b16f1cfb94d05a",
     "CLIENT_SECRET": process.env.CLIENT_SECRET || "dc50bb7ebaec89e9a27d27a82081eb99260d84e9c349b67512704df0eb672f16",
 
-    */
-///*    
+//    */
+/*    
 // Clés Savoir Rouler à Vélo
     "CLIENT_ID": process.env.CLIENT_ID || "14a5bbbc66fd6ea4a525e5faadb38afec6bd07375d12dba2a42ffb7cab9ef49d",
     "CLIENT_SECRET": process.env.CLIENT_SECRET || "9154ebbc9f9243cc34899ee7fecbf17f55a4d8208f51f0317df414586b010132",
-//*/
+*/
     "CALLBACK_FS_PATH": process.env.CALLBACK_FS_PATH || "/connexion/login",
     "LOGOUT_FS_PATH": process.env.LOGOUT_FS_PATH || "/connexion/logout",
     
@@ -47,7 +47,7 @@ module.exports = {
     "LOGOUT_FC_PATH": process.env.LOGOUT_FC_PATH || "/api/v1/logout",
 
     //"SCOPES": "openid profile birth",
-    "SCOPES": "openid profile",
+    "SCOPES": "email openid given_name family_name preferred_username",
 
     // Random values for security purpose
     "state": "02XZ4MjSE0OAZ3JS",
