@@ -80,7 +80,7 @@ app.use(config.URL_PREFIX + '/pdf', pdf);
 app.use(config.URL_PREFIX + '/user', user);
 
 app.get(config.URL_PREFIX + '', function (req, res) {
-    res.send('Bienvenue sur le backend de Savoir Rouler à vélo');
+    res.send('Bienvenue sur le backend d''Aisance Aquatique');
 });
 
 app.use(config.URL_PREFIX + '/batch', batch);
