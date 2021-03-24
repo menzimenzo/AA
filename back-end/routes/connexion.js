@@ -255,6 +255,7 @@ router.get('/user', (req,res) => {
     return res.send(formatUtilisateur(req.session.user))
 })
 
+// Route pour la mise à jour du compte utilisateur à partir de 'MonCompte'
 router.put('/edit-mon-compte/:id', async function (req, res) {
     const profil = req.body.profil
     const id = req.params.id
