@@ -211,7 +211,8 @@ create table UTI_STR (
 /*==============================================================*/
 create table UTI_PIS (
    UTI_ID               BIGINT               not null,
-   PIS_ID               BIGINT               not null
+   PIS_ID               BIGINT               not null,
+   constraint PK_UTI_PIS primary key (uti_id,pis_id);
 );
 
 /*==============================================================*/
