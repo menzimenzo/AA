@@ -152,7 +152,6 @@ router.get('/csv', async function (req, res) {
                     return res.send(csvContent)
                 }
             })            
-            //res.json({ users });
         }
     })
 });
@@ -215,7 +214,6 @@ router.get('/:id', async function (req, res) {
 router.get('/', async function (req, res) {
     log.i('::list - In')
     const utilisateurCourant = req.session.user
-    //const utilisateurId = 1; // TODO à récupérer via GET ?
     
     if ( utilisateurCourant.rol_id == 1) {
         // si on est admin, on affiche tous les utilisateurs

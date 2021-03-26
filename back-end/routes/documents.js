@@ -1,6 +1,5 @@
 const express    = require('express');
 const router     = express.Router();
-const config     = require('../config');
 const stream = require('stream');
 let   upload     = require('../utils/multer.config.js')
 const pgPool = require('../pgpool').getPool();
