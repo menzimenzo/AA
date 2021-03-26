@@ -259,18 +259,40 @@ router.get('/user', (req,res) => {
 router.put('/edit-mon-compte/:id', async function (req, res) {
     const profil = req.body.profil
     const id = req.params.id
-    log.i('::edit-mon-compte - In', { id })
+    log.d('::edit-mon-compte - In', { id })
     if(!id) {
         return res.status(400).json('Aucun ID fournit pour  identifier l\'utilisateur.');
     }
+    log.d(profil)
     //insert dans la table intervention
+    /*
     const requete = `UPDATE utilisateur 
         SET uti_mail = $1,
         uti_structurelocale = $2
         WHERE uti_id = ${id}
         RETURNING *
         ;`    
-    pgPool.query(requete,[profil.mail, profil.structureLocale], (err, result) => {
+    */
+        const requete = `UPDATE utilisateur SET  
+                        uti_mail = $1, 
+                        uti_nom = $2, 
+                        uti_prenom = $3, 
+                        uti_validated = true, 
+                        uti_eaps = $4, 
+                        uti_publicontact = $5, 
+                        uti_mailcontact = $7, 
+                        uti_sitewebcontact = $8, 
+                        uti_adrcontact = $9, 
+                        uti_compadrcontact = $10, 
+                        uti_telephonecontact = $11,  
+                        uti_com_codeinseecontact = $12, 
+                        uti_com_cp_contact = $13 
+                        WHERE uti_id = $6
+                        RETURNING *
+                        ;`
+
+        
+    pgPool.query(requete,[profil.mail, profil.nom, profil.prenom, profil.eaps,Boolean(profil.publicontact), profil.id, profil.mailcontact,profil.sitewebcontact,profil.adrcontact, profil.compadrcontact,profil.telephonecontact , profil.cpi_codeinsee, profil.cp], (err, result) => {
         if (err) {
             log.w('::edit-mon-compte - erreur lors de l\'update', {requete, erreur: err.stack});
             return res.status(400).json('erreur lors de la sauvegarde de l\'utilisateur');
