@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const pgPool = require('../pgpool').getPool();
 
+const logger = require('../utils/logger')
+const log = logger(module.filename)
 /*
 Test : 
     Sur serveur web backend : 
@@ -10,9 +12,8 @@ Test :
         http://localhost/backend/listecommune?codepostal=57530
 */
 
-router.get('/',
-
-    function (req, res) {
+router.get('/', function (req, res) {
+        log.i('::listdepartement - In')
         var v_codepostal;
         v_codepostal = req.query.codepostal;
         // Recherche des communes correspondant au codepostal
@@ -24,10 +25,11 @@ router.get('/',
             [$1 = v_codepostal],
             (err, result) => {
                 if (err) {
-                    console.log(err);
+                    log.w('::listdepartement - erreur', err)
                     return res.statusCode(400).json({ message: 'erreur sur la requete de listcommune' });
                 }
                 else {
+                    log.i('::listdepartement - done', { count: result.rowCount})
                     const communes = result.rows;
                     console.log(communes)
                     return res.status(200).json({ communes });

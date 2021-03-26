@@ -3,13 +3,6 @@ const router = express.Router();
 const pgPool = require('../pgpool').getPool();
 const logger = require('../utils/logger')
 const log = logger(module.filename)
-/*
-Test : 
-    Sur serveur web backend : 
-        http://localhost:3001/listecommune?codepostal=57530
-    Via l'exposition du backend par le proxy (nginx)  
-        http://localhost/backend/listecommune?codepostal=57530
-*/
 
 router.get('/',
 
@@ -88,7 +81,7 @@ router.post('/', function (req, res) {
     pgPool.query(requete, [maPiscine.utilisateurId,maPiscine.id], (err, result) => {
         if (err) {
             log.w('::post - Erreur lors de la requête.', err.stack);
-            return res.status(400).json('erreur lors de la sauvegarde de la piscine favorite');
+            return res.status(400).json({ message: 'erreur lors de la sauvegarde de la piscine favorite' });
         }
         else {
             log.i('::post - Done', { rows: result.rows })
@@ -123,7 +116,7 @@ router.post('/delete/', async function (req, res) {
     pgPool.query(requete, [maPiscine.uti_id, maPiscine.id], (err, result) => {
         if (err) {
             log.w('::delete - Erreur survenue lors de la suppression.', { requete, err: err.stack })
-            return res.status(400).json('erreur lors de la suppression de la piscine favorite ' + id);
+            return res.status(400).json({ message: `Erreur lors de la suppression de la piscine favorite ${id} ` });
         }
         else {
             log.i('::delete - Done')
