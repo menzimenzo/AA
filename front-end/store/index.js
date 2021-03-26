@@ -1,53 +1,54 @@
 import Vue from 'vue'
-import { get } from 'lodash'
+import { get } from 'lodash'
 import { parseErrorMessage, formatEmail } from '~/lib/utils'
 import logger from '~/plugins/logger'
 const log = logger('store:index')
 
 export const state = () => ({
-  interventions         : [],
-  interventionCourrante : {},
-  utilisateurCourant    : null,
+  interventions: [],
+  interventionCourrante: {},
+  utilisateurCourant: null,
+  mesPiscines: null,
   utilisateurSelectionne: [],
-  users                 : [],
-  structures            : [],
-  structureSelectionnee : [],
-  documents             : [],
-  statStructure         : []
+  users: [],
+  structures: [],
+  structureSelectionnee: [],
+  documents: [],
+  statStructure: []
 
 });
 
 export const mutations = {
   CLEAR(state) {
-      log.i('mutations::demande/CLEAR')
-      const initial = defaultState()
-      Object.keys(initial).forEach(k => {
-          state[k] = initial[k]
-      })
+    log.i('mutations::demande/CLEAR')
+    const initial = defaultState()
+    Object.keys(initial).forEach(k => {
+      state[k] = initial[k]
+    })
   },
   SET(state, { key, value }) {
-      log.i(`mutations::SET:${key}`, { value, key })
-      const splitted = key && key.split('.')
-      const lastKey = splitted.pop()
-      let origin = state
-      splitted.forEach(p => {
-          // Si origin est vide et n'est pas un Boolean alors définir origin comme Object vide
-          if (!origin[p] && typeof origin[p] !== 'boolean') Vue.set(origin, p, {})
-          origin = origin[p]
-      })
-      Vue.set(origin, lastKey, value)
+    log.i(`mutations::SET:${key}`, { value, key })
+    const splitted = key && key.split('.')
+    const lastKey = splitted.pop()
+    let origin = state
+    splitted.forEach(p => {
+      // Si origin est vide et n'est pas un Boolean alors définir origin comme Object vide
+      if (!origin[p] && typeof origin[p] !== 'boolean') Vue.set(origin, p, {})
+      origin = origin[p]
+    })
+    Vue.set(origin, lastKey, value)
   },
   UNSET(state, { key }) {
-      log.i(`mutations::UNSET:${key}`)
-      const splitted = key.split('.')
-      const lastKey = splitted.pop()
-      let origin = state
-      splitted.forEach(p => {
-          // Si origin est vide et n'est pas un Boolean alors définir origin comme Object vide
-          if (!origin[p] && typeof origin[p] !== 'boolean') Vue.set(origin, p, {})
-          origin = origin[p]
-      })
-      Vue.set(origin, lastKey, null)
+    log.i(`mutations::UNSET:${key}`)
+    const splitted = key.split('.')
+    const lastKey = splitted.pop()
+    let origin = state
+    splitted.forEach(p => {
+      // Si origin est vide et n'est pas un Boolean alors définir origin comme Object vide
+      if (!origin[p] && typeof origin[p] !== 'boolean') Vue.set(origin, p, {})
+      origin = origin[p]
+    })
+    Vue.set(origin, lastKey, null)
   },
   set_statStructure(state, statStructure) {
     log.i(`mutations::set_statStructure`)
@@ -101,6 +102,18 @@ export const mutations = {
     log.i(`mutations::set_users`)
     state.users = users
   },
+  add_piscine(state, piscine) {
+    log.i(`mutations::add_piscine`, { piscine })
+    state.interventions.push(piscine);
+  },
+  set_mesPiscines(state, utilisateur) {
+    log.i("::mutations::set_mesPiscines - In");
+    state.mesPiscines = utilisateur;
+  },
+  clean_mesPiscines(state) {
+    log.i(`mutations::clean_mesPiscines`)
+    state.mesPiscines = null;
+  },
   put_user(state, {user, index}){
     log.i(`mutations::put_user`)
     Vue.set(state.users, index, user)
@@ -128,7 +141,7 @@ export const mutations = {
   set_documents(state, documents){
     log.i(`mutations::set_documents`)    
     state.documents = documents
-  },
+  }
 };
 
 export const actions = {
@@ -139,7 +152,7 @@ export const actions = {
       return
     }
     await this.$axios.$get(process.env.PROXY_URL + '/backend/api/connexion/user').then(utilisateur => {
-      log.i('actions::nuxtServerInit - Done')      
+      log.i('actions::nuxtServerInit - Done')
       commit("set_utilisateurCourant", utilisateur)
     }).catch((err) => {
       log.w('actions::nuxtServerInit - Error - nuxtServerInit', err.stack)
@@ -152,7 +165,7 @@ export const actions = {
       .$get(url)
       .then(response => {
         response.interventions.forEach(intervention => {
-          intervention.dateCreation     = new Date(intervention.dateCreation)
+          intervention.dateCreation = new Date(intervention.dateCreation)
           intervention.dateIntervention = new Date(intervention.dateIntervention)
         })
         commit("set_interventionCourrantes", response.interventions);
@@ -163,7 +176,7 @@ export const actions = {
       })
       .catch(error => {
         log.w("actions::Une erreur est survenue lors de la récupération des interventions", error);
-        this.$store.commit("clean_interventions");
+        dcommit("clean_interventions");
       });
   },
   async get_intervention({ commit, state }, idIntervention) {
@@ -172,7 +185,7 @@ export const actions = {
     return await this.$axios
       .$get(url)
       .then(response => {
-        response.intervention.dateCreation     = new Date(response.intervention.dateCreation)
+        response.intervention.dateCreation = new Date(response.intervention.dateCreation)
         response.intervention.dateIntervention = new Date(response.intervention.dateIntervention)
         commit("set_interventionCourrante", response.intervention);
         log.i("actions::get_intervention - done", { intervention: response.intervention });
@@ -183,8 +196,8 @@ export const actions = {
       });
   },
   async post_intervention({ commit, state }, intervention) {
-    const url                        = process.env.API_URL + "/interventions";
-          intervention.utilisateurId = state.utilisateurCourant.id
+    const url = process.env.API_URL + "/interventions";
+    intervention.utilisateurId = state.utilisateurCourant.id
     return await this.$axios.$post(url, { intervention }).then(({ intervention }) => {
       log.i("actions::post_intervention - In", { intervention });  
       commit('add_intervention', intervention)
@@ -199,6 +212,34 @@ export const actions = {
     return await this.$axios.$put(url, { intervention }).then(({ intervention }) => {
       commit('put_intervention', { intervention, index })
       return intervention
+    })
+  },
+  async get_mesPiscines({ commit, state }) {
+    const url = process.env.API_URL + "/piscine/" + state.utilisateurCourant.id;
+    log.i("get_mesPiscines - In", { url });
+    return await this.$axios
+      .$get(url)
+      .then(response => {
+        commit("set_mesPiscines", response.mesPiscines);
+        log.i("fetched mesPiscines - Done", {
+          mesPiscines: this.mesPiscines
+        });
+        // this.interventions = response.interventions
+      })
+      .catch(error => {
+        log.w(
+          "Une erreur est survenue lors de la récupération des piscines de l'utilisateur " + state.utilisateurCourant.id,
+          error
+        );
+        commit("clean_mesPiscines");
+      });
+  },
+  async post_maPiscine({ commit, state }, maPiscine) {
+    maPiscine.utilisateurId = state.utilisateurCourant.id
+    const url = process.env.API_URL + "/piscine/"
+    return await this.$axios.$post(url, { maPiscine }).then(({ maPiscine }) => {
+      commit('add_maPiscine', { maPiscine })
+      return maPiscine
     })
   },
   async set_utilisateur({ commit }, utilisateur) {
@@ -243,13 +284,13 @@ export const actions = {
         return this.$axios
           .$get(url)
           .then(response => {
-            commit("put_user", {user: response.user, index: userIndex});
+            commit("put_user", { user: response.user, index: userIndex });
           })
       })
       .catch(error => {
         log.w("actions::put_user - erreur", { error });  
       });
-  }, 
+  },
   async logout({ commit }) {
     commit("set_utilisateurCourant", null)
   },
@@ -296,10 +337,8 @@ export const actions = {
       .catch(error => {
         log.w("actions::put_structure - error", { error });  
       });
-      
   }, 
   async post_structure({ commit, state }, structure) {
-    
     const url  = process.env.API_URL + "/structures";
     log.i("actions::post_structure - In", { url });  
     return await this.$axios.$post(url, { structure }).then(({ structure }) => {
@@ -308,7 +347,7 @@ export const actions = {
       return structure
     });
   },
-  async get_documents({commit}) {
+  async get_documents({ commit }) {
     const url = process.env.API_URL + '/documents'
     log.i("actions::get_documents - In", { url });  
     return this.$axios.get(url).then(response => {
@@ -327,54 +366,54 @@ export const actions = {
     log.i('actions::login - In', mail)
     const url = process.env.API_URL + "/connexion/pwd-login"
     return this.$axios.$post(url, { mail, password })
-        .then(res => {
-            const user = res.user
-            log.d('login - response from server', user)
-            if(!user || !user.id) {
-              log.w('login - authserver, user not found')              
-              throw new Error('Email ou mot de passe incorrect.')
-            } else {
-              log.i('login - Done', { user })
-              commit("set_utilisateurCourant", user)
-              return this.$toast.success(`Bienvenue ${user.prenom}`)
-            }
-        })
-        .catch(err => {
-            log.w('login - error', err)
-            const message = parseErrorMessage(get(err, 'response.data.message') || err.message)
-            this.$toast.error(message)
-            throw new Error(message)
-        })
+      .then(res => {
+        const user = res.user
+        log.d('login - response from server', user)
+        if (!user || !user.id) {
+          log.w('login - authserver, user not found')
+          throw new Error('Email ou mot de passe incorrect.')
+        } else {
+          log.i('login - Done', { user })
+          commit("set_utilisateurCourant", user)
+          return this.$toast.success(`Bienvenue ${user.prenom}`)
+        }
+      })
+      .catch(err => {
+        log.w('login - error', err)
+        const message = parseErrorMessage(get(err, 'response.data.message') || err.message)
+        this.$toast.error(message)
+        throw new Error(message)
+      })
   },
   register({ commit }, params) {
-      params.user.mail = formatEmail(params.user.mail)
-      const { mail, password, confirm } = params.user
-      log.i('actions::register - In', mail, password, confirm )
-      let user = null
-      let path = null
+    params.user.mail = formatEmail(params.user.mail)
+    const { mail, password, confirm } = params.user
+    log.i('actions::register - In', mail, password, confirm)
+    let user = null
+    let path = null
 
-      return this.$axios.$post(`${process.env.API_URL}/connexion/create-account-pwd`, { password, mail, confirm })
-          .then(apiRes => {
-            user = apiRes.user
-            if(apiRes && apiRes.confirmInscription) {
-              log.d('actions::register - User not recorded with FC')
-              path= '/connexion/inscription'
-              commit("set_utilisateurCourant", user)
-            } else {
-              log.d('actions::register - User already use FC')
-              // Route pour les Maîtres nagueurs MN
-              //path = '/interventions'
-              path = '/login'
-              this.$toast.info(`Un email de confirmation d'inscription vous a été envoyé. Veuillez cliquer sur le lien contenu dans ce mail.`)
-            }
-            return this.$router.push({ path })
-          })
-          .catch((err) => {
-            log.w('actions::register', err)
-            const message = err.message || parseErrorMessage(get(err, 'response.data.message'))
-            this.$toast.error(message)
-            throw new Error(message)
-          })
+    return this.$axios.$post(`${process.env.API_URL}/connexion/create-account-pwd`, { password, mail, confirm })
+      .then(apiRes => {
+        user = apiRes.user
+        if(apiRes && apiRes.confirmInscription) {
+          log.d('actions::register - User not recorded with FC')
+          path= '/connexion/inscription'
+          commit("set_utilisateurCourant", user)
+        } else {
+          log.d('actions::register - User already use FC')
+          // Route pour les Maîtres nagueurs MN
+          //path = '/interventions'
+          path = '/login'
+          this.$toast.info(`Un email de confirmation d'inscription vous a été envoyé. Veuillez cliquer sur le lien contenu dans ce mail.`)
+        }
+        return this.$router.push({ path })
+      })
+      .catch((err) => {
+        log.w('actions::register', err)
+        const message = err.message || parseErrorMessage(get(err, 'response.data.message'))
+        this.$toast.error(message)
+        throw new Error(message)
+      })
   },
   forgot_password({ state }, { mail }) {
       log.i('actions::forgot_password - Init', { mail })
