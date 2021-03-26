@@ -50,30 +50,35 @@ export const mutations = {
       Vue.set(origin, lastKey, null)
   },
   set_statStructure(state, statStructure) {
+    log.i(`mutations::set_statStructure`)
     state.statStructure = statStructure;
   },
   set_interventionCourrantes(state, interventions) {
+    log.i(`mutations::set_interventionCourrantes`)
     state.interventions = interventions;
   },
   set_interventionCourrante(state, intervention) {
-    console.info("set_interventionCourrante", { intervention });
+    log.i(`mutations::set_interventionCourrante`, { intervention })
     state.interventionCourrante = intervention;
   },
   put_intervention(state, { intervention, index }) {
-    console.info("set_interventionCourrante", { intervention });
+    log.i(`mutations::put_interventionCourrante`, { intervention })
     Vue.set(state.interventions, index, intervention);
   },
   add_intervention(state, intervention) {
-    console.info("add_intervention", { intervention: JSON.stringify(intervention) });
+    log.i(`mutations::add_interventionCourrante`, { intervention })
     state.interventions.push(intervention);
   },
   clean_interventions(state) {
+    log.i(`mutations::clean_interventionCourrante`)
     state.interventions = [];
   },
   reset_interventions(state) {
+    log.i(`mutations::reset_interventionCourrante`)
     state.interventionCourrante = {};
   },
   select_intervention(state, index) {
+    log.i(`mutations::select_intervention`)
     state.intervention = state.interventions[index];
   },
   set_utilisateurCourant(state, utilisateur) {
@@ -81,44 +86,47 @@ export const mutations = {
     state.utilisateurCourant = utilisateur;
   },
   set_utilisateurSelectionne(state, utilisateur) {
-    console.info("set_utilisateurSelectionne BEGIN");
+    log.i(`mutations::set_utilisateurSelectionne`)
     state.utilisateurSelectionne = utilisateur;
   },
-
   put_user(state, { utilisateurSelectionne, index }) {
-    console.info("set_utilisateurSelectionne", { utilisateurSelectionne });
+    log.i(`mutations::put_user`)
     Vue.set(state.utilisateurSelectionne, index, utilisateurSelectionne);
   },
-
   clean_utilisateurCourant(state) {
-    console.log("CLEANING USER")
+    log.i(`mutations::clean_utilisateurCourant`)
     state.utilisateurCourant = null;
   },
   set_users(state, users){
+    log.i(`mutations::set_users`)
     state.users = users
   },
   put_user(state, {user, index}){
+    log.i(`mutations::put_user`)
     Vue.set(state.users, index, user)
   },
   set_structures(state, structures){
+    log.i(`mutations::set_structures`)
     state.structures = structures
   },
   set_structureSelectionnee(state, structure) {
-    console.info("set_structureSelectionne BEGIN");
+    log.i(`mutations::set_structureSelectionne`)
     state.structureSelectionnee = structure;
   },
   put_structure(state, {structure, index}){
+    log.i(`mutations::put_structure`)
     Vue.set(state.structures, index, structure)
   },
   add_structure(state, structure) {
-    console.info("add_structure", { structure: JSON.stringify(structure) });
+    log.i(`mutations::add_structure`)
     state.structures.push(structure);
   },
   clean_structureSelectionnee(state) {
-    console.log("CLEANING structure sélectionnée")
+    log.i(`mutations::clean_structureSelectionnee`)
     state.structureSelectionnee = null;
   },
   set_documents(state, documents){
+    log.i(`mutations::set_documents`)    
     state.documents = documents
   },
 };
@@ -138,7 +146,7 @@ export const actions = {
     })
   },
   async get_interventions({ commit, state }) {
-    log.i("get_interventions - In");
+    log.i("actions::get_interventions - In");
     const url = process.env.API_URL + "/interventions";
     return await this.$axios
       .$get(url)
@@ -148,21 +156,18 @@ export const actions = {
           intervention.dateIntervention = new Date(intervention.dateIntervention)
         })
         commit("set_interventionCourrantes", response.interventions);
-        log.i("fetched interventions - Done", {
+        log.i("actions::get_interventions - Done", {
           interventions: this.interventions
         });
         // this.interventions = response.interventions
       })
       .catch(error => {
-        log.w(
-          "Une erreur est survenue lors de la récupération des interventions",
-          error
-        );
+        log.w("actions::Une erreur est survenue lors de la récupération des interventions", error);
         this.$store.commit("clean_interventions");
       });
   },
   async get_intervention({ commit, state }, idIntervention) {
-    console.info("get_interventions");
+    log.i("actions::get_intervention - In");  
     const url = process.env.API_URL + "/interventions/" + idIntervention;
     return await this.$axios
       .$get(url)
@@ -170,28 +175,24 @@ export const actions = {
         response.intervention.dateCreation     = new Date(response.intervention.dateCreation)
         response.intervention.dateIntervention = new Date(response.intervention.dateIntervention)
         commit("set_interventionCourrante", response.intervention);
-        console.info("fetched intervention - done", {
-          intervention: response.intervention
-        });
+        log.i("actions::get_intervention - done", { intervention: response.intervention });
         // this.interventions = response.interventions
       })
       .catch(error => {
-        console.error(
-          "Une erreur est survenue lors de la récupération de l'intervention",
-          error
-        );
+        log.w("actions::get_intervention - erreur", error);
       });
   },
   async post_intervention({ commit, state }, intervention) {
     const url                        = process.env.API_URL + "/interventions";
           intervention.utilisateurId = state.utilisateurCourant.id
     return await this.$axios.$post(url, { intervention }).then(({ intervention }) => {
-      console.info('post_intervention', { intervention });
+      log.i("actions::post_intervention - In", { intervention });  
       commit('add_intervention', intervention)
       return intervention
     });
   },
   async put_intervention({ commit, state }, intervention) {
+    log.i("actions::put_intervention - In", { intervention });  
     const url                        = process.env.API_URL + "/interventions/" + intervention.id;
     const index                      = state.interventions.findIndex(i => i.id === intervention.id )
           intervention.utilisateurId = state.utilisateurCourant.id
@@ -204,45 +205,33 @@ export const actions = {
     commit("set_utilisateurCourant", utilisateur)
   },
   async get_users({ commit, state }) {
-    console.info("get_users :" + state.utilisateurCourant);
+    log.i("actions::get_users - In");  
     const url = process.env.API_URL + "/user/";
-    console.info('url:' + url)
     return await this.$axios
       .$get(url)
       .then(response => {
         commit("set_users", response.users);
         return { users: response.users }
       })
-
       .catch(error => {
-        console.error(
-          "Une erreur est survenue lors de la récupération des utilisateurs",
-          error
-        );
+        log.w("actions::get_users - erreur", error);
       });
   },
   async get_user({ commit,state }, idUtilisateur) {
-    console.info("get_user :" + idUtilisateur);
+    log.i("actions::get_user - In");  
     const url = process.env.API_URL + "/user/" + idUtilisateur;
-    console.info('url:' + url)
     return await this.$axios
       .$get(url)
       .then(response => {
         commit("set_utilisateurSelectionne", response.user);
-        console.info("fetched user - done", {
-          utilisateurSelectionne: response.user
-        });
       })
       .catch(error => {
-        console.error(
-          "Une erreur est survenue lors de la récupération de l'utilisateur",
-          error
-        );
+        log.w("actions::get_user - In", error);
       });
   },
   async put_user({ commit, state }, utilisateurSelectionne) {
     const url = process.env.API_URL + "/user/" + utilisateurSelectionne.id;
-    console.info('url:' + url)
+    log.i("actions::put_user - In", { url });  
     var userIndex = state.users.findIndex(utilisateur => {
       return utilisateur.id == utilisateurSelectionne.id
     })
@@ -250,7 +239,7 @@ export const actions = {
       .$put(url, { utilisateurSelectionne })
       .then(async res => {
         const url = process.env.API_URL + "/user/" + res.user.id;
-        console.info('url:' + url)
+        log.d("actions::put_user - get updated user", { url });          
         return this.$axios
           .$get(url)
           .then(response => {
@@ -258,47 +247,38 @@ export const actions = {
           })
       })
       .catch(error => {
-        console.error(
-          "Une erreur est survenue lors de la mise à jour de l'utilisateur",
-          error
-        );
+        log.w("actions::put_user - erreur", { error });  
       });
   }, 
   async logout({ commit }) {
     commit("set_utilisateurCourant", null)
   },
   async get_structures({commit}) {
+    log.i("actions::get_structures - In");  
     const url = process.env.API_URL + '/structures'
     return this.$axios.get(url).then(response => {
       commit("set_structures", response.data);
-      console.info("fetched structures - done")
+      log.i("actions::get_structures - done");  
     }).catch(err => {
-      console.log(err)
+      log.w("actions::get_structures - error", { err });  
     })
   },
   async get_structure({ commit,state }, idStructure) {
-    console.info("get_structure :" + idStructure);
+    log.i("actions::get_structure - In", { idStructure });  
     const url = process.env.API_URL + "/structures/" + idStructure;
-    console.info('url:' + url)
     return await this.$axios
       .$get(url)
       .then(response => {
         commit("set_structureSelectionnee", response.structures);
-        console.info("fetched structure - done", {
-          structureSelectionnee: response.structures
-        });
+        log.i("actions::get_structure - done");  
       })
       .catch(error => {
-        console.error(
-          "Une erreur est survenue lors de la récupération de la structure",
-          error
-        );
+        log.w("actions::get_structure - erreur", { error });  
       });
   },
   async put_structure({ commit, state }, structureSelectionnee) {
-    
+    log.i("actions::put_structure - In", { structureSelectionnee });  
     const url = process.env.API_URL + "/structures/" + structureSelectionnee.str_id;
-    console.info('url put:' + url)
     var structureIndex = state.structures.findIndex(structure=> {
       return structure.id == structureSelectionnee.id
     })
@@ -306,41 +286,40 @@ export const actions = {
       .$put(url, { structureSelectionnee })
       .then(async res => {
         const url = process.env.API_URL + "/structures/" + res.structures.str_id;
-        console.info('url put 2 :' + url)
         return this.$axios
           .$get(url)
           .then(response => {
             commit("put_user", {structure: response.structure, index: structureIndex});
+            log.i("actions::put_structure - done");  
           })
       })
       .catch(error => {
-        console.error(
-          "Une erreur est survenue lors de la mise à jour de l'utilisateur",
-          error
-        );
+        log.w("actions::put_structure - error", { error });  
       });
       
   }, 
   async post_structure({ commit, state }, structure) {
     
     const url  = process.env.API_URL + "/structures";
-          
+    log.i("actions::post_structure - In", { url });  
     return await this.$axios.$post(url, { structure }).then(({ structure }) => {
-      console.info('post_structure', { structure });
       commit('add_structure', structure)
+      log.i("actions::post_structure - done");  
       return structure
     });
   },
   async get_documents({commit}) {
     const url = process.env.API_URL + '/documents'
+    log.i("actions::get_documents - In", { url });  
     return this.$axios.get(url).then(response => {
       var documents = response.data
       documents.forEach(doc => {
         delete doc.doc_contenu
       })
+      log.i("actions::get_documents - done");  
       commit("set_documents", response.data);
     }).catch(err => {
-      console.log(err)
+      log.w("actions::get_documents - error", { err });  
     })
     
   },
@@ -380,16 +359,14 @@ export const actions = {
             if(apiRes && apiRes.confirmInscription) {
               log.d('actions::register - User not recorded with FC')
               path= '/connexion/inscription'
+              commit("set_utilisateurCourant", user)
             } else {
               log.d('actions::register - User already use FC')
               // Route pour les Maîtres nagueurs MN
               //path = '/interventions'
-              console.log("route accueilMN index")
-              path = '/accueilMN'
-              this.$toast.success(`Bienvenue ${user.prenom}`)
-              this.$toast.info(`Vous pouvez maintenant vous connecter via France Connect et via mot de passe!`)
+              path = '/login'
+              this.$toast.info(`Un email de confirmation d'inscription vous a été envoyé. Veuillez cliquer sur le lien contenu dans ce mail.`)
             }
-            commit("set_utilisateurCourant", user)
             return this.$router.push({ path })
           })
           .catch((err) => {
@@ -398,6 +375,30 @@ export const actions = {
             this.$toast.error(message)
             throw new Error(message)
           })
+  },
+  forgot_password({ state }, { mail }) {
+      log.i('actions::forgot_password - Init', { mail })
+      return this.$axios.$post(`${process.env.API_URL}/connexion/forgot-password/${formatEmail(mail)}`)
+        .then(res => {
+          log.i('actions::forgot_password - Done', res)
+        })
+        .catch(err => {
+          log.w('actions::forgot_password', err)
+          const message = parseErrorMessage(get(err, 'response.data.message'))
+          throw new Error(message)
+        })
+  },
+  reset_password({ state }, { id, old, password, confirm }) {
+    log.i('actions::reset_password - in ', { id, old, password, confirm })
+    return this.$axios.$post(`${process.env.API_URL}/connexion/reset-password/`,{ id, old, password, confirm })
+      .then(res => {
+        log.i('actions::forgot_password - Done', res)
+      })
+      .catch(err => {
+        log.w('actions::forgot_password', err)
+        const message = parseErrorMessage(get(err, 'response.data.message'))
+        throw new Error(message)
+      })
   },
   set_state_element({ commit }, {key,value }) {
     log.i('actions::set_state_element - In',{key , value} )

@@ -132,10 +132,8 @@
               v-model="user.mailcontact"
               name="mailcontact"
               key="email-input"
-              v-validate="{ email: true }"
               aria-describedby="emailcontactFeedback"
               placeholder="Courriel contact"
-              :state="validateState('mail')"
             />
             
           </b-form-group>
@@ -204,7 +202,7 @@
             @click="submit"
             variant="success"
             :disabled="
-              errors.any() 
+              errors.any()
             "
             >{{ submitTxt }}</b-button
           >
@@ -335,11 +333,6 @@ export default {
     }
   
  },
-  mounted() {
-    
-
-    
-  },
   async mounted() {
     await this.$store.dispatch("get_structures");
     /*

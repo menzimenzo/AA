@@ -179,6 +179,7 @@ create table UTILISATEUR (
    ROL_ID               BIGINT               not null,
    STU_ID               BIGINT               not null,
    UTI_VALIDATED        BOOLEAN              default false,
+   PWD_VALIDATED        BOOLEAN              default false,
    UTI_MAIL             VARCHAR(50)          not null,
    UTI_PWD              VARCHAR(255)         null,
    UTI_NOM              VARCHAR(50)          null,

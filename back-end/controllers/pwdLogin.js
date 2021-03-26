@@ -5,7 +5,7 @@ const {formatUtilisateur} = require('../utils/utils')
 const logger = require('../utils/logger')
 const log = logger(module.filename)
 
-const pwdLogin = async function(req, res) {
+module.exports = async function(req, res) {
     const { mail, password } = req.body
     log.i('In', { mail })
     if(!mail) {
@@ -27,24 +27,24 @@ const pwdLogin = async function(req, res) {
         }
         else {
             log.d('Getting user')
-            const user = result.rows && result.rows.length && result.rows[0];
+            const user = result.rowCount === 1 && result.rows[0];
             if (!user) {
                 log.w('Utilisateur inexistant')
-                return res.status(404).json({ message: 'L\'utilisateur n\'existe pas' });
+                return res.status(404).json({ message: 'Mail ou mot de passe incorrect' });
             }
 
             if(user.uti_pwd && user.uti_pwd === crypted) {
-                log.i('Done')
+                if(!user.pwd_validated) {
+                    return res.status(400).json({ message: 'En attente de confirmation du mot de passe.' });
+                }    
                 req.session.user = user
                 req.accessToken = crypted;
                 req.session.accessToken = crypted;
                 log.i('Done', { user })            
                 return res.json({ user: formatUtilisateur(user) });
             } else {
-                return res.status(400).json({ message: 'Mot de passe incorrect' });
+                return res.status(404).json({ message: 'Mail ou mot de passe incorrect' });
             }
         }
     })
 }
-
-module.exports =  { pwdLogin };
