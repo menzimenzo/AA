@@ -51,6 +51,7 @@ const interventions = require('./routes/interventions');
 const listecommune  = require('./routes/listecommune');
 const listedepartement  = require('./routes/listedepartement');
 const listepci  = require('./routes/listepci');
+const piscine  = require('./routes/piscine');
 const attestations  = require('./routes/attestations');
 const structures    = require('./routes/structures');
 const pdf           = require('./routes/pdf');
@@ -68,6 +69,8 @@ app.use(config.URL_PREFIX + '/listecommune', listecommune);
 app.use(config.URL_PREFIX + '/listedepartement', listedepartement);
 
 app.use(config.URL_PREFIX + '/listepci', listepci);
+
+app.use(config.URL_PREFIX + '/piscine', piscine);
 
 app.use(config.URL_PREFIX + '/attestations', attestations);
 
