@@ -71,7 +71,7 @@
             >Le nom est obligatoire.</b-form-invalid-feedback
           >
         </b-form-group>
-        <b-form-group 
+       <b-form-group 
           label="Numéro de carte professionnelle :"
           id="eapsInputGroup"
           label-for="eapsInput"
@@ -80,17 +80,19 @@
           <b-form-input
             id="eapsInput"
             type="text"
+            required
             v-model="user.eaps"
             name="eaps"
             key="eaps-input"
-            v-validate="{ required: true, numeric: false }"
+            v-validate="{ required: true, regex: /[0-9]{5}ED[0-9]{4}/ }"
+            :state="validateState('eaps')"
             aria-describedby="eapsFeedback"
             placeholder="Numéro de carte professionnelle"
-            :state="validateState('eaps')"
           />
-           <b-form-invalid-feedback id="prenomFeedback"
-            >Le numéro de carte professionnelle est obligatoire.</b-form-invalid-feedback
+           <b-form-invalid-feedback id="eapsFeedback"
+            >Le format de la carte professionnelle n'est pas respecté.</b-form-invalid-feedback
           >
+        
         </b-form-group>
       </b-form>
     </b-card>
@@ -312,38 +314,24 @@ export default {
     },
   },
  watch: {
-    "user.cp"() {
-      console.info(" CP BIS");
-    },
     "cp"() {
       console.info("Saisie CP");
       this.user.cp = this.cp;
       this.recherchecommune();
     },
-    selectedCommune() {
-      console.log("this.selectedCommune" + this.selectedCommune)
-      this.user.cpi_codeinsee 
-        console.log("this.user.cpi_codeinsee " + this.user.cpi_codeinsee )
-      this.communeselectionne = this.listecommune.find(commune => {
-        return commune.cpi_codeinsee == this.selectedCommune;
-      });
-        console.log("###########" +this.communeselectionne)
-      this.user.cpi_codeinsee = this.communeselectionne.cpi_codeinsee
-
-    }
-  
  },
   async mounted() {
     await this.$store.dispatch("get_structures");
-    /*
-    if (this.user.cp) {
-      this.cp = this.user.cp;
-      console.log(this.user.cpi_codeinsee)
-      this.recherchecommune();
-      this.selectedCommune = this.user.cpi_codeinsee;
-              console.log(this.selectedCommune)
+    // Chargement du CP et liste commune + sélection
+    if(this.user.cp)
+    {
+      // Recopie du CP dans le champ code postal
+      this.cp = this.user.cp
+      // Recherche de la liste des commune
+      this.recherchecommune()
+      // Sélection de la commune correspondant à celle de l'utilisateur dans la liste
+      this.selectedCommune = this.user.cpi_codeinsee
     }
-    */
   },
   computed: {
     ...mapState(["structures"]),
