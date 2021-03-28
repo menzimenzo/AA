@@ -2,86 +2,35 @@
   <div>
     <b-card class="mb-3">
       <b-form>
-        <b-form-group
-          id="emailInputGroup"
-          label="Courriel :"
-          label-for="emailInput"
+        <b-form-group 
+          id="emailInputGroup" 
+          label="Courriel :" 
+          label-for="emailInput" 
           required
         >
           <b-form-input
-            id="emailInput"
-            type="email"
-            v-model="user.mail"
-            required
-            name="mail"
-            key="email-input"
-            v-validate="{ required: true, email: true }"
-            aria-describedby="emailFeedback"
-            placeholder="Courriel"
-            :disabled="!isUserRegisteredViaPwd"
+          id="emailInput"
+          type="email"
+          v-model="user.mail"
+          required
+          name="mail"
+          key="email-input"
+          v-validate="{ required: true, email: true }"
+          aria-describedby="emailFeedback"
+          placeholder="Courriel"
+          :state="validateState('mail')"
+          :disabled="!isUserRegisteredViaPwd"
           />
-        </b-form-group>
+        <b-form-invalid-feedback id="emailFeedback">Le courriel est obligatoire et doit être valide.</b-form-invalid-feedback>
+      </b-form-group>
+
+
         <b-form-group label="Prénom :" >
           <b-form-input type="text" v-model="user.prenom" :disabled="isUserRegisteredViaPwd" />
         </b-form-group>
         <b-form-group label="Nom :">
           <b-form-input type="text" v-model="user.nom" :disabled="isUserRegisteredViaPwd" />
         </b-form-group>
-
-<!--
-        <b-form-group
-          required
-          id="structNationaleGroup"
-          label="Structure nationale :"
-          label-for="structNatSelect"
-        >
-    
-          <b-form-select
-            id="structNatSelect"
-            v-model="user.structureId"
-            v-validate="{ required: true, min_value: 1 }"
-            name="struct"
-            :state="validateState('struct')"
-            aria-describedby="structFeedback"
-            :disabled="!checkLegal"
-          >
-            <option value="0">Veuillez choisir votre structure...</option>
-            <option
-              v-for="structure in listeStructures"
-              :key="structure.str_id"
-              :value="structure.str_id"
-            >
-              {{ structure.str_libelle }}
-            </option>
-          </b-form-select>
-          
-        </b-form-group>
-
-        <div v-if="user.structureLocale != ''" >
-          <b-form-group
-            id="structLocaleGroup"
-            label="Structure locale :"
-            required
-            label-for="structLocaleInput"
-            key="structurelocale"
-          >
-            <b-form-input
-              v-validate="{ required: true }"
-              name="structLoc"
-              :state="validateState('structLoc')"
-              aria-describedby="structLocFeedback"
-              id="structLocaleInput"
-              type="text"
-              v-model="user.structureLocale"
-              placeholder="Nom de la structure locale"
-            />
-            <b-form-invalid-feedback id="structLocFeedback">
-              La structure locale est obligatoire.
-            </b-form-invalid-feedback>
-          </b-form-group>
-        </div>
-        -->
-
 
         <b-form-group 
           label="Numéro de carte professionnelle :"
@@ -92,44 +41,32 @@
           <b-form-input
             id="eapsInput"
             type="text"
+            required
             v-model="user.eaps"
             name="eaps"
             key="eaps-input"
-            v-validate="{ required: true, numeric: false }"
+            v-validate="{ required: true, regex: /[0-9]{5}ED[0-9]{4}/ }"
+            :state="validateState('eaps')"
             aria-describedby="eapsFeedback"
             placeholder="Numéro de carte professionnelle"
-            :state="validateState('eaps')"
           />
-           <b-form-invalid-feedback id="prenomFeedback"
-            >Le numéro de carte professionnelle est obligatoire.</b-form-invalid-feedback
-          >
+           <b-form-invalid-feedback id="eapsFeedback">Le format de la carte professionnelle n'est pas respecté.</b-form-invalid-feedback>
         </b-form-group>        
       </b-form>
       
     </b-card>
 
 <b-card class="mb-3">
-      <b-form>
-        <b-form-group id="publiCheckGroup" >
-          <b-form-checkbox-group
-            v-model="user.publicontact"
-            id="publiCheck"
-            :state="validateState('publiCheck')"
-            name="publiCheck"
-          >
-            <b-form-checkbox >
-              Je souhaite que ces données soient publiées sur le site "prévention des noyades" et qu'elles apparaissent sur la cartographie             
 
-            </b-form-checkbox> 
-          </b-form-checkbox-group>
-        </b-form-group>
-      </b-form>
       <!--<div v-if="user.publicontact==true">-->
+        <!--v-validate="{url: {require_protocol: true }}" -->
       <div>
         <b-form >
           <b-form-group label="Site Web de contact :">
             <b-form-input
               v-model="user.sitewebcontact"
+              name="siteweb"
+
               type="text"
               placeholder="http:// ou https://"
             />
@@ -147,10 +84,13 @@
               name="mailcontact"
               key="email-input"
               v-validate="{ email: true }"
-              aria-describedby="emailcontactFeedback"
               placeholder="Courriel contact"
-              :state="validateState('mail')"
-            />
+              :state="validateState('mailcontact')"
+              aria-describedby="emailcontactFeedback"
+              />
+        <b-form-invalid-feedback id="emailcontactFeedback">Le courriel est obligatoire et doit être valide.</b-form-invalid-feedback>
+
+ 
             
           </b-form-group>
           <b-form-group
@@ -207,33 +147,70 @@
                 >{{ commune.com_libellemaj}}</option>
               </b-form-select>
           </b-form-group>
+
+          
        </b-form>
+
+             <b-form>
+        <b-form-group id="publiCheckGroup" >
+          <b-form-checkbox-group
+            v-model="user.publicontact"
+            id="publiCheck"
+          >
+            <b-form-checkbox >
+              Je souhaite que ces données soient publiées sur le site "prévention des noyades" et qu'elles apparaissent sur la cartographie             
+
+            </b-form-checkbox> 
+          </b-form-checkbox-group>
+        </b-form-group>
+      </b-form>
       </div>
       <b-form>
         <b-form-group>
           <span style="color: red">*</span> : Champ obligatoire
         </b-form-group>
       </b-form>
-    </b-card>    
+    </b-card>   
+    
+    <b-card>    
+      <b-form-group id="legalCheckGroup" >
+        <b-form-checkbox-group
+          v-model="accordHonneur"
+          id="accordHonneur"
+          name="accordHonneur"
+        >
+          <b-form-checkbox value="true">
+            <span style="color: red">*</span> En cochant cette case « je certifie sur l'honneur l'exactitude des informations ci-dessus ».
+          </b-form-checkbox>
+        </b-form-checkbox-group>
+      </b-form-group>    
+    </b-card> 
+     
     <div class="mb-3 text-right">
       <b-button
         @click="submit"
         variant="success"
-        :disabled="
-          errors.any() || (isLegalChecked == 'false' && !user.validated)
-        "
+
         >{{ submitTxt }}</b-button
       >
     </div>
   </div>
   
 </template>
+  <!--(errors.any()==false  || accordHonneur==false)
+  
+          :disabled="
+        errors.any()==true
+        "
+  -->
 
 <script>
 import { mapState } from "vuex";
 export default {
   data() {
     return {
+      // Validité de concentement
+      accordHonneur: false, 
       // Pour le champ code postal
       cp: null,
       // Pour le champ Commune
@@ -250,13 +227,48 @@ export default {
       ],
     };
   },
-  props: ["user", "submitTxt", "isLegalChecked"],
+  props: ["user", "submitTxt", "checkLegal"],
   methods: {
     submit: function () {
       this.$validator.validateAll().then((isValid) => {
-        if (isValid) {
-          this.$emit("submit");
+
+/*        console.log('Form valid: ' + isvalid);
+        console.log(this.errors.count());
+        console.log(this.errors.has('list name'));
+        console.log(this.errors.has('email'))
+        console.log(this.errors.has('display name'))
+
+
+        */
+       /*
+        console.log(this.errors.count())
+       console.log('mail' + this.errors.has('mail'));
+       console.log('eaps' + this.errors.has('eaps'));
+       console.log('publicCheck'+ this.errors.has('publiCheck'));
+       console.log('siteweb'+ this.errors.has('siteweb'));
+       console.log('cp'+ this.errors.has('cp'));
+      
+
+        console.log("Validité : " + isValid);
+        console.log("accordHonneur : " + this.accordHonneur);
+        */
+
+        if (this.accordHonneur) { 
+          if (isValid) 
+          {
+            this.$emit("submit");
+          } 
+          else 
+          {
+            this.$toast.error('Veuillez vérifier la validité des champs.');
+          }
         }
+        else
+        {
+          this.$toast.error('Veuillez certifier sur l honneur l exactitude des informations déclarées.');
+
+        }
+
       });
     },
     validateState(ref) {
@@ -302,6 +314,9 @@ export default {
     },
   },
   watch: {
+    "isValid"() {
+        console.log("watch Validité " + this.isValid)
+    },
     "cp"() {
       // On recherche la liste des communes lors de la modification du Code postal
       this.recherchecommune();
