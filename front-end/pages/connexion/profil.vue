@@ -28,6 +28,8 @@ export default {
     // Validation de l'inscription
     async editProfile(){
         const url = process.env.API_URL + `/connexion/edit-mon-compte/${this.user.id }`
+        console.log(url)
+        //const url = process.env.API_URL + `/connexion/verify/${this.user.id }`
         return this.$axios.$put(url, { profil: this.user })
         .then(async response => {
             await this.$store.dispatch('set_utilisateurCourant', response.user);
