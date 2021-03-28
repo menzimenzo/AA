@@ -93,7 +93,7 @@ router.post('/verify', async (req,res) => {
 
         })
         if (eapslExistenceQuery.rowCount == 0) {
-            return res.status(200).json({nonAuthorizedUser: 'Vous n\'êtes pas autorisés à vous créer un compte'})
+            return res.status(200).json({nonAuthorizedUser: 'Vous n\'êtes pas autorisé(e) à vous créer un compte (carte professionnelle invalide)'})
         }
     }
 
