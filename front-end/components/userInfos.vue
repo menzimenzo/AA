@@ -97,21 +97,6 @@
       </b-form>
     </b-card>
     <b-card class="mb-3">
-      <b-form>
-        <b-form-group id="publiCheckGroup" >
-          <b-form-checkbox-group
-            v-model="user.publicontact"
-            id="publiCheck"
-            :state="validateState('publiCheck')"
-            name="publiCheck"
-          >
-            <b-form-checkbox >
-              Je souhaite que ces données soient publiées sur le site "prévention des noyades" et qu'elles apparaissent sur la cartographie             
-
-            </b-form-checkbox> 
-          </b-form-checkbox-group>
-        </b-form-group>
-      </b-form>
       <!--<div v-if="user.publicontact==true">-->
       <div>
         <b-form >
@@ -194,7 +179,37 @@
               </b-form-select>
           </b-form-group>
        </b-form>
+       <b-form>
+        <b-form-group id="publiCheckGroup" >
+          <b-form-checkbox-group
+            v-model="user.publicontact"
+            id="publiCheck"
+            :state="validateState('publiCheck')"
+            name="publiCheck"
+          >
+            <b-form-checkbox >
+              Je souhaite que ces données soient publiées sur le site "prévention des noyades" et qu'elles apparaissent sur la cartographie             
+
+            </b-form-checkbox> 
+          </b-form-checkbox-group>
+        </b-form-group>
+      </b-form>
       </div>
+
+    <b-card>    
+      <b-form-group id="legalCheckGroup" >
+        <b-form-checkbox-group
+          v-model="accordHonneur"
+          id="accordHonneur"
+          name="accordHonneur"
+        >
+          <b-form-checkbox value="true">
+            <span style="color: red">*</span> En cochant cette case « je certifie sur l'honneur l'exactitude des informations ci-dessus ».
+          </b-form-checkbox>
+        </b-form-checkbox-group>
+      </b-form-group>    
+    </b-card> 
+
       <b-form>
         <b-form-group>
           <span style="color: red">*</span> : Champ obligatoire
@@ -203,9 +218,7 @@
           <b-button
             @click="submit"
             variant="success"
-            :disabled="
-              errors.any()
-            "
+
             >{{ submitTxt }}</b-button
           >
         </div>
@@ -255,13 +268,27 @@ export default {
   props: ["submitTxt", "user", "checkLegal"],
   methods: {
     submit: function () {
+
+      
       this.$validator.validateAll().then((isValid) => {
-        if (isValid) {
-          this.$store.dispatch("set_state_element", {
-            key: "utilisateurCourant",
-            value: this.user,
-          });
-          return this.$emit("submit");
+
+        if (this.accordHonneur) { 
+          if (isValid) {
+            this.$store.dispatch("set_state_element", {
+              key: "utilisateurCourant",
+              value: this.user,
+            });
+            return this.$emit("submit");
+          }
+          else
+          {
+            this.$toast.error('Veuillez vérifier la validité des champs.');
+          }
+        }
+        else
+        {
+          this.$toast.error('Veuillez certifier sur l honneur l exactitude des informations déclarées.');
+
         }
       });
     },
