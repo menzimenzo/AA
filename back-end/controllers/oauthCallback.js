@@ -108,33 +108,61 @@ module.exports = async (req, res, next) => {
             utilisateur.uti_nom = nom
             // -- fin 68472
 
-            // Account was never validated so is considered as new user
-            if(!utilisateur.uti_validated){
-              url = "/connexion/inscription"
-            // User access the app
-            } else {
-              if(utilisateur.rol_id == 1){
-                url = "/admin"
-              } else if(utilisateur.rol_id == 2) {
-                // Structure
-                url = "/partenaire"
-              } else if(utilisateur.rol_id == 3) {
-                // FormateurAAQ
-                url = "/partenaire"
-              } else if(utilisateur.rol_id == 4) {
-                // MaitreNageurAAQ
-                url = "/partenaire"
-              } else {
-                // MaitreNageur
-                console.log("Route accueilMN oauthallBack")
-                console.log(utilisateur.rol_id)
-                //log.d('Route accueilMN oauthallBack')
-                url = "/accueilMN"
-              }
-            }
-          }
+            // Vérification de la validité de la carte professionnelle
+            console.log('Numéro EAPS :' + utilisateur.uti_eaps)
+            await pgPool.query('SELECT eap_numero  \
+                                FROM ref_eaps \
+                                WHERE eap_numero= $1', [$1 = utilisateur.uti_eaps],
+               async (erreaps, resulteaps) => {
+                  if(erreaps){
+                    console.log(erreaps)
+                    throw(erreaps)
+                  }
+                  if (resulteaps.rows.length === 0) {
+                    const { rows } = await pgPool.query(
+                      'UPDATE utilisateur SET uti_validated = false where uti_id = $1 RETURNING *'
+                      , [utilisateur.uti_id]
+                    ).catch(err => {
+                      console.log('erreur lors de l\'invalidation du compte:'+err)
+                      throw err
+                    })
+                    // L'utilisateur n'est pas autorisé à se connecter sans avoir mis à jour sa carte professionnelle
+                    utilisateur.uti_validated = false    
+                  }
+                  
 
-          //console.log(err.message)
+
+
+
+              })
+
+          // Account was never validated so is considered as new user
+          if(!utilisateur.uti_validated){
+            url = "/connexion/inscription"
+          // User access the app
+          } else {
+            if(utilisateur.rol_id == 1){
+              url = "/admin"
+            } else if(utilisateur.rol_id == 2) {
+              // Structure
+              url = "/partenaire"
+            } else if(utilisateur.rol_id == 3) {
+              // FormateurAAQ
+              url = "/partenaire"
+            } else if(utilisateur.rol_id == 4) {
+              // MaitreNageurAAQ
+              url = "/partenaire"
+            } else {
+              // MaitreNageur
+              console.log("Route accueilMN oauthallBack")
+              console.log(utilisateur.rol_id)
+              //log.d('Route accueilMN oauthallBack')
+              url = "/accueilMN"
+            }
+          }        
+        }
+
+        //console.log(err.message)
           req.session.user = utilisateur
           return res.send({user: formatUtilisateur(utilisateur), url});
       })

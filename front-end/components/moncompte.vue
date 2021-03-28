@@ -231,28 +231,6 @@ export default {
   methods: {
     submit: function () {
       this.$validator.validateAll().then((isValid) => {
-
-/*        console.log('Form valid: ' + isvalid);
-        console.log(this.errors.count());
-        console.log(this.errors.has('list name'));
-        console.log(this.errors.has('email'))
-        console.log(this.errors.has('display name'))
-
-
-        */
-       /*
-        console.log(this.errors.count())
-       console.log('mail' + this.errors.has('mail'));
-       console.log('eaps' + this.errors.has('eaps'));
-       console.log('publicCheck'+ this.errors.has('publiCheck'));
-       console.log('siteweb'+ this.errors.has('siteweb'));
-       console.log('cp'+ this.errors.has('cp'));
-      
-
-        console.log("Validité : " + isValid);
-        console.log("accordHonneur : " + this.accordHonneur);
-        */
-
         if (this.accordHonneur) { 
           if (isValid) 
           {

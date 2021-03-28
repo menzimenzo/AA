@@ -234,6 +234,7 @@ export default {
     return {
       cp: null,
       isPubliChecked:"false",
+      accordHonneur: false,
       /*listtypecol: [
         { text: "Commune", value: 1 },
         { text: "Conseil Général", value: 2 },
