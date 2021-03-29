@@ -606,7 +606,7 @@ export default {
           // Crée un lien caché pour télécharger le fichier
           const link = document.createElement("a");
           link.href = url;
-          const fileName = "Savoir Rouler - Utilisateurs.csv";
+          const fileName = "Aisance Aquatique - Utilisateurs.csv";
           link.setAttribute("download", fileName);
           // Télécharge le fichier
           link.click();

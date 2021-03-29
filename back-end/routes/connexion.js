@@ -110,11 +110,11 @@ router.post('/verify', async (req,res) => {
         log.d('::verify - Mail de confirmation envoyé.')
         sendEmail({
             to: user.uti_mail,
-            subject: 'création compte savoir rouler à vélo',
+            subject: 'création compte Aisance Aquatique',
             body: `<p>Bonjour,</p>
-                <p>Votre compte « Aisance Aquatique » a bien été créé. <br/><br/>
-                Nous vous invitons à y renseigner les informations relatives à la mise en œuvre de chacun des 3 blocs du socle commun du SRAV.<br/>
-                Le site <a href="www.savoirrouleravelo.fr">www.savoirrouleravelo.fr</a> est à votre disposition pour toute information sur le programme Savoir Rouler à Vélo.<br/></p>`
+                <p>Votre compte a bien été créé. <br/><br/>
+                Nous vous invitons à faire votre demande auprès de votre formateur Aisance Aquatique la demande d'activation de compte « Aisance Aquatique » .<br/>
+                Le site <a href="www.aisanceaquatique.fr">www.aisanceaquatique.fr</a> est à votre disposition pour toute information sur le programme Aisance Aquatique.<br/></p>`
             })
         }
         
@@ -128,7 +128,7 @@ router.post('/verify', async (req,res) => {
             email: bddRes.rows[0].uti_mail,
             pwd: bddRes.rows[0].uti_pwd,
             id: bddRes.rows[0].uti_id,
-            siteName: 'Savoir Rouler à Vélo',
+            siteName: 'Aisance Aquatique',
             url: `${config.FRONT_DOMAIN}`,
         })
         .then(() => {
@@ -215,7 +215,7 @@ router.post('/create-account-pwd', async (req, res) => {
                 email: mailExistenceQuery.rows[0].uti_mail,
                 pwd: crypted,
                 id: mailExistenceQuery.rows[0].uti_id,
-                siteName: 'Savoir Rouler à Vélo',
+                siteName: 'Aisance Aquatique',
                 url: `${config.FRONT_DOMAIN}`,
             })
             .then(() => log.d('Mail de confirmation envoyé'))
