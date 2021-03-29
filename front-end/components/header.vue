@@ -12,11 +12,17 @@
     </b-row>
     <div class="accountMenu" v-if="utilisateurCourant">
       <div >
+        <nuxt-link to="/interventions" v-if="utilisateurCourant.profilId == 3 || utilisateurCourant.profilId == 4">
+          <b-button variant="outline-primary" class="settingsBtn"><i class="material-icons" >settings</i> Interventions</b-button>
+        </nuxt-link>
         <nuxt-link to="/admin" >
           <b-button variant="outline-primary" v-if="utilisateurCourant.profilId == 1" class="settingsBtn"><i class="material-icons" >settings</i> Espace admin</b-button>
         </nuxt-link>
         <nuxt-link to="/partenaire" v-if="utilisateurCourant.profilId == 2">
           <b-button variant="outline-primary" class="settingsBtn"><i class="material-icons" >settings</i> Espace partenaire</b-button>
+        </nuxt-link>
+        <nuxt-link to="/formateur" v-if="utilisateurCourant.profilId == 3">
+          <b-button variant="outline-primary" class="settingsBtn"><i class="material-icons" >settings</i> Espace Formateur</b-button>
         </nuxt-link>
       </div>
       <b-dropdown  id="accountBtn"  >

@@ -77,7 +77,8 @@ router.get('/csv/:utilisateurId', async function (req, res) {
     /* Pour un profil Admin, on exporte toutes les interventions */
     var whereClause = ""
     /* Pour un profil Intervenant on exporte que ces interventions */
-    if (user.pro_id == 3) {
+    // Modification des profils.
+    if ( user.pro_id == 4 || user.pro_id == 3 ) {
         whereClause += ` and utilisateur.uti_id=${utilisateurId} `
     }
     /* Pour un profil Partenaire, on exporte les interventions de sa structure*/
@@ -152,7 +153,7 @@ router.get('/:id', async function (req, res) {
 
     // Where condition is here for security reasons.
     var whereClause = ""
-    if (user.rol_id == 3) {
+    if (user.rol_id == 3 ||  user.rol_id == 4) {
         whereClause += ` and uti_id=${utilisateurId} `
     }
 
@@ -195,7 +196,7 @@ router.get('/', async function (req, res) {
     //  whereClause += `LEFT JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id  `
     // Utilisateur est intervenant => ses interventions
     //} 
-    if (user.rol_id == 3) {
+    if (user.rol_id == 3 || user.rol_id == 4) {
         whereClause += `LEFT JOIN utilisateur uti ON int.uti_id = uti.uti_id  \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
          LEFT JOIN structure str on str.str_id = int.str_id
@@ -203,6 +204,11 @@ router.get('/', async function (req, res) {
         // Utilisateur Administrateur : 
     } else {
         // whereClause += `LEFT JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id LEFT JOIN structure ON structure.str_id = utilisateur.str_id `
+        // Laurent : Pour le moment on met la même chose pour les admin pour éviter que ça plante.
+        whereClause += `LEFT JOIN utilisateur uti ON int.uti_id = uti.uti_id  \
+         LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
+         LEFT JOIN structure str on str.str_id = int.str_id
+         where uti.uti_id=${utilisateurId}`
     }
 
     const requete = `SELECT int.*, pis.*, str.str_libellecourt from intervention int ${whereClause} order by int.int_dateintervention desc`;

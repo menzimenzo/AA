@@ -86,7 +86,7 @@ module.exports = async (req, res, next) => {
             const { rows } = await pgPool.query(
               'INSERT INTO utilisateur(rol_id,stu_id, uti_mail, uti_nom, uti_prenom,\
                 uti_tockenfranceconnect) VALUES($1, $2, $3, $4, upper($5), $6) RETURNING *'
-              , [ 3, 1, userInfo.email, nom, userInfo.given_name, userInfo.sub]
+              , [ 5, 1, userInfo.email, nom, userInfo.given_name, userInfo.sub]
             ).catch(err => {
               console.log(err)
               throw err
@@ -148,10 +148,10 @@ module.exports = async (req, res, next) => {
               url = "/partenaire"
             } else if(utilisateur.rol_id == 3) {
               // FormateurAAQ
-              url = "/partenaire"
+              url = "/formateur"
             } else if(utilisateur.rol_id == 4) {
               // MaitreNageurAAQ
-              url = "/partenaire"
+              url = "/intervention"
             } else {
               // MaitreNageur
               console.log("Route accueil oauthallBack")
