@@ -129,7 +129,7 @@ module.exports = {
     }
     else
     {
-        checkLog = 'Check log Backend SRAV';
+        checkLog = 'Check log Backend AAQ';
     }    
     var contenu = formatDate() + '|' + codeerreur + '|' + checkLog + '|ExecTime=' + execTime;
 

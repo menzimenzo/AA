@@ -12,7 +12,7 @@
         </b-col>
       </b-row>
       <modal name="confirmIdentityModal" height="auto" width="900px" :scrollabe="true">
-        <connection-form  @submit="confirmUserInfos" :hasToConfirmMail="true" information="Cet email est déjà utilisé sur Savoir Rouler, veuillez confirmer votre mot de passe." />
+        <connection-form  @submit="confirmUserInfos" :hasToConfirmMail="true" information="Cet email est déjà utilisé sur Aisance Aquatique, veuillez confirmer votre mot de passe." />
       </modal>
     </b-container>
   </section>
