@@ -224,7 +224,7 @@ export default {
           // Crée un lien caché pour télécharger le fichier
           const link = document.createElement("a");
           link.href = url;
-          const fileName = "Savoir Rouler - Interventions.csv";
+          const fileName = "Aisance Aquatique - Interventions.csv";
           link.setAttribute("download", fileName);
           // Télécharge le fichier
           link.click();

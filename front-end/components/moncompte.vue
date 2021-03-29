@@ -243,7 +243,7 @@ export default {
         }
         else
         {
-          this.$toast.error('Veuillez certifier sur l honneur l exactitude des informations déclarées.');
+          this.$toast.error('Veuillez certifier sur l\'honneur l\'exactitude des informations déclarées.');
 
         }
 

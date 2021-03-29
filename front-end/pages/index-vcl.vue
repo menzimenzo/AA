@@ -3,10 +3,10 @@
     <div>
       <app-logo/>
       <h1 class="title">
-        Savoir Rouler
+        Aisance Aquatique
       </h1>
       <h2 class="subtitle">
-        Pour ne pas rouler de joints pourris
+        Savoir nager sans se noyer
       </h2>
       <div class="links">
         <a
