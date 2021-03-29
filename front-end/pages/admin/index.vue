@@ -454,6 +454,7 @@ export default {
       structure1: "nationale",
       structure2: "nationale",
       structure3: "",
+      structure: null,
       data1: null,
       data2: null,
       data3: null,
@@ -1069,18 +1070,23 @@ export default {
       }),
       this.$store.dispatch("get_interventions"),
     ]);
-
+// Laurent : Mise en commentaire sinon ça plantait au lancement (sûrement lié à l'architecture de la BDD)
+/*
     // Calcul des stats définies dans le mixins stat.js
     this.statCal(this.interventions, this.structures)
     // Initaliasiation des couleurs et des structures.
     this.remplissage= this.statStructure[this.structure1].CouleurParDepartementAdmin
     // on positionne structure1 sur la structure de l'utilisateur
     this.structure2 = this.structure1;
+
+    
     // Affichage des graphiques
     this.viewHisto(this.structure2, this.structure3);
     this.viewDoughnut(this.structure2);
     this.data4 = this.statStructure["nationale"].data4;
+    
     this.loading = false;
+    */
   }
 };
 </script>

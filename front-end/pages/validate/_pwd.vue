@@ -53,7 +53,7 @@ export default {
                 this.$toast.success('Votre mot de passe a été validé.')            
                 this.$store.dispatch('set_utilisateur', res.user);
                 log.i('mounted - Done')
-                return this.$router.push('/accueilMN')
+                return this.$router.push('/accueil')
                 
             })
             .catch(e => {

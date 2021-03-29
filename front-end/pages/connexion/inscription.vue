@@ -56,7 +56,7 @@ export default {
            } else {
             await this.$store.dispatch('set_utilisateur', response.user);
             this.$toast.success('Inscription validée.')
-            return this.$router.push('/accueilMN')
+            return this.$router.push('/accueil')
            }
         }).catch(error => {
           console.log(error)
@@ -72,8 +72,8 @@ export default {
           await this.$store.dispatch('set_utilisateur', user)
           // Route pour les Maîtres nagueurs MN
           //this.$router.push('/interventions')
-          console.log("route accueilMN inscription 2")
-          this.$router.push('/accueilMN')
+          console.log("route accueil inscription 2")
+          this.$router.push('/accueil')
 
           this.$toast.success(`Bienvenue ${user.prenom}`)
           this.$toast.info(`Vous pouvez maintenant vous connecter via France Connect et via mot de passe!`)

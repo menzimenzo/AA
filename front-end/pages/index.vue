@@ -77,8 +77,24 @@ export default {
             this.formErrors = []
             this.$modal.hide('connexionForm')
             // Route pour les Maîtres nagueurs MN
-            console.log("route accueilMN index racine page")
-            return this.$router.push('/accueilMN')
+            console.log("route accueil index racine page")
+
+            if (this.$store.state.utilisateurCourant.profilId == 1) {
+              return this.$router.push('/admin')
+            }
+            if (this.$store.state.utilisateurCourant.profilId == 2) {
+              return this.$router.push('/partenaire')
+            }
+            if (this.$store.state.utilisateurCourant.profilId == 3) {
+              return this.$router.push('/formateur')
+            }
+            if (this.$store.state.utilisateurCourant.profilId == 4) {
+              return this.$router.push('/interventions')
+            } else
+            {
+              return this.$router.push('/accueil')
+            }
+            
         })
         .catch((e) => {
             console.log('Error during login process', e.stack)
