@@ -4,6 +4,7 @@ const log = logger('middleware:checkAuth')
 const logedOutRoutes = ['/']
 const adminRoutes = ['/admin']
 const partenaireRoutes = ['/partenaire']
+const accueilRoutes = ['/accueil']
 
 export default async function({ env, route, store, req, res, redirect, app, isServer }) {
     log.i('In')
@@ -48,8 +49,8 @@ export default async function({ env, route, store, req, res, redirect, app, isSe
         // route utilisée pour une connexion FC déjà
         if(partenaireRoutes.indexOf(route.path) > -1){
             if(store.state.utilisateurCourant.profilId != 2){
-                console.log("route accueilMN check-auth")
-                return redirect('/accueilMN')
+                console.log("route accueil check-auth")
+                return redirect('/accueil')
             }
         }
 

@@ -48,7 +48,7 @@ router.get('/csv', async function (req, res) {
 
     log.d('::csv - Profil de l\'utilisateur : ' + req.session.user.rol_id);
     // Je suis utilisateur "Administrateur" ==> Export de la liste des tous les utilisateurs
-    if ( utilisateurCourant.pro_id == 1 ) {
+    if ( utilisateurCourant.rol_id == 1 ) {
         requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, uti_mail as Courriel, to_char(uti_datenaissance,'DD/MM/YYYY') Date_De_Naissance, 
         replace(replace(uti_validated::text,'true','Validée'),'false','Non validée') as inscription , stu.stu_libelle Statut_Utilisateur
         from utilisateur  uti
@@ -125,17 +125,17 @@ router.get('/:id', async function (req, res) {
     const id = req.params.id;
     log.i('::get - In', { id })
     const utilisateurCourant = req.session.user
-    if ( utilisateurCourant.pro_id == 1) {
+    if ( utilisateurCourant.rol_id == 1) {
         // si on est admin, on affiche l'utilisateur
         requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, rol.rol_libelle from utilisateur uti 
-        join profil pro on pro.pro_id = uti.pro_id
+        join profil pro on pro.rol_id = uti.rol_id
         where uti_id=${id} order by uti_id asc`;
     }
     else 
     {
         // si on est partenaire, on affiche l'utilisateur s'il appartient à ma structure
-        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, str.str_libellecourt,pro.pro_libelle from utilisateur uti 
-        join role pro on pro.pro_id = uti.pro_id
+        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, str.str_libellecourt,pro.rol_libelle from utilisateur uti 
+        join role pro on pro.rol_id = uti.rol_id
         where uti_id=${id} and uti.str_id = ${utilisateurCourant.str_id}
         order by uti_id asc `;
     }
@@ -163,24 +163,24 @@ router.get('/', async function (req, res) {
     const utilisateurCourant = req.session.user
     //const utilisateurId = 1; // TODO à récupérer via GET ?
     
-    if ( utilisateurCourant.pro_id == 1) {
+    if ( utilisateurCourant.rol_id == 1) {
         // si on est admin, on affiche tous les utilisateurs
-        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,str.str_libellecourt,pro.pro_libelle
+        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,str.str_libellecourt,pro.rol_libelle
         from utilisateur uti 
         join uti_str ust on ust.uti_id = uti.uti_id
         join structure str on str.str_id = ust.str_id 
-        join profil pro on pro.pro_id = uti.pro_id
+        join profil pro on pro.rol_id = uti.rol_id
         order by uti_id asc`;
     }
     else 
     {
         // si on est partenaire, on affiche seulements les utilisateurs de la structure
         // Sauf les Admin créés sur structure
-        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,str.str_libellecourt,pro.pro_libelle
+        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,str.str_libellecourt,pro.rol_libelle
         from utilisateur uti 
         join uti_str ust on ust.uti_id = uti.uti_id
         join structure str on str.str_id = ust.str_id 
-        join profil pro on pro.pro_id = uti.pro_id and pro.pro_id <> 1
+        join profil pro on pro.rol_id = uti.rol_id and pro.rol_id <> 1
         where uti.str_id=${utilisateurCourant.str_id} order by uti_id asc  `;
     }
     log.d('::list - requete',{ requete })
@@ -209,7 +209,7 @@ router.put('/:id', async function (req, res) {
         uti_prenom = $2,
         uti_mail = $3,
         uti_validated = $4,
-        pro_id = $5,
+        rol_id = $5,
         str_id = $6,
         uti_structurelocale = $7,
         stu_id = $8

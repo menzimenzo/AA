@@ -232,7 +232,7 @@ router.post('/create-account-pwd', async (req, res) => {
         bddRes = await pgPool.query(
             'INSERT INTO utilisateur(rol_id, stu_id, uti_mail, uti_validated, uti_pwd)\
             VALUES($1, $2, $3, $4, $5) RETURNING *'
-            , [3, 1, formatedMail, false, crypted ]
+            , [5, 1, formatedMail, false, crypted ]
           ).catch(err => {
             log.w(err)
             throw err
