@@ -73,11 +73,11 @@ module.exports = {
             from: SENDER_EMAIL,
             replyTo: SENDER_EMAIL,
             to: mail,
-            subject: `Réinitialiser votre mot de passe pour le site Savoir Rouler à vélo"`,
+            subject: `Réinitialiser votre mot de passe pour le site Aisance Aquatique"`,
             body: `
             <p>Bonjour,</p>
 
-            <p>Vous recevez ce mail car vous avez effecuté une demande de réinitialisation de mot de passe sur le site Savoir Rouler à vélo</p>
+            <p>Vous recevez ce mail car vous avez effecuté une demande de réinitialisation de mot de passe sur le site Aisance Aquatique</p>
 
             <p>Veuillez entamer la procédure en cliquant sur le lien suivant:</p>
 
@@ -96,10 +96,10 @@ module.exports = {
     formatAndSendMail: (idUtilisateurCourant, IdUtilisateurIntervention, nomUtilisateurCourant, mailUtilisateurCourant, nbIntervention, interventionACompleter, interventionAVerifier, corpsMail) => {
         var objetMail = ''
         var EnteteMail  = ''
-        objetMail = `[SRAV] Intervention`
+        objetMail = `[AAQ] Intervention`
         var EnteteMail 
         EnteteMail = `Bonjour ` + nomUtilisateurCourant + `<br/><br/>`
-        EnteteMail = EnteteMail + `Vous êtes intervenu(e) sur le site du programme « Savoir rouler à vélo » pour la déclaration`
+        EnteteMail = EnteteMail + `Vous êtes intervenu(e) sur le site du programme « Aisance Aquatique » pour la déclaration`
         // Ajout du "s" s'il y a plusieurs internentions
         if (nbIntervention > 1) {
             objetMail = objetMail + `s à `
@@ -118,12 +118,12 @@ module.exports = {
         if (interventionAVerifier == true) {
             objetMail = objetMail + `vérifier`
         }
-        EnteteMail = EnteteMail + `Afin de disposer d’indicateurs sur le public formé, nous vous invitons à vérifier/compléter vos données sur https://savoirrouleravelo.fr/intervenant` 
+        EnteteMail = EnteteMail + `Afin de disposer d’indicateurs sur le public formé, nous vous invitons à vérifier/compléter vos données sur https://aisanceaquatique.fr/intervenant` 
 
         corpsMail = EnteteMail + `<br/><br/>` + corpsMail
         corpsMail = corpsMail + `<br/>`
         corpsMail = corpsMail + `Cordialement,<br/><br/>`
-        corpsMail = corpsMail + `L’équipe « Savoir rouler à vélo »`
+        corpsMail = corpsMail + `L’équipe « Aisance Aquatique »`
         /* Mode test pour écriture mail local*/
         /*
         fs.writeFile(config.PATH_SUPERVISION_BATCH + '/' + idUtilisateurCourant + '.html', 'idUtilisateurCourant : ' + idUtilisateurCourant + '<br/><br>intervention.utiId : ' + IdUtilisateurIntervention + '<br/><br>Objet : ' + objetMail+ '<br/><br>' + corpsMail, function (err) {

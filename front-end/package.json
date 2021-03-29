@@ -1,7 +1,7 @@
 {
   "name": "front-end",
   "version": "1.0.0",
-  "description": "Front end pour savoir rouler",
+  "description": "Front end pour Aisance Aquatique",
   "author": "GWEILL <gweill@synaltic.fr>",
   "private": true,
   "scripts": {
