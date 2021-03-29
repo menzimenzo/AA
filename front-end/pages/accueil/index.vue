@@ -1,5 +1,5 @@
 <template>
-  <b-container class="accueilMN">
+  <b-container class="accueil">
         <b-row style="
     margin-top:1%">
       <b-col  class="col-12 col-md-4">

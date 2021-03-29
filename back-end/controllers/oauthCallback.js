@@ -154,10 +154,10 @@ module.exports = async (req, res, next) => {
               url = "/partenaire"
             } else {
               // MaitreNageur
-              console.log("Route accueilMN oauthallBack")
+              console.log("Route accueil oauthallBack")
               console.log(utilisateur.rol_id)
-              //log.d('Route accueilMN oauthallBack')
-              url = "/accueilMN"
+              //log.d('Route accueil oauthallBack')
+              url = "/accueil"
             }
           }        
         }
