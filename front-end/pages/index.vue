@@ -77,8 +77,8 @@ export default {
             this.formErrors = []
             this.$modal.hide('connexionForm')
             // Route pour les Maîtres nagueurs MN
-            console.log("route accueilMN index racine page")
-            return this.$router.push('/accueilMN')
+            console.log("route accueil index racine page")
+            return this.$router.push('/accueil')
         })
         .catch((e) => {
             console.log('Error during login process', e.stack)
