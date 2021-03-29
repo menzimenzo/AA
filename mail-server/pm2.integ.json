@@ -14,7 +14,7 @@
                 "PORT":"3006",
                 "SMTP_HOST":"164.131.87.8",
                 "SMTP_PORT":"25",
-                "SMTP_SENDER":"srav@sg.social.gouv.fr",
+                "SMTP_SENDER":"AAQ@sg.social.gouv.fr",
 		        "PROXY_USER": "vincent.carcel@sg.social.gouv.fr",
                 "DEBUG":"mail-server:info:*"
             }

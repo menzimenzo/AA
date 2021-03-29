@@ -1,7 +1,7 @@
 const logger = function(name) {
-    const debug = require('debug')('srav-frontend:debug:' + name)
-    const info = require('debug')('srav-frontend:info:' + name)
-    const warn = require('debug')('srav-frontend:warn:' + name)
+    const debug = require('debug')('aaq-frontend:debug:' + name)
+    const info = require('debug')('aaq-frontend:info:' + name)
+    const warn = require('debug')('aaq-frontend:warn:' + name)
     return {
         d: function(message, ...args) {
             if (debug.enabled) {
