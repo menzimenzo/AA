@@ -68,7 +68,7 @@ router.get('/mailrelance', async function (req, res) {
     pgPool.query(requete, (err, result) => {
         if (err) {
             log.w('::mailrelance - erreur lors de la requete',{ requete, erreur: err.stack});
-            logTrace('srav-mailrelance',2,startTime);
+            logTrace('aaq-mailrelance',2,startTime);
             return res.status(400).json('[BATCH-RELANCEMAIL] erreur lors de la récupération des interventions');
         }
         else {
@@ -189,11 +189,11 @@ STATE_DEPENDENT=4
             pgPool.query(requete, (err, result) => {
                 if (err) {
                     log.w('::mailrelance - erreur lors de la mise à jour',{requete, erreur: err.stack});
-                    logTrace('srav-mailrelance',1,startTime);
+                    logTrace('aaq-mailrelance',1,startTime);
                     return res.status(400).json('[BATCH-RELANCEMAIL] erreur lors de la mise à jour de la relance mail');
                 }
             })
-            logTrace('srav-mailrelance',0,startTime);
+            logTrace('aaq-mailrelance',0,startTime);
             log.i('::mailrelance - Done')
             res.json({ interventions });
         }
@@ -208,13 +208,13 @@ router.get('/testmail', function (req, res) {
     // Lancement du batch http://localhost:3001/api/batch/mailrelance
     sendEmail({
         to: v_email,
-        subject: '[SRAV] Mail de test',
+        subject: '[AAQ] Mail de test',
         body: `<p>Bonjour,</p>
             <p>Ce mail est un mail de test.<br/><br/>
             <p>Si vous le recevez et que vous ne deviez pas en être destinataire, alors merci de l'ignorer</p>`
     });
     //return res.statusCode(400).json({ message: 'erreur sur la requete de listcommune' });
-    logTrace('srav-testmail',0,startTime)
+    logTrace('aaq-testmail',0,startTime)
     log.i('::testmail - Done')
     return res.send(formatDate());
 });
