@@ -196,17 +196,8 @@ router.get('/', async function (req, res) {
     //  whereClause += `LEFT JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id  `
     // Utilisateur est intervenant => ses interventions
     //} 
-<<<<<<< HEAD
-    if (user.rol_id == 3) {
-        whereClause += `LEFT JOIN uti_int ui ON int.int_id = ui.int_id  \
-         LEFT JOIN utilisateur uti on uti.uti_id = ui.uti_id \
-||||||| parent of 72c54ca... MAJ Roles et création des routes
-    if (user.rol_id == 3) {
-        whereClause += `LEFT JOIN utilisateur uti ON int.uti_id = uti.uti_id  \
-=======
     if (user.rol_id == 3 || user.rol_id == 4) {
         whereClause += `LEFT JOIN utilisateur uti ON int.uti_id = uti.uti_id  \
->>>>>>> 72c54ca... MAJ Roles et création des routes
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
          LEFT JOIN structure str on str.str_id = int.str_id
          where uti.uti_id=${utilisateurId}`
