@@ -296,7 +296,7 @@ export default {
   },
   data() {
     return {
-      loading: true,
+      loading: false,
       interventionsToDisplay: null,
       headers: [
         {
@@ -555,8 +555,8 @@ export default {
   //  CHARGEMENT ASYNCHRONE DES INTERVENTIONS
   //
   async mounted() {
-    await Promise.all([this.$store.dispatch("get_mesPiscines"),this.$store.dispatch("get_interventions"),]);
-   /*
+    await Promise.all([this.$store.dispatch("get_mesPiscines"),this.$store.dispatch("get_interventions")]);
+      /*
       this.interventionsToDisplay = this.interventions.filter(x => {
         var isMatch = true;
         isMatch =

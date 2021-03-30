@@ -105,7 +105,7 @@ router.get('/encadrant', async function (req, res) {
         join statut_utilisateur stu on stu.stu_id = uti.stu_id
         where stu.stu_id = 1 
         AND uti.uti_validated = true 
-        AND uti.rol_Id in (2,3)
+        AND uti.rol_Id in (3,4)
         order by 3,4 asc`;
     
     pgPool.query(requete, (err, result) => {

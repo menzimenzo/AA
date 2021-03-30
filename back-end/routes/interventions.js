@@ -163,42 +163,34 @@ router.get('/:id', async function (req, res) {
     LEFT JOIN uti_int ui on ui.int_id = int.int_id \
     LEFT JOIN utilisateur uti on ui.uti_id = uti.uti_id \
     where int.int_id=${id} ${whereClause} order by int_id asc`;
-    log.d('::get - récuperation via la requête.', { requete })
+    log.d('::get - récuperation via la requête.', { requete });
 
-    pgPool.query(requete, (err, result) => {
-        if (err) {
-            log.w('::get - Erreur survenue lors de la récupération.', err.stack);
-            return res.status(400).json('erreur lors de la récupération de l\'intervention');
-        }
-        else {
-            const intervention = result.rows && result.rows.length && result.rows[0];
-            if (!intervention) {
-                log.w('::get - Intervention inexistante.')
-                return res.status(400).json({ message: 'Intervention inexistante' });
-            }
-            log.i('::get - Done')
-            intervention = formatIntervention(intervention)
+    (async () => {
+        try {
+            let result = await pgPool.query(requete)
+            let intervention = result.rows.map(formatIntervention);
 
-            // récuperation de la liste des utilsiateurs associés à l'intervention
-            log.i('::get2 - In')
-            let secondeRequete = `SELECT uti.* from utilisateur uti \
+            for (const [key, int] of Object.entries(intervention)) {
+                log.i('::get2 - In' + key)
+                let secondeRequete = `SELECT uti.*
+                 from utilisateur uti \
                 LEFT JOIN uti_int ui on uti.uti_id = ui.uti_id \
                 LEFT JOIN intervention int on int.int_id = ui.int_id \
-                WHERE int.int_id = ${id}`
+                WHERE int.int_id = ${int.id}`
 
-            pgPool.query(secondeRequete, (err, result) => {
-                if (err) {
-                    log.w('::get2 - Erreur survenue lors de la récupération', err.stack);
-                    return res.status(400).json('erreur lors de la récupération des utilisateurs associés à une intervention');
-                }
-                else {
-                    log.i('::get2 - Done')
-                    intervention.uti = result.rows;
-                }
-            })
-            res.json({ intervention });
+                let result2 = await pgPool.query(secondeRequete)
+                log.i('::get2 - Done')
+                intervention[key].utilisateur = result2.rows;
+                res.json({ intervention });
+            }
         }
-    })
+        catch (err) {
+            throw err
+        }
+    })().catch(err => {
+        log.w('::get - Erreur survenue lors de la récupération', err.stack)
+        return res.status(400).json('erreur lors de la récupération de l\'intervention '+id)}
+    )
 });
 
 router.get('/', async function (req, res) {
@@ -236,40 +228,37 @@ router.get('/', async function (req, res) {
     }
 
     const requete = `SELECT int.*, pis.*, str.str_libellecourt from intervention int ${whereClause} order by int.int_dateintervention desc`;
-    log.d('::list - récuperation via la requête.', { requete })
+    log.d('::list - récuperation via la requête.', { requete });
 
-    pgPool.query(requete, (err, result) => {
-        if (err) {
-            log.w('::list - Erreur survenue lors de la récupération.', err.stack);
-            return res.status(400).json('erreur lors de la récupération des interventions');
-        }
-        else {
-            log.i('::list - Done')
+    (async () => {
+        try {
+            let result = await pgPool.query(requete)
             let interventions = result.rows.map(formatIntervention);
 
-            // requete complémentaire pour récupérer la liste des utilisateurs associés aux interventions remontées
-            interventions.forEach(intervention => {
-                log.i('::list2 - In')
-                let secondeRequete = `SELECT uti.* from utilisateur uti \
+            for (const [key, intervention] of Object.entries(interventions)) {
+                log.i('::list2 - In - ' + key)
+                let secondeRequete = `SELECT uti.*
+                 from utilisateur uti \
                 LEFT JOIN uti_int ui on uti.uti_id = ui.uti_id \
                 LEFT JOIN intervention int on int.int_id = ui.int_id \
                 WHERE int.int_id = ${intervention.id}`
 
-                pgPool.query(secondeRequete, (err, result) => {
-                    if (err) {
-                        log.w('::list - Erreur survenue lors de la récupération', err.stack);
-                        return res.status(400).json('erreur lors de la récupération des utilisateurs associés à une intervention');
-                    }
-                    else {
-                        log.i('::list2 - Done')
-                        intervention.uti = result.rows;
-                    }
-                })
-            })
-            res.json({ interventions });
+                let result2 = await pgPool.query(secondeRequete)
+                log.i('::list2 - Done - '+key)
+                interventions[key].utilisateur = result2.rows;
+                res.json({ interventions });
+            }
         }
-    })
+        catch (err) {
+            throw err
+        }
+    })().catch(err => {
+        log.w('::list - Erreur survenue lors de la récupération', err.stack)
+        return res.status(400).json('erreur lors de la récupération des interventions')}
+    )
+
 });
+
 
 router.put('/:id', async function (req, res) {
     const intervention = req.body.intervention
@@ -341,11 +330,11 @@ router.post('/', function (req, res) {
 
     //insert dans la table intervention
     const requete = `insert into intervention 
-                    (pis_id,str_id,uti_id, int_nombreenfant,int_dateintervention,int_datecreation,int_datemaj) 
-                    values($1,$2,$3,$4,$5,$6,$7 ) RETURNING *`;
+                    (pis_id,str_id,int_nombreenfant,int_dateintervention,int_datecreation,int_datemaj) 
+                    values($1,$2,$3,$4,$5,$6 ) RETURNING *`;
 
     log.d('::post - requete', { requete });
-    pgPool.query(requete, [intervention.piscine.id, intervention.strId, intervention.maitreNageurId, intervention.nbEnfants,
+    pgPool.query(requete, [intervention.piscine.id, intervention.strId, intervention.nbEnfants,
     intervention.dateIntervention, new Date().toISOString(), new Date().toISOString()], (err, result) => {
         if (err) {
             log.w('::post - Erreur lors de la requête.', err.stack);
@@ -358,6 +347,7 @@ router.post('/', function (req, res) {
             //  myPdf.generate(result.rows.map(formatIntervention)[0].id,nbEnfants,dateIntervention);
             //}
 
+            // Insertion de tous 
             // requete de selection pour que l'objet retourné par le POST soit au même format que le GET
             const requete2 = `SELECT int.*, pis.*, str.str_libellecourt from intervention int \
                             LEFT JOIN piscine pis on int.pis_id = pis.pis_id \

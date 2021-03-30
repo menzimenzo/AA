@@ -25,8 +25,20 @@
     </b-row>
     <br />
     <b-row>
-      <b-col cols="12">
-        <div>
+      <div class="mb-3">
+                <b-form inline>
+                  <label for="nameFilter">Intervenant:</label>
+                  <b-input
+                    class="ml-2"
+                    id="nameFilter"
+                    v-model="nameFilter"
+                    placeholder="Dupond"
+                  />
+                </b-form>
+              </div>
+
+    </b-row>
+    <b-row>
           <editable
             :columns="headersEncadrants"
             :data="listeMaitreNageur"
@@ -37,8 +49,7 @@
             tableMaxHeight="none"
           >
           </editable>
-        </div>
-      </b-col>
+       
     </b-row>
     <b-row>
       <div
@@ -198,6 +209,24 @@ export default {
       },
     },
   },
+  computed:{
+    filteredMN: function() {
+      if (this.nameFilter.length > 2 ) {
+      return this.listeMaitreNageur.filter(mn => {
+        // Suppression des interventions sans commentaire
+        let isMatch = mn.nom
+        if (this.nameFilter) {
+          isMatch =  isMatch && mn.nom.toLowerCase().indexOf(this.nameFilter.toLowerCase()) > -1
+        }
+        return isMatch;
+      });
+    }
+    
+    else {
+      return []
+    }
+    }
+  },
   components: {
     Editable,
   },
@@ -224,7 +253,8 @@ export default {
           id: 10,
         },
       ],
-      toto: "",
+      dataready: null,
+      nameFilter: "",
       loading: false,
       formIntervention: loadFormIntervention(this.intervention),
       //<aria-label="texte de l'infobulle">
@@ -401,22 +431,22 @@ export default {
       });
     },
   },
-  mounted() {
-    const url =
-          process.env.API_URL + "/user/encadrant"
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then(response => {
-            this.listeMaitreNageur = response.encadrants;
-          })
-          .catch(error => {
-            console.error(
-              "Une erreur est survenue lors de la récupération des encadrants",
-              error
-            );
-          });
-    
+  async mounted() {
+    const url = process.env.API_URL + "/user/encadrant";
+    console.info(url);
+
+    await this.$axios({
+      url: url,
+      method: "GET",
+    })
+      .then((response) => {
+        this.listeMaitreNageur = response.data.encadrants
+        this.dataready = true;
+      })
+      .catch((err) => {
+        console.log(JSON.stringify(err));
+        //this.$toasted.error("Erreur lors du téléchargement: " + err.message);
+      });
   },
 };
 </script>
