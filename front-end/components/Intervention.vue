@@ -26,19 +26,20 @@
     <br />
     <b-row>
       <div class="mb-3">
-                <b-form inline>
-                  <label for="nameFilter">Intervenant:</label>
-                  <b-input
-                    class="ml-2"
-                    id="nameFilter"
-                    v-model="nameFilter"
-                    placeholder="Dupond"
-                  />
-                </b-form>
-              </div>
-
+        Liste des intervenants présents durant l'intervention
+        <ol>
+          <li
+            v-for="user in this.formIntervention.utilisateurs"
+            :key="user.id"
+            :value="user"
+          >
+            {{ user.nom }} {{ user.prenom }}
+          </li>
+        </ol>
+      </div>
     </b-row>
     <b-row>
+<<<<<<< HEAD
           <editable
             :columns="headersEncadrants"
             :data="listeMaitreNageur"
@@ -47,31 +48,62 @@
             :editable="false"
             :noDataLabel="''"
             tableMaxHeight="none"
+||||||| parent of 551b40d... POST intervention presque bon
+          <editable
+            :columns="headersEncadrants"
+            :data="filteredMN"
+            :removable="false"
+            :creable="false"
+            :editable="false"
+            :noDataLabel="''"
+            tableMaxHeight="none"
+=======
+      <div class="mb-3">
+        <b-form inline>
+          <label for="nameFilter"
+            >Saissisez le début du nom d'un intervenant pour l'ajouter :</label
+>>>>>>> 551b40d... POST intervention presque bon
           >
-          </editable>
-       
+          <b-input
+            class="ml-2"
+            id="nameFilter"
+            v-model="nameFilter"
+            placeholder="Dupond"
+          />
+        </b-form>
+      </div>
     </b-row>
     <b-row>
+<<<<<<< HEAD
       <div
         class="input-group-display"
         v-if="utilisateurCourant.roleId == 3"
+||||||| parent of 551b40d... POST intervention presque bon
+      <div
+        class="input-group-display"
+        v-if="this.$store.state.utilisateurCourant.roleId == 3"
+=======
+      <editable
+        :columns="headersEncadrants"
+        :data="filteredMN"
+        :removable="false"
+        :creable="false"
+        :editable="false"
+        :noDataLabel="''"
+        tableMaxHeight="none"
+>>>>>>> 551b40d... POST intervention presque bon
       >
-        <span>Personne ayant réalisé l'intervention * :</span>
-
-        <b-form-select
-          class="liste-deroulante"
-          v-model="formIntervention.maitreNageur"
-        >
-          <option
-            v-for="maitreNageur in this.listeMaitreNageur"
-            :key="maitreNageur.id"
-            :value="maitreNageur"
+        <template slot-scope="props" slot="actions">
+          <b-btn
+            @click="addMN(props.data)"
+            size="sm"
+            class="mr-1"
+            variant="primary"
           >
-            {{ maitreNageur.nom }}
-          </option>
-        </b-form-select>
-        <br />
-      </div>
+            <i class="material-icons">add</i>
+          </b-btn>
+        </template>
+      </editable>
     </b-row>
 
     <b-row>
@@ -178,7 +210,6 @@ import moment from "moment";
 import Editable from "~/components/editable/index.vue";
 
 var loadFormIntervention = function (intervention) {
-  console.log(intervention);
   let formIntervention = JSON.parse(
     JSON.stringify(
       Object.assign(
@@ -190,6 +221,7 @@ var loadFormIntervention = function (intervention) {
           nbEnfants: "",
           nbNouveauxEnfants: "",
           listeEnfants: [],
+          utilisateurs: [],
         },
         intervention
       )
@@ -200,6 +232,7 @@ var loadFormIntervention = function (intervention) {
   return formIntervention;
 };
 
+
 export default {
   props: {
     intervention: {
@@ -209,23 +242,23 @@ export default {
       },
     },
   },
-  computed:{
-    filteredMN: function() {
-      if (this.nameFilter.length > 2 ) {
-      return this.listeMaitreNageur.filter(mn => {
-        // Suppression des interventions sans commentaire
-        let isMatch = mn.nom
-        if (this.nameFilter) {
-          isMatch =  isMatch && mn.nom.toLowerCase().indexOf(this.nameFilter.toLowerCase()) > -1
-        }
-        return isMatch;
-      });
-    }
-    
-    else {
-      return []
-    }
-    }
+  computed: {
+    filteredMN: function () {
+      if (this.nameFilter.length > 2) {
+        return this.listeMaitreNageur.filter((mn) => {
+          // Suppression des interventions sans commentaire
+          let isMatch = mn.nom;
+          if (this.nameFilter) {
+            isMatch =
+              isMatch &&
+              mn.nom.toLowerCase().indexOf(this.nameFilter.toLowerCase()) > -1;
+          }
+          return isMatch;
+        });
+      } else {
+        return [];
+      }
+    },
   },
   components: {
     Editable,
@@ -235,7 +268,8 @@ export default {
       erreurformulaire: [],
       headersEncadrants: [
         { path: "nom", title: "Nom", type: "text", sortable: true },
-        //{ path: "prenom", title: "Prénom", type: "text", sortable: true },
+        { path: "prenom", title: "Prénom", type: "text", sortable: true },
+        { path: "courriel", title: "Courriel", type: "text", sortable: true },
         {
           path: "__slot:actions",
           title: "Actions",
@@ -243,30 +277,15 @@ export default {
           sortable: false,
         },
       ],
-      listeMaitreNageur: [
-        {
-          nom: "carcel",
-          id: 11,
-        },
-        {
-          nom: "dupond",
-          id: 10,
-        },
-      ],
-      dataready: null,
+      listeMaitreNageur: [],
       nameFilter: "",
-      loading: false,
       formIntervention: loadFormIntervention(this.intervention),
-      //<aria-label="texte de l'infobulle">
-      // v-b-popover.hover="'I am popover content!'"
-
       listebloc: [
         { text: "-- Choix du type de bloc --", value: null },
         { text: "Bloc 1 : Savoir pédaler", value: "1" },
         { text: "Bloc 2 : Savoir circuler", value: "2" },
         { text: "Bloc 3 : Savoir rouler", value: "3" },
       ],
-      selectedCommune: null,
       // Nécessaire pour le fonctionnement des popovers quand plusieurs composants intervention sont sur la page
       randomId: "popover-" + Math.floor(Math.random() * 100000),
     };
@@ -285,30 +304,10 @@ export default {
     }*/
   },
   methods: {
-    showPDF: function (id) {
-      console.info("showPDF");
-      this.$axios({
-        url: process.env.API_URL + "/pdf/" + id,
-        method: "GET",
-        responseType: "blob", // important
-      }).then((response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        var idformate = "";
-        var nbzero;
-        idformate = id.toString();
-        for (nbzero = 0; nbzero < 7 - id.toString().length; nbzero++) {
-          idformate = "0" + idformate;
-        }
-        idformate = "AAQ_Attestation-" + idformate;
-        console.log("intervention : " + idformate);
-        link.setAttribute("download", `${idformate}.pdf`); //or any other extension
-        document.body.appendChild(link);
-        link.click();
-      });
+    addMN: function (mn) {
+      this.formIntervention.utilisateurs.push(mn);
+      this.nameFilter = "";
     },
-
     resetform: function () {
       this.erreurformulaire = [];
       const action = "reset_interventions";
@@ -316,18 +315,27 @@ export default {
       //this.formIntervention.maitreNageur = this.$store.state.utilisateurCourant;
       return this.$store.commit(action);
     },
-
     checkform: function () {
       console.info("Validation du formulaire");
       this.erreurformulaire = [];
       var formOK = true;
 
+<<<<<<< HEAD
       // s le profil est différent de partenaire, on force le maitre nageur avec l'utilisateur courant
       if (this.utilisateurCourant.roleId != 5) {
         console.log("utilisateur de type structure");
         this.formIntervention.maitreNageur = this.utilisateurCourant;
+||||||| parent of 551b40d... POST intervention presque bon
+      // s le profil est différent de partenaire, on force le maitre nageur avec l'utilisateur courant
+      if (this.$store.state.utilisateurCourant.roleId != 5) {
+        console.log("utilisateur de type structure");
+        this.formIntervention.maitreNageur = this.$store.state.utilisateurCourant;
+=======
+      if (!this.formIntervention.utilisateurs) {
+        this.erreurformulaire.push("Les intervenants");
+        formOK = false;
+>>>>>>> 551b40d... POST intervention presque bon
       }
-
       if (!this.formIntervention.strId) {
         this.erreurformulaire.push("La structure");
         formOK = false;
@@ -353,7 +361,6 @@ export default {
         console.info("Formulaire invalide", this.erreurformulaire);
         return;
       }
-
       const url = process.env.API_URL + "/interventions";
       const intervention = {
         id: this.formIntervention.id,
@@ -363,6 +370,7 @@ export default {
         piscine: this.formIntervention.piscine,
         nbEnfants: this.formIntervention.nbEnfants,
         nbNouveauEnfants: this.formIntervention.nbNouveauxEnfants,
+        utilisateurs: this.formIntervention.utilisateurs,
       };
 
       const action = intervention.id ? "put_intervention" : "post_intervention";
@@ -412,6 +420,7 @@ export default {
               nbEnfants: "",
               nbNouveauxEnfants: "",
               listeEnfants: [],
+              utilisateurs: [],
             },
             intervention
           )
@@ -425,27 +434,28 @@ export default {
     "formIntervention.cp"(cp) {
       this.recherchecommune();
     },
-    selectedCommune() {
-      this.formIntervention.commune = this.listecommune.find((commune) => {
-        return commune.cpi_codeinsee == this.selectedCommune;
-      });
-    },
   },
   async mounted() {
+    // si le user courant est de profil 3 ou 4 on l'ajoute
+    if (
+      this.$store.state.utilisateurCourant.profilId == 3 ||
+      this.$store.state.utilisateurCourant.profilId == 4
+    ) {
+      this.formIntervention.utilisateurs.push(
+        this.$store.state.utilisateurCourant
+      );
+    }
     const url = process.env.API_URL + "/user/encadrant";
     console.info(url);
-
     await this.$axios({
       url: url,
       method: "GET",
     })
       .then((response) => {
-        this.listeMaitreNageur = response.data.encadrants
-        this.dataready = true;
+        this.listeMaitreNageur = response.data.encadrants;
       })
       .catch((err) => {
-        console.log(JSON.stringify(err));
-        //this.$toasted.error("Erreur lors du téléchargement: " + err.message);
+        console.log("Erreur lors du téléchargement: " + err.message);
       });
   },
 };

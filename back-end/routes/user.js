@@ -99,8 +99,8 @@ router.get('/encadrant', async function (req, res) {
     log.i('::encadrant - In')
     const utilisateurCourant = req.session.user;
 
-    const requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,uti.rol_id as RoleId, uti_mail as Courriel, 
-        uti.uti_validated as inscription , stu.stu_libelle Statut_Utilisateur
+    const requete =`SELECT  uti.uti_id As id , uti.uti_prenom as prenom, uti_nom As nom,uti.rol_id as profilId, uti_mail as courriel, 
+        uti.uti_validated as inscription , stu.stu_libelle statut
         from utilisateur uti
         join statut_utilisateur stu on stu.stu_id = uti.stu_id
         where stu.stu_id = 1 

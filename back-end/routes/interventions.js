@@ -189,7 +189,8 @@ router.get('/:id', async function (req, res) {
         }
     })().catch(err => {
         log.w('::get - Erreur survenue lors de la récupération', err.stack)
-        return res.status(400).json('erreur lors de la récupération de l\'intervention '+id)}
+        return res.status(400).json('erreur lors de la récupération de l\'intervention ' + id)
+    }
     )
 });
 
@@ -244,7 +245,7 @@ router.get('/', async function (req, res) {
                 WHERE int.int_id = ${intervention.id}`
 
                 let result2 = await pgPool.query(secondeRequete)
-                log.i('::list2 - Done - '+key)
+                log.i('::list2 - Done - ' + key)
                 interventions[key].utilisateur = result2.rows;
                 res.json({ interventions });
             }
@@ -254,7 +255,8 @@ router.get('/', async function (req, res) {
         }
     })().catch(err => {
         log.w('::list - Erreur survenue lors de la récupération', err.stack)
-        return res.status(400).json('erreur lors de la récupération des interventions')}
+        return res.status(400).json('erreur lors de la récupération des interventions')
+    }
     )
 
 });
@@ -331,10 +333,29 @@ router.post('/', function (req, res) {
     //insert dans la table intervention
     const requete = `insert into intervention 
                     (pis_id,str_id,int_nombreenfant,int_dateintervention,int_datecreation,int_datemaj) 
-                    values($1,$2,$3,$4,$5,$6 ) RETURNING *`;
+                    values($1,$2,$3,$4,$5,$6 ) RETURNING int_id AS int_id`;
 
-    log.d('::post - requete', { requete });
-    pgPool.query(requete, [intervention.piscine.id, intervention.strId, intervention.nbEnfants,
+    (async () => {
+        try {
+            //log.d('::post - requete', { requete });
+            await pgPool.query('BEGIN')
+            const res = await pgPool.query(requete, [intervention.piscine.id, intervention.strId, intervention.nbEnfants, intervention.dateIntervention, new Date().toISOString(), new Date().toISOString()])
+            
+            intervention.utilisateurs.forEach( async us => {
+                const insert = `insert into uti_int(uti_id,int_id) values ($1,${res.rows[0].int_id})`
+                console.log('REQ:'+insert+ 'US : '+us.id)
+            await pgPool.query(insert, [us.id])
+            })
+            await pgPool.query('COMMIT')
+        } catch (e) {
+
+            await pgPool.query('COMMIT')
+            throw e
+        }
+    })().catch(e => console.error(e.stack))
+
+
+    /*pgPool.query(requete, [intervention.piscine.id, intervention.strId, intervention.nbEnfants,
     intervention.dateIntervention, new Date().toISOString(), new Date().toISOString()], (err, result) => {
         if (err) {
             log.w('::post - Erreur lors de la requête.', err.stack);
@@ -366,7 +387,7 @@ router.post('/', function (req, res) {
                 }
             })
         }
-    })
+    })*/
 })
 
 module.exports = router;
