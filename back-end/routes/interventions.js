@@ -197,7 +197,8 @@ router.get('/', async function (req, res) {
     // Utilisateur est intervenant => ses interventions
     //} 
     if (user.rol_id == 3 || user.rol_id == 4) {
-        whereClause += `LEFT JOIN utilisateur uti ON int.uti_id = uti.uti_id  \
+        whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
+         LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
          LEFT JOIN structure str on str.str_id = int.str_id
          where uti.uti_id=${utilisateurId}`
