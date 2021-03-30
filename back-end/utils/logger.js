@@ -7,9 +7,9 @@ const logger = function(caller) {
         name.pop()
     }
     name = name.join().replace(/\//g, ':')
-    const debug = require('debug')('srav-backend:debug:' + name)
-    const info = require('debug')('srav-backend:info:' + name)
-    const warn = require('debug')('srav-backend:warn:' + name)
+    const debug = require('debug')('aaq-backend:debug:' + name)
+    const info = require('debug')('aaq-backend:info:' + name)
+    const warn = require('debug')('aaq-backend:warn:' + name)
     return {
         d: function(message, ...args) {
             if (debug.enabled) {

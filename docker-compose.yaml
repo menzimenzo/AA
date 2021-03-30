@@ -8,7 +8,7 @@ services:
       - PROXY_URL=http://proxy
       - PORT=3000
       - HOST=0.0.0.0
-      - DEBUG=srav-frontend:*
+      - DEBUG=aaq-frontend:*
     tty: true
   back-end:
     build: ./back-end
@@ -20,7 +20,7 @@ services:
       - pg
     environment:
       - MAIL_URL=http://mail-server:3000
-      - DEBUG=srav-backend:*
+      - DEBUG=aaq-backend:*
   mail-server:
     build: ./mail-server
     restart: always
