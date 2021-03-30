@@ -83,7 +83,7 @@
                       </b-btn>
                       <editable
                         :columns="headers"
-                        :data="this.$store.state.interventions"
+                        :data="interventions"
                         :removable="false"
                         :creable="false"
                         :editable="false"
@@ -176,7 +176,7 @@
                     <div>
                       <editable
                         :columns="headersPiscine"
-                        :data="this.$store.state.mesPiscines"
+                        :data="mesPiscines"
                         :removable="false"
                         :creable="false"
                         :editable="false"
@@ -195,8 +195,7 @@
                             >
                               <i class="material-icons">delete_forever</i>
                             </b-btn>
-                          </div> </template
-                        >-->
+                          </div> </template>
                       </editable>
                       <b-btn
                         @click="editPiscine(null)"
@@ -396,6 +395,7 @@ export default {
   },
   computed: mapState([
     "interventions",
+    "mesPiscines",
     "interventionCourrante",
     "utilisateurCourant",
     "documents",
@@ -449,7 +449,7 @@ export default {
    deletePiscine: function (piscine) { 
         this.loading = true;
         const url = process.env.API_URL + "/piscine/delete/";
-        piscine.uti_id = this.$store.state.utilisateurCourant.id
+        piscine.uti_id = this.utilisateurCourant.id
        return this.$axios.$post(url, { piscine }).then((response) => {
             this.$store.dispatch("get_mesPiscines");
             this.loading = false;

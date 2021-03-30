@@ -95,6 +95,32 @@ router.get('/csv', async function (req, res) {
     })
 });
 
+router.get('/encadrant', async function (req, res) {
+    log.i('::encadrant - In')
+    const utilisateurCourant = req.session.user;
+
+    const requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,uti.rol_id as RoleId, uti_mail as Courriel, 
+        uti.uti_validated as inscription , stu.stu_libelle Statut_Utilisateur
+        from utilisateur uti
+        join statut_utilisateur stu on stu.stu_id = uti.stu_id
+        where stu.stu_id = 1 
+        AND uti.uti_validated = true 
+        AND uti.rol_Id in (2,3)
+        order by 3,4 asc`;
+    
+    pgPool.query(requete, (err, result) => {
+        if (err) {
+            log.w('::encadrant - Erreur lors de la requête.', { requete, erreur: err.stack});
+            return res.status(400).json('erreur lors de la récupération des encadrants');
+        }
+        else {
+            const encadrants = result.rows;
+            console.log(encadrants);
+            res.json({ encadrants });
+        }
+    })
+});
+
 router.get('/:id', async function (req, res) {
     const id = req.params.id;
     log.i('::get - In', { id })

@@ -25,9 +25,25 @@
     </b-row>
     <br />
     <b-row>
+      <b-col cols="12">
+        <div>
+          <editable
+            :columns="headersEncadrants"
+            :data="listeMaitreNageur"
+            :removable="false"
+            :creable="false"
+            :editable="false"
+            :noDataLabel="''"
+            tableMaxHeight="none"
+          >
+          </editable>
+        </div>
+      </b-col>
+    </b-row>
+    <b-row>
       <div
         class="input-group-display"
-        v-if="this.$store.state.utilisateurCourant.roleId == 5"
+        v-if="utilisateurCourant.roleId == 3"
       >
         <span>Personne ayant réalisé l'intervention * :</span>
 
@@ -68,7 +84,7 @@
         >
           <option :value="null">-- Choix de la Piscine --</option>
           <option
-            v-for="piscine in this.$store.state.mesPiscines"
+            v-for="piscine in mesPiscines"
             :key="piscine.id"
             :value="piscine.id"
           >
@@ -146,11 +162,12 @@
 </template>
 <script>
 import Vue from "vue";
+import { mapState } from "vuex";
 import moment from "moment";
+import Editable from "~/components/editable/index.vue";
 
 var loadFormIntervention = function (intervention) {
-  console.log('Avant loadFormIntervention')
-  console.log(intervention)
+  console.log(intervention);
   let formIntervention = JSON.parse(
     JSON.stringify(
       Object.assign(
@@ -169,8 +186,6 @@ var loadFormIntervention = function (intervention) {
   );
   let dateIntervention = moment(intervention.dateIntervention);
   formIntervention.dateIntervention = dateIntervention.format("YYYY-MM-DD");
-  console.log('Après loadFormIntervention')
-  console.log(formIntervention.piscine) 
   return formIntervention;
 };
 
@@ -183,28 +198,34 @@ export default {
       },
     },
   },
-  /*computed: {
-    showAttestation() {
-      return (
-        this.intervention &&
-        this.intervention.id &&
-        this.intervention.blocId === "3"
-      );
-    },
-  },*/
+  components: {
+    Editable,
+  },
   data() {
     return {
       erreurformulaire: [],
-      listeMaitreNageur: {
-        1: {
+      headersEncadrants: [
+        { path: "nom", title: "Nom", type: "text", sortable: true },
+        //{ path: "prenom", title: "Prénom", type: "text", sortable: true },
+        {
+          path: "__slot:actions",
+          title: "Actions",
+          type: "__slot:actions",
+          sortable: false,
+        },
+      ],
+      listeMaitreNageur: [
+        {
           nom: "carcel",
           id: 11,
         },
-        2: {
+        {
           nom: "dupond",
           id: 10,
         },
-      },
+      ],
+      toto: "",
+      loading: false,
       formIntervention: loadFormIntervention(this.intervention),
       //<aria-label="texte de l'infobulle">
       // v-b-popover.hover="'I am popover content!'"
@@ -219,6 +240,19 @@ export default {
       // Nécessaire pour le fonctionnement des popovers quand plusieurs composants intervention sont sur la page
       randomId: "popover-" + Math.floor(Math.random() * 100000),
     };
+  },
+  computed: {
+    ...mapState(["utilisateurCourant","mesPiscines"]),
+    /*filteredMN: function() {
+        console.log(this.listeMaitreNageur)
+        return this.listeMaitreNageur
+        /*return this.listeMaitreNageur.filter(mn => {
+        // Suppression des interventions sans commentaire
+        let isMatch = mn.nom 
+        console.log(isMatch)
+        return isMatch;
+      })
+    }*/
   },
   methods: {
     showPDF: function (id) {
@@ -259,9 +293,9 @@ export default {
       var formOK = true;
 
       // s le profil est différent de partenaire, on force le maitre nageur avec l'utilisateur courant
-      if (this.$store.state.utilisateurCourant.roleId != 5) {
+      if (this.utilisateurCourant.roleId != 5) {
         console.log("utilisateur de type structure");
-        this.formIntervention.maitreNageur = this.$store.state.utilisateurCourant;
+        this.formIntervention.maitreNageur = this.utilisateurCourant;
       }
 
       if (!this.formIntervention.strId) {
@@ -336,7 +370,7 @@ export default {
     },
   },
   watch: {
-    intervention(intervention) {  
+    intervention(intervention) {
       let formIntervention = JSON.parse(
         JSON.stringify(
           Object.assign(
@@ -367,13 +401,22 @@ export default {
       });
     },
   },
-  async mounted() {
-    // gestion de la liste des maitres nageurs
-    if (this.$store.state.utilisateurCourant.roleId == 5) {
-      console.log("utilisateur de type structure");
-      // TO DO recupérér la liste des maitres nageurs de ma structure
-      this.listeMaitreNageur = this.$store.state.utilisateurCourant;
-    }
+  mounted() {
+    const url =
+          process.env.API_URL + "/user/encadrant"
+        console.info(url);
+        return this.$axios
+          .$get(url)
+          .then(response => {
+            this.listeMaitreNageur = response.encadrants;
+          })
+          .catch(error => {
+            console.error(
+              "Une erreur est survenue lors de la récupération des encadrants",
+              error
+            );
+          });
+    
   },
 };
 </script>

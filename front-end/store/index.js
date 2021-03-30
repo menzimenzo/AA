@@ -176,7 +176,7 @@ export const actions = {
       })
       .catch(error => {
         log.w("actions::Une erreur est survenue lors de la récupération des interventions", error);
-        dcommit("clean_interventions");
+        commit("clean_interventions");
       });
   },
   async get_intervention({ commit, state }, idIntervention) {

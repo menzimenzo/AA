@@ -16,6 +16,7 @@ drop index IF EXISTS IDX_DEP_NUM CASCADE;
 drop table IF EXISTS DEPARTEMENT CASCADE;
 drop table IF EXISTS DOCUMENT CASCADE;
 drop table IF EXISTS INTERVENTION CASCADE;
+drop table IF EXISTS UTI_INT CASCADE;
 drop table IF EXISTS PROFIL CASCADE;
 drop table IF EXISTS REGION CASCADE;
 drop table IF EXISTS STATUT_INTERVENTION CASCADE;
@@ -120,13 +121,21 @@ create table INTERVENTION (
    INT_ID               SERIAL               not null,
    PIS_ID               BIGINT               not null,
    STR_ID               BIGINT               not null,
-   UTI_ID               BIGINT               not null,
+   /*UTI_ID               BIGINT               not null,*/
    INT_NOMBREENFANT     INT                  not null,
    INT_DATEINTERVENTION DATE                 not null,
    INT_DATECREATION     timestamp            not null,
    INT_DATEMAJ          timestamp            null,
    INT_COMMENTAIRE      TEXT                 null,
    constraint PK_INTERVENTION primary key (INT_ID)
+);
+
+/*==============================================================*/
+/* Table : UTI_INT                                              */
+/*==============================================================*/
+create table UTI_INT (
+   INT_ID               SERIAL               not null,
+   UTI_ID               BIGINT               not null
 );
 
 /*==============================================================*/
@@ -286,10 +295,16 @@ alter table ATTESTATION
       references INTERVENTION (INT_ID)
       on delete restrict on update restrict;
 
-alter table INTERVENTION
+alter table UTI_INT
    add constraint FK_INTERVEN_REFERENCE_UTILISAT foreign key (UTI_ID)
       references UTILISATEUR (UTI_ID)
       on delete restrict on update restrict;
+
+alter table UTI_INT  
+  add constraint FK_INTERVEN_REFERENCE_INTERVENTION foreign key (INT_ID)
+      references INTERVENTION (INT_ID)
+      on delete CASCADE ;
+
 /*
 alter table UTILISATEUR
    add constraint FK_UTILISAT_REFERENCE_PROFIL foreign key (ROL_ID)
