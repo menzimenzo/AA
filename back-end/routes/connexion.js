@@ -257,13 +257,15 @@ router.get('/user', (req,res) => {
 
 // Route pour la mise à jour du compte utilisateur à partir de 'MonCompte'
 router.put('/edit-mon-compte/:id', async function (req, res) {
+    log.i('edit-mon-compte::In')
     const profil = req.body.profil
     const id = req.params.id
     log.d('::edit-mon-compte - In', { id })
     if(!id) {
         return res.status(400).json('Aucun ID fournit pour  identifier l\'utilisateur.');
     }
-    log.d(profil)
+    log.d('edit-mon-compte::Profil : ' + profil)
+    log.d('edit-mon-compte::Code Insee : ' + profil.cpi_codeinsee)
     //insert dans la table intervention
     /*
     const requete = `UPDATE utilisateur 
@@ -303,6 +305,8 @@ router.put('/edit-mon-compte/:id', async function (req, res) {
             return res.status(200).json({ user: formatUtilisateur(result.rows[0])});
         }
     })
+    log.i('edit-mon-compte::Done')
+
 })
 
 // Validation du mot de passe.

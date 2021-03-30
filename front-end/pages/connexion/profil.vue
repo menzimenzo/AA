@@ -28,11 +28,12 @@ export default {
     // Validation de l'inscription
     async editProfile(){
         const url = process.env.API_URL + `/connexion/edit-mon-compte/${this.user.id }`
-        console.log(url)
+        //console.log(url)
         //const url = process.env.API_URL + `/connexion/verify/${this.user.id }`
+        //console.log(this.user.cpi_codeinsee)
         return this.$axios.$put(url, { profil: this.user })
         .then(async response => {
-            await this.$store.dispatch('set_utilisateurCourant', response.user);
+            await this.$store.dispatch('set_utilisateur', response.user);
             this.$toast.success('Profil enregistré avec succès.')
 
         }).catch(err => {
