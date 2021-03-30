@@ -12,7 +12,7 @@ const log = logger(module.filename)
 const formatIntervention = intervention => {
     var result = {
         id: intervention.int_id,
-        utiId: intervention.uti_id,
+        //utiId: intervention.uti_id,
         nbEnfants: intervention.int_nombreenfant,
         strId: intervention.str_id,
         pisId: intervention.pis_id,
@@ -20,7 +20,7 @@ const formatIntervention = intervention => {
             nom: intervention.pis_nom,
             id: intervention.pis_id,
             adresse: intervention.pis_adresse,
-            cp :intervention.cp,
+            cp: intervention.cp,
             type: intervention.typ_id,
             x: intervention.pis_x,
             y: intervention.pis_y
@@ -63,8 +63,8 @@ router.get('/delete/:id', async function (req, res) {
 
 router.get('/csv/:utilisateurId', async function (req, res) {
 
-   // Modification de la récupération de l'utilisateur courant 
-    if(!req.session.user){
+    // Modification de la récupération de l'utilisateur courant 
+    if (!req.session.user) {
         return res.sendStatus(403)
     }
     const id = req.params.id
@@ -78,7 +78,7 @@ router.get('/csv/:utilisateurId', async function (req, res) {
     var whereClause = ""
     /* Pour un profil Intervenant on exporte que ces interventions */
     // Modification des profils.
-    if ( user.pro_id == 4 || user.pro_id == 3 ) {
+    if (user.pro_id == 4 || user.pro_id == 3) {
         whereClause += ` and utilisateur.uti_id=${utilisateurId} `
     }
     /* Pour un profil Partenaire, on exporte les interventions de sa structure*/
@@ -153,13 +153,15 @@ router.get('/:id', async function (req, res) {
 
     // Where condition is here for security reasons.
     var whereClause = ""
-    if (user.rol_id == 3 ||  user.rol_id == 4) {
-        whereClause += ` and uti_id=${utilisateurId} `
+    if (user.rol_id == 3 || user.rol_id == 4) {
+        whereClause += ` and uti.uti_id=${utilisateurId} `
     }
 
     const requete = `SELECT int.*,pis.*, str.str_libellecourt from intervention int \
     LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
     LEFT JOIN structure str on str.str_id = int.str_id \
+    LEFT JOIN uti_int ui on ui.int_id = int.int_id \
+    LEFT JOIN utilisateur uti on ui.uti_id = uti.uti_id \
     where int.int_id=${id} ${whereClause} order by int_id asc`;
     log.d('::get - récuperation via la requête.', { requete })
 
@@ -175,7 +177,26 @@ router.get('/:id', async function (req, res) {
                 return res.status(400).json({ message: 'Intervention inexistante' });
             }
             log.i('::get - Done')
-            res.json({ intervention: formatIntervention(intervention) });
+            intervention = formatIntervention(intervention)
+
+            // récuperation de la liste des utilsiateurs associés à l'intervention
+            log.i('::get2 - In')
+            let secondeRequete = `SELECT uti.* from utilisateur uti \
+                LEFT JOIN uti_int ui on uti.uti_id = ui.uti_id \
+                LEFT JOIN intervention int on int.int_id = ui.int_id \
+                WHERE int.int_id = ${id}`
+
+            pgPool.query(secondeRequete, (err, result) => {
+                if (err) {
+                    log.w('::get2 - Erreur survenue lors de la récupération', err.stack);
+                    return res.status(400).json('erreur lors de la récupération des utilisateurs associés à une intervention');
+                }
+                else {
+                    log.i('::get2 - Done')
+                    intervention.uti = result.rows;
+                }
+            })
+            res.json({ intervention });
         }
     })
 });
@@ -190,6 +211,7 @@ router.get('/', async function (req, res) {
     const user = req.session.user
     const utilisateurId = user.uti_id
     var whereClause = ""
+
     // Utilisateur est partenaire => intervention de la structure
     //if(user.pro_id == 2){
     //whereClause += `LEFT JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id where utilisateur.str_id=${user.str_id} `
@@ -206,7 +228,8 @@ router.get('/', async function (req, res) {
     } else {
         // whereClause += `LEFT JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id LEFT JOIN structure ON structure.str_id = utilisateur.str_id `
         // Laurent : Pour le moment on met la même chose pour les admin pour éviter que ça plante.
-        whereClause += `LEFT JOIN utilisateur uti ON int.uti_id = uti.uti_id  \
+        whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
+        LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
          LEFT JOIN structure str on str.str_id = int.str_id
          where uti.uti_id=${utilisateurId}`
@@ -222,7 +245,27 @@ router.get('/', async function (req, res) {
         }
         else {
             log.i('::list - Done')
-            const interventions = result.rows.map(formatIntervention);
+            let interventions = result.rows.map(formatIntervention);
+
+            // requete complémentaire pour récupérer la liste des utilisateurs associés aux interventions remontées
+            interventions.forEach(intervention => {
+                log.i('::list2 - In')
+                let secondeRequete = `SELECT uti.* from utilisateur uti \
+                LEFT JOIN uti_int ui on uti.uti_id = ui.uti_id \
+                LEFT JOIN intervention int on int.int_id = ui.int_id \
+                WHERE int.int_id = ${intervention.id}`
+
+                pgPool.query(secondeRequete, (err, result) => {
+                    if (err) {
+                        log.w('::list - Erreur survenue lors de la récupération', err.stack);
+                        return res.status(400).json('erreur lors de la récupération des utilisateurs associés à une intervention');
+                    }
+                    else {
+                        log.i('::list2 - Done')
+                        intervention.uti = result.rows;
+                    }
+                })
+            })
             res.json({ interventions });
         }
     })
