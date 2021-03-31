@@ -125,20 +125,32 @@
           <b-form-group id="CodePostal" label="Code Postal :" label-for="cp">
             <b-form-input
               v-model="cp"
-              name="cp"
+              name="codepostal"
               key="cp"
-              :state="validateState('cp')"
+              :state="validateState('codepostal')"
+              v-validate="{ length:5,numeric:true}"
               aria-describedby="cpFeedback"
               id="cp"
               type="number"
               placeholder="CP de la commune"
             />
+            <b-form-invalid-feedback id="cpFeedback">Le code postal doit contenir 5 caractères.</b-form-invalid-feedback>
           </b-form-group>
           <b-form-group 
-            label="Commune">
+            v-if="cp"
+            label="Commune"
+            label-for="lstcommune" 
+            require
+            >
               <b-form-select 
                 class="liste-deroulante"
-                v-model="user.cpi_codeinsee">
+                v-model="user.cpi_codeinsee"
+                name="lstcommune"
+                v-validate="{ required: true, min:5, max:5}"
+                :state="validateState('lstcommune')"
+                aria-describedby="lstcommuneFeedback"
+
+              >
                 <option :value="null">-- Choix de la commune --</option>
                 <option
                   v-for="commune in listecommune"
@@ -146,6 +158,7 @@
                   :value="commune.cpi_codeinsee"
                 >{{ commune.com_libellemaj}}</option>
               </b-form-select>
+              <b-form-invalid-feedback id="lstcommuneFeedback">Une commune doit être sélectionnée avec un code postal valide.</b-form-invalid-feedback>
           </b-form-group>
 
           
@@ -291,6 +304,8 @@ export default {
             );
           });
       } else {
+        // On vide le CodeInsee si le CP n'est pas complet
+        this.user.cpi_codeinsee = null
         // On vide la liste car le code postal a changé
         this.listecommune = ["Veuillez saisir un code postal"];
         return Promise.resolve(null);
