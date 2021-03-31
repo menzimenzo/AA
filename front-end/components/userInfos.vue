@@ -169,7 +169,7 @@
             label="Commune">
               <b-form-select 
                 class="liste-deroulante"
-                v-model="selectedCommune">
+                v-model="user.cpi_codeinsee">
                 <option :value="null">-- Choix de la commune --</option>
                 <option
                   v-for="commune in listecommune"
@@ -262,8 +262,6 @@ export default {
           codedep: null
         },
       ],
-      //communeselectionne: {},
-      selectedCommune: null
     };
   },
   props: ["submitTxt", "user", "checkLegal"],
@@ -358,7 +356,7 @@ export default {
       // Recherche de la liste des commune
       this.recherchecommune()
       // Sélection de la commune correspondant à celle de l'utilisateur dans la liste
-      this.selectedCommune = this.user.cpi_codeinsee
+      //this.selectedCommune = this.user.cpi_codeinsee
     }
   },
   computed: {
