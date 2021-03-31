@@ -301,7 +301,7 @@ export default {
         {
           // On vide le CodeInsee si le CP n'est pas complet
           this.user.cpi_codeinsee = null          
-          this.$toast.error('Veuillez certifier sur l honneur l exactitude des informations déclarées.');
+          this.$toast.error('Veuillez certifier sur l\'honneur l\'exactitude des informations déclarées.');
 
         }
       });
