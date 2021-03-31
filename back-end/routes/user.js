@@ -19,7 +19,15 @@ const formatUser = user => {
         nom: user.uti_nom,
         prenom: user.uti_prenom,
         rolLibelle:user.rol_libelle,
-        inscription: user.inscription
+        inscription: user.inscription,
+        publicontact: user.uti_publicontact,
+        mailcontact: user.uti_mailcontact,            
+        sitewebcontact: user.uti_sitewebcontact,
+        adrcontact: user.uti_adrcontact,
+        compadrcontact: user.uti_compadrcontact,
+        cpi_codeinsee: user.uti_com_codeinseecontact,
+        cp: user.uti_com_cp_contact,
+        telephonecontact: user.uti_telephonecontact
     }
 }
 
@@ -35,7 +43,15 @@ const formatUserCSV = user => {
         nom: user.uti_nom,
         prenom: user.uti_prenom,
         rolLibelle:user.rol_libelle,
-        inscription: user.inscription
+        inscription: user.inscription,
+        publicontact: user.uti_publicontact,
+        mailcontact: user.uti_mailcontact,            
+        sitewebcontact: user.uti_sitewebcontact,
+        adrcontact: user.uti_adrcontact,
+        compadrcontact: user.uti_compadrcontact,
+        cpi_codeinsee: user.uti_com_codeinseecontact,
+        cp: user.uti_com_cp_contact,
+        telephonecontact: user.uti_telephonecontact        
     }
 }
 
@@ -49,20 +65,24 @@ router.get('/csv', async function (req, res) {
     log.d('::csv - Profil de l\'utilisateur : ' + req.session.user.rol_id);
     // Je suis utilisateur "Administrateur" ==> Export de la liste des tous les utilisateurs
     if ( utilisateurCourant.rol_id == 1 ) {
-        requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, uti_mail as Courriel, to_char(uti_datenaissance,'DD/MM/YYYY') Date_De_Naissance, 
-        replace(replace(uti_validated::text,'true','Validée'),'false','Non validée') as inscription , stu.stu_libelle Statut_Utilisateur
+        requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, uti_mail as Courriel,  
+        replace(replace(uti_validated::text,'true','Validée'),'false','Non validée') as inscription, replace(replace(uti_publicontact::text,'true','Oui'),'false','Non') AutorisePublicationContact, 
+        uti_mailcontact MailContact, uti_sitewebcontact SiteInternetContact, uti_telephonecontact TelephoneContact, uti_adrcontact AdresseContact,
+        uti_compadrcontact ComplementAdresseContact, uti_com_cp_contact CodePostalContact, uti_com_codeinseecontact CodeInseeContact, com_art ArtCommune, com_libelle LibelleCommune, dep_num Departement
+
         from utilisateur  uti
-        join role rol on rol.rol_id = uti.rol_id 
-        join statut_utilisateur  stu on stu.stu_id = uti.stu_id
+        join profil rol on rol.rol_id = uti.rol_id 
+        left join commune com on cpi_codeinsee = uti.uti_com_codeinseecontact
         order by 3,4 asc`;
     } 
     // Je suis utilisateur "Partenaire" ==> Export de la liste des interventants
+    // TODO : Refaire l'export pour les autre profils
     else {
         requete =`SELECT uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, uti_mail as Courriel, 
         replace(replace(uti_validated::text,'true','Validée'),'false','Non validée') as inscription , stu.stu_libelle Statut_Utilisateur,
         str.str_libellecourt As Structure, uti.uti_structurelocale As Struture_Locale
         from utilisateur  uti
-        join role rol on rol.rol_id = uti.rol_id and rol.rol_id <> 1
+        join profil rol on rol.rol_id = uti.rol_id and rol.rol_id <> 1
         join statut_utilisateur  stu on stu.stu_id = uti.stu_id
         where uti.str_id=${utilisateurCourant.str_id} order by 3,4 asc`;
     }
@@ -139,10 +159,10 @@ router.get('/', async function (req, res) {
     
     if ( utilisateurCourant.rol_id == 1) {
         // si on est admin, on affiche tous les utilisateurs
-        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,str.str_libellecourt,pro.rol_libelle
+        requete = `SELECT uti.*, pro.rol_libelle,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription
         from utilisateur uti 
-        join uti_str ust on ust.uti_id = uti.uti_id
-        join structure str on str.str_id = ust.str_id 
+        left join uti_str ust on ust.uti_id = uti.uti_id
+        left join structure str on str.str_id = ust.str_id 
         join profil pro on pro.rol_id = uti.rol_id
         order by uti_id asc`;
     }
