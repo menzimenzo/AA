@@ -105,8 +105,11 @@ export default {
     },
     // Fonction permettant d'afficher dynamiquement la partie Login
     SeLoguer: function(e) {
-      if (e === "AS")  {this.b_MN = false;}
-      if (e === "MN")  {this.b_AS = false;}
+      if (e === "AS")  {
+        //this.b_MN = !this.b_MN
+        this.$toast.info("Ce profil n'est pas encore accessible.")
+        }
+      if (e === "MN")  {this.b_AS = !this.b_AS;}
     }
 
   },
