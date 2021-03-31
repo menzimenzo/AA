@@ -185,9 +185,14 @@
         </b-form-checkbox-group>
       </b-form-group>    
     </b-card> 
-     
+
     <div class="mb-3 text-right">
       <b-button
+        @click="cancel"
+        variant="secondary"
+
+        >{{ cancelTxt }}</b-button
+      >      <b-button
         @click="submit"
         variant="success"
 
@@ -225,8 +230,11 @@ export default {
       ],
     };
   },
-  props: ["user", "submitTxt", "checkLegal"],
+  props: ["user", "submitTxt", "cancelTxt", "checkLegal"],
   methods: {
+    cancel: function () {
+      this.$emit("cancel");
+    },
     submit: function () {
       this.$validator.validateAll().then((isValid) => {
         if (this.accordHonneur) { 
