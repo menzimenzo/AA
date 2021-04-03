@@ -27,18 +27,10 @@
     <b-row>
       <div class="mb-3">
         Liste des intervenants présents durant l'intervention
-        <ol>
-          <li
-            v-for="user in this.formIntervention.utilisateurs"
-            :key="user.id"
-            :value="user"
-          >
-            {{ user.nom }} {{ user.prenom }}
-          </li>
-        </ol>
       </div>
     </b-row>
     <b-row>
+<<<<<<< HEAD
 <<<<<<< HEAD
           <editable
             :columns="headersEncadrants"
@@ -58,6 +50,31 @@
             :noDataLabel="''"
             tableMaxHeight="none"
 =======
+||||||| parent of 3656b7e... manque que le PUT
+=======
+      <editable
+        :columns="headersEncadrants"
+        :data="this.formIntervention.utilisateur"
+        :removable="false"
+        :creable="false"
+        :editable="false"
+        :noDataLabel="''"
+        tableMaxHeight="none"
+      >
+        <template slot-scope="props" slot="actions">
+          <b-btn
+            @click="deleteMN(props.data)"
+            size="sm"
+            class="mr-1"
+            variant="primary"
+          >
+            <i class="material-icons">delete</i>
+          </b-btn>
+        </template>
+      </editable>
+    </b-row>
+    <b-row>
+>>>>>>> 3656b7e... manque que le PUT
       <div class="mb-3">
         <b-form inline>
           <label for="nameFilter"
@@ -216,12 +233,10 @@ var loadFormIntervention = function (intervention) {
         {
           structureId: null,
           piscine: {},
-          maitreNageur: {},
           dateIntervention: null,
           nbEnfants: "",
           nbNouveauxEnfants: "",
-          listeEnfants: [],
-          utilisateurs: [],
+          utilisateur: [],
         },
         intervention
       )
@@ -231,7 +246,6 @@ var loadFormIntervention = function (intervention) {
   formIntervention.dateIntervention = dateIntervention.format("YYYY-MM-DD");
   return formIntervention;
 };
-
 
 export default {
   props: {
@@ -269,7 +283,7 @@ export default {
       headersEncadrants: [
         { path: "nom", title: "Nom", type: "text", sortable: true },
         { path: "prenom", title: "Prénom", type: "text", sortable: true },
-        { path: "courriel", title: "Courriel", type: "text", sortable: true },
+        { path: "mail", title: "Courriel", type: "text", sortable: true },
         {
           path: "__slot:actions",
           title: "Actions",
@@ -305,14 +319,37 @@ export default {
   },
   methods: {
     addMN: function (mn) {
-      this.formIntervention.utilisateurs.push(mn);
+      let absent = true;
+      for (const [key, user] of Object.entries(
+        this.formIntervention.utilisateur
+      )) {
+        if (user.id == mn.id) {
+          absent = false;
+        }
+      }
+      if (absent) {
+        this.formIntervention.utilisateur.push(mn);
+        this.$toast.success(`l'intervenant ${mn.nom} est ajouté à la liste`);
+      } else {
+        this.$toast.error(
+          `l'intervenant ${mn.nom} est déjà présent dans la liste`
+        );
+      }
       this.nameFilter = "";
+    },
+    deleteMN: function (mn) {
+      for (const [key, user] of Object.entries(
+        this.formIntervention.utilisateur
+      )) {
+        if (user.id == mn.id) {
+          this.formIntervention.utilisateur.splice(key, 1);
+        }
+      }
     },
     resetform: function () {
       this.erreurformulaire = [];
       const action = "reset_interventions";
       console.info({ action });
-      //this.formIntervention.maitreNageur = this.$store.state.utilisateurCourant;
       return this.$store.commit(action);
     },
     checkform: function () {
@@ -320,6 +357,7 @@ export default {
       this.erreurformulaire = [];
       var formOK = true;
 
+<<<<<<< HEAD
 <<<<<<< HEAD
       // s le profil est différent de partenaire, on force le maitre nageur avec l'utilisateur courant
       if (this.utilisateurCourant.roleId != 5) {
@@ -332,6 +370,14 @@ export default {
         this.formIntervention.maitreNageur = this.$store.state.utilisateurCourant;
 =======
       if (!this.formIntervention.utilisateurs) {
+||||||| parent of 3656b7e... manque que le PUT
+      if (!this.formIntervention.utilisateurs) {
+=======
+      if (
+        !this.formIntervention.utilisateur ||
+        this.formIntervention.length == 0
+      ) {
+>>>>>>> 3656b7e... manque que le PUT
         this.erreurformulaire.push("Les intervenants");
         formOK = false;
 >>>>>>> 551b40d... POST intervention presque bon
@@ -365,12 +411,11 @@ export default {
       const intervention = {
         id: this.formIntervention.id,
         strId: this.formIntervention.strId,
-        maitreNageurId: this.formIntervention.maitreNageur.id,
         dateIntervention: this.formIntervention.dateIntervention,
         piscine: this.formIntervention.piscine,
         nbEnfants: this.formIntervention.nbEnfants,
         nbNouveauEnfants: this.formIntervention.nbNouveauxEnfants,
-        utilisateurs: this.formIntervention.utilisateurs,
+        utilisateur: this.formIntervention.utilisateur,
       };
 
       const action = intervention.id ? "put_intervention" : "post_intervention";
@@ -389,7 +434,6 @@ export default {
               class: "toastLink",
             });
           }*/
-          console.log(serverIntervention);
           var interventionLabel = serverIntervention.id
             ? "#" + serverIntervention.id
             : "";
@@ -420,7 +464,7 @@ export default {
               nbEnfants: "",
               nbNouveauxEnfants: "",
               listeEnfants: [],
-              utilisateurs: [],
+              utilisateur: [],
             },
             intervention
           )
@@ -436,14 +480,16 @@ export default {
     },
   },
   async mounted() {
-    // si le user courant est de profil 3 ou 4 on l'ajoute
+    // si le user courant est de profil 3 ou 4 on l'ajoute et que l'intervention courrante est nulle
     if (
-      this.$store.state.utilisateurCourant.profilId == 3 ||
-      this.$store.state.utilisateurCourant.profilId == 4
+      (this.$store.state.utilisateurCourant.profilId == 3 ||
+        this.$store.state.utilisateurCourant.profilId == 4) &&
+      !this.$store.state.interventionCourrante.id
     ) {
-      this.formIntervention.utilisateurs.push(
+      this.formIntervention.utilisateur.push(
         this.$store.state.utilisateurCourant
       );
+
     }
     const url = process.env.API_URL + "/user/encadrant";
     console.info(url);

@@ -99,13 +99,13 @@ router.get('/encadrant', async function (req, res) {
     log.i('::encadrant - In')
     const utilisateurCourant = req.session.user;
 
-    const requete =`SELECT  uti.uti_id As id , uti.uti_prenom as prenom, uti_nom As nom,uti.rol_id as profilId, uti_mail as courriel, 
-        uti.uti_validated as inscription , stu.stu_libelle statut
+    const requete =`SELECT uti.uti_id AS id, uti.uti_nom AS nom, uti.uti_prenom AS prenom,uti.uti_mail AS mail,
+        uti.uti_validated, stu.stu_libelle
         from utilisateur uti
         join statut_utilisateur stu on stu.stu_id = uti.stu_id
         where stu.stu_id = 1 
         AND uti.uti_validated = true 
-        AND uti.rol_Id in (3,4)
+        AND uti.rol_id in (3,4)
         order by 3,4 asc`;
     
     pgPool.query(requete, (err, result) => {
@@ -115,7 +115,6 @@ router.get('/encadrant', async function (req, res) {
         }
         else {
             const encadrants = result.rows;
-            console.log(encadrants);
             res.json({ encadrants });
         }
     })

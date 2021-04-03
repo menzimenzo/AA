@@ -81,15 +81,21 @@
                         >
                         Export CSV
                       </b-btn>
-                      <editable
+                     <editable
                         :columns="headers"
+<<<<<<< HEAD
                         :data="interventions"
+||||||| parent of 3656b7e... manque que le PUT
+                        :data="this.$store.state.interventions"
+=======
+                        :data="this.interventionsToDisplay"
+>>>>>>> 3656b7e... manque que le PUT
                         :removable="false"
                         :creable="false"
                         :editable="false"
                         :noDataLabel="''"
                         tableMaxHeight="none"
-                        :loading="loading"
+                        :loading="loadingInt"
                         :defaultSortField="{
                           key: 'dateIntervention',
                           order: 'desc',
@@ -131,7 +137,7 @@
                     </div>
                     <h4
                       class="text-center"
-                      v-if="interventions.length == 0 && loading === false"
+                      v-if="interventions.length == 0 && loadingInt === false"
                     >
                       Aucune intervention n'a été créée pour le moment.
                     </h4>
@@ -182,7 +188,6 @@
                         :editable="false"
                         :noDataLabel="''"
                         tableMaxHeight="none"
-                        :loading="loading"
                       >
                         <template slot-scope="props" slot="actions">
                           <div style="min-width: 147px">
@@ -195,7 +200,15 @@
                             >
                               <i class="material-icons">delete_forever</i>
                             </b-btn>
+<<<<<<< HEAD
                           </div> </template>
+||||||| parent of 3656b7e... manque que le PUT
+                          </div> </template
+                        >
+=======
+                          </div>
+                        </template>
+>>>>>>> 3656b7e... manque que le PUT
                       </editable>
                       <b-btn
                         @click="editPiscine(null)"
@@ -204,10 +217,6 @@
                         <i class="material-icons">add</i>
                       </b-btn>
                     </div>
-                    <!-- <h4
-                      class="text-center"
-                      v-if="(interventions.length == 0) && (loading===false)"
-                    >Aucune intervention n'a été créée pour le moment.</h4>-->
                   </b-col>
                 </b-row>
               </b-container>
@@ -296,7 +305,7 @@ export default {
   },
   data() {
     return {
-      loading: false,
+      loadingInt: false,
       interventionsToDisplay: null,
       headers: [
         {
@@ -305,7 +314,7 @@ export default {
           type: "text",
           sortable: true,
         },
-         {
+        {
           path: "strNom",
           title: "Structure",
           type: "text",
@@ -374,7 +383,7 @@ export default {
   },
   watch: {
     interventions: function () {
-      this.loading = true;
+      this.loadingInt = true;
       if (this.utilisateurCourant.profilId == 2) {
         //console.info('suppression interventions hors structure_id : '+this.utilisateurCourant.structureId)
         //console.info('nb inter avant: '+ this.interventions.length)
@@ -390,8 +399,8 @@ export default {
       } else {
         this.interventionsToDisplay = this.interventions;
       }
-      this.loading = false;
-    }
+      this.loadingInt = false;
+    },
   },
   computed: mapState([
     "interventions",
@@ -405,6 +414,8 @@ export default {
       return this.$store
         .dispatch("get_intervention", idIntervention)
         .then(() => {
+          console.log('_________________')
+          console.log(this.$store.state.interventionCourrante)
           this.$modal.show("editIntervention");
         })
         .catch((error) => {
@@ -415,9 +426,9 @@ export default {
         });
     },
     editPiscine: function (id) {
-        this.$modal.show("editPiscine");
-      },
-    
+      this.$modal.show("editPiscine");
+    },
+
     deleteIntervention: function (idIntervention) {
       console.info("Suppression d'une intervention : " + idIntervention);
       //this.$dialog.confirm({ text: 'Confirmez-vous la suppression définitive d\'intervention', title: 'Suppression'});
@@ -446,6 +457,7 @@ export default {
         this.loading = false;
       }
     },
+<<<<<<< HEAD
    deletePiscine: function (piscine) { 
         this.loading = true;
         const url = process.env.API_URL + "/piscine/delete/";
@@ -466,6 +478,50 @@ export default {
           });
         
   
+||||||| parent of 3656b7e... manque que le PUT
+   deletePiscine: function (piscine) { 
+        this.loading = true;
+        const url = process.env.API_URL + "/piscine/delete/";
+        piscine.uti_id = this.$store.state.utilisateurCourant.id
+       return this.$axios.$post(url, { piscine }).then((response) => {
+            this.$store.dispatch("get_mesPiscines");
+            this.loading = false;
+            this.$toast.success(`#${piscine.nom} a bien été supprimée de vos piscines favorites`,
+              {}
+            );
+          })
+          .catch((error) => {
+            console.error(
+              "Une erreur est survenue lors de la suppresion de la piscine favorite",
+              error
+            );
+            this.loading = false;
+          });
+        
+  
+=======
+    deletePiscine: function (piscine) {
+      this.loading = true;
+      const url = process.env.API_URL + "/piscine/delete/";
+      piscine.uti_id = this.$store.state.utilisateurCourant.id;
+      return this.$axios
+        .$post(url, { piscine })
+        .then((response) => {
+          this.$store.dispatch("get_mesPiscines");
+          this.loading = false;
+          this.$toast.success(
+            `#${piscine.nom} a bien été supprimée de vos piscines favorites`,
+            {}
+          );
+        })
+        .catch((error) => {
+          console.error(
+            "Une erreur est survenue lors de la suppresion de la piscine favorite",
+            error
+          );
+          this.loading = false;
+        });
+>>>>>>> 3656b7e... manque que le PUT
     },
     downloadPdf: function (id) {
       this.$axios({
@@ -555,20 +611,10 @@ export default {
   //  CHARGEMENT ASYNCHRONE DES INTERVENTIONS
   //
   async mounted() {
-    await Promise.all([this.$store.dispatch("get_mesPiscines"),this.$store.dispatch("get_interventions")]);
-      /*
-      this.interventionsToDisplay = this.interventions.filter(x => {
-        var isMatch = true;
-        isMatch =
-          isMatch &&
-          String(x.structureId) == this.utilisateurCourant.structureId;
-        return isMatch;
-      });
-      console.info('2 - nb inter apres filtrage structure: '+ this.interventionsToDisplay.length)
-    } else {
-      this.interventionsToDisplay = this.interventions;
-    }*/
-    this.loading = false;
+    await Promise.all([
+      this.$store.dispatch("get_mesPiscines"),
+      this.$store.dispatch("get_interventions"),
+    ]);
   },
 };
 </script>
