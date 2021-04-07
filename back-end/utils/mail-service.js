@@ -77,7 +77,7 @@ module.exports = {
             body: `
             <p>Bonjour,</p>
 
-            <p>Vous recevez ce mail car vous avez effecuté une demande de réinitialisation de mot de passe sur le site Aisance Aquatique</p>
+            <p>Vous recevez ce mail car vous avez effectué une demande de réinitialisation de mot de passe sur le site Aisance Aquatique</p>
 
             <p>Veuillez entamer la procédure en cliquant sur le lien suivant:</p>
 
