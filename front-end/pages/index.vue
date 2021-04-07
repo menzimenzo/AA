@@ -52,7 +52,8 @@ export default {
       // Booleen Maitre nageur
       b_MN: true,
       // Booleen agent de structure
-      b_AS: true
+      // V1 : On ne permet pas l'affichage du bouton Partenaire
+      b_AS: false
     };
   },
 //
@@ -105,6 +106,9 @@ export default {
     },
     // Fonction permettant d'afficher dynamiquement la partie Login
     SeLoguer: function(e) {
+      // V1 : On ne permet pas de basculer d'un bouton à l'autre
+      return
+      // Return à supprimer pour faire fonctionne le switch des boutons
       if (e === "AS")  {
         //this.b_MN = !this.b_MN
         this.$toast.info("Ce profil n'est pas encore accessible.")

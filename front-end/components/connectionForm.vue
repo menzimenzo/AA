@@ -25,7 +25,7 @@
             type="password"
             v-model="password"
             required
-            name="mail"
+            name="password"
             v-validate="{required: true, min:8}"
             aria-describedby="pwdFeedback"
             placeholder="Mot de passe"
