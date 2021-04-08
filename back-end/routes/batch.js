@@ -24,9 +24,9 @@ router.get('/csvopendatasoft', async function (req, res) {
     var requete = "";
 
     log.d('::csvopendatasoft - Recherche des données : ' + requete);
-    requete =`SELECT uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, uti_mail as Courriel,  
+    requete =`SELECT uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, lower(uti_mail) as Courriel,  
     replace(replace(uti_validated::text,'true','Validée'),'false','Non validée') as inscription, replace(replace(uti_publicontact::text,'true','Oui'),'false','Non') AutorisePublicationContact, 
-    uti_mailcontact MailContact, uti_sitewebcontact SiteInternetContact, uti_telephonecontact TelephoneContact, uti_adrcontact AdresseContact,
+    lower(uti_mailcontact) MailContact, uti_sitewebcontact SiteInternetContact, uti_telephonecontact TelephoneContact, uti_adrcontact AdresseContact,
     uti_compadrcontact ComplementAdresseContact, uti_com_cp_contact CodePostalContact, uti_com_codeinseecontact CodeInseeContact, com_art ArtCommune, com_libelle LibelleCommune, dep_num Departement
 
     from utilisateur  uti

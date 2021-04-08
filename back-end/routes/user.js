@@ -65,9 +65,9 @@ router.get('/csv', async function (req, res) {
     log.d('::csv - Profil de l\'utilisateur : ' + req.session.user.rol_id);
     // Je suis utilisateur "Administrateur" ==> Export de la liste des tous les utilisateurs
     if ( utilisateurCourant.rol_id == 1 ) {
-        requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, uti_mail as Courriel,  
+        requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, lower(uti_mail) as Courriel,  
         replace(replace(uti_validated::text,'true','Validée'),'false','Non validée') as inscription, replace(replace(uti_publicontact::text,'true','Oui'),'false','Non') AutorisePublicationContact, 
-        uti_mailcontact MailContact, uti_sitewebcontact SiteInternetContact, uti_telephonecontact TelephoneContact, uti_adrcontact AdresseContact,
+        lower(uti_mailcontact) MailContact, uti_sitewebcontact SiteInternetContact, uti_telephonecontact TelephoneContact, uti_adrcontact AdresseContact,
         uti_compadrcontact ComplementAdresseContact, uti_com_cp_contact CodePostalContact, uti_com_codeinseecontact CodeInseeContact, com_art ArtCommune, com_libelle LibelleCommune, dep_num Departement
 
         from utilisateur  uti
@@ -78,7 +78,7 @@ router.get('/csv', async function (req, res) {
     // Je suis utilisateur "Partenaire" ==> Export de la liste des interventants
     // TODO : Refaire l'export pour les autre profils
     else {
-        requete =`SELECT uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, uti_mail as Courriel, 
+        requete =`SELECT uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, lower(uti_mail) as Courriel, 
         replace(replace(uti_validated::text,'true','Validée'),'false','Non validée') as inscription , stu.stu_libelle Statut_Utilisateur,
         str.str_libellecourt As Structure, uti.uti_structurelocale As Struture_Locale
         from utilisateur  uti
@@ -201,7 +201,7 @@ router.put('/:id', async function (req, res) {
     const requete = `UPDATE utilisateur 
         SET uti_nom = $1,
         uti_prenom = $2,
-        uti_mail = $3,
+        uti_mail = lower($3),
         uti_validated = $4,
         rol_id = $5,
         str_id = $6,

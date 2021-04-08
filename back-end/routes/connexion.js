@@ -74,7 +74,7 @@ router.post('/verify', async (req,res) => {
 
    
     // Vérifier si l'email est déjà utilisé en base.
-    const mailExistenceQuery = await pgPool.query(`SELECT uti_mail,uti_pwd, uti_tockenfranceconnect FROM utilisateur WHERE uti_mail='${user.uti_mail}'`).catch(err => {
+    const mailExistenceQuery = await pgPool.query(`SELECT lower(uti_mail) uti_mail,uti_pwd, uti_tockenfranceconnect FROM utilisateur WHERE lower(uti_mail)=lower('${user.uti_mail}')`).catch(err => {
         log.w(err)
         throw err
     })
@@ -98,8 +98,8 @@ router.post('/verify', async (req,res) => {
     }
 
     log.d('::verify - Mise à jour de l\'utilisateur existant', { insee: user.uti_com_codeinseecontact, mailcontact: user.uti_mailcontact })   
-    const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = $1, uti_nom = $2, uti_prenom = $3, uti_validated = true, \
-    uti_eaps = $4, uti_publicontact = $5, uti_mailcontact = $7, uti_sitewebcontact = $8, uti_adrcontact = $9, uti_compadrcontact = $10, uti_telephonecontact = $11,  uti_com_codeinseecontact = $12, uti_com_cp_contact = $13 WHERE uti_id = $6 RETURNING *", 
+    const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = lower($1), uti_nom = $2, uti_prenom = $3, uti_validated = true, \
+    uti_eaps = $4, uti_publicontact = $5, uti_mailcontact = lower($7), uti_sitewebcontact = $8, uti_adrcontact = $9, uti_compadrcontact = $10, uti_telephonecontact = $11,  uti_com_codeinseecontact = $12, uti_com_cp_contact = $13 WHERE uti_id = $6 RETURNING *", 
     [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.uti_mailcontact,user.uti_sitewebcontact,user.uti_adrcontact, user.uti_compadrcontact,user.uti_telephonecontact , user.uti_com_codeinseecontact, user.uti_com_cp_contact]).catch(err => {
         console.log(err)
         throw err
@@ -114,10 +114,10 @@ router.post('/verify', async (req,res) => {
             body: `<p>Bonjour,</p>
                 <p>Votre compte a bien été créé. <br/><br/>
                 Nous vous invitons à faire votre demande auprès de votre formateur Aisance Aquatique la demande d'activation de compte « Aisance Aquatique » .<br/>
-                Le site <a href="www.aisanceaquatique.fr">www.aisanceaquatique.fr</a> est à votre disposition pour toute information sur le programme Aisance Aquatique.<br/></p>`
+                Le site <a href="https://www.sports.gouv.fr/preventiondesnoyades">Prevention des noyades</a> est à votre disposition pour toute information sur le programme Aisance Aquatique.<br/></p>`
             })
         }
-        
+     
     user = formatUtilisateur(bddRes.rows[0])
     req.session.user = bddRes.rows[0]
     
@@ -154,7 +154,7 @@ router.put('/confirm-profil-infos', async (req,res) => {
     const candidate = user && user.password && await crypto.createHash('md5').update(user.password).digest('hex')
     log.i('::confirm-profil-infos - In', {mail , candidate, tokenFc})
 
-    const authConfirmationQuery = await pgPool.query(`SELECT * FROM utilisateur WHERE uti_mail='${mail}'`).catch(err => {
+    const authConfirmationQuery = await pgPool.query(`SELECT * FROM utilisateur WHERE lower(uti_mail)=lower('${mail}')`).catch(err => {
         log.w('::confirm-profil-infos - Erreur pendant la suppression des users.', err)
         throw err
     })
@@ -171,7 +171,7 @@ router.put('/confirm-profil-infos', async (req,res) => {
         throw err
     })
     
-    const bddUpdate =  await pgPool.query("UPDATE utilisateur SET uti_tockenfranceconnect = $1, uti_mail = $2, uti_prenom = $3, uti_nom = $4 \
+    const bddUpdate =  await pgPool.query("UPDATE utilisateur SET uti_tockenfranceconnect = $1, uti_mail = lower($2), uti_prenom = $3, uti_nom = $4 \
     WHERE uti_id = $5 RETURNING *", 
     [tokenFc, mail, user.prenom, user.nom, existingUser.uti_id]).catch(err => {
         log.w('::confirm-profil-infos - Erreur pendant l\'update des infos du user', err)
@@ -197,7 +197,7 @@ router.post('/create-account-pwd', async (req, res) => {
     let bddRes
     let confirmInscription
     // Vérifier si l'email est déjà utilisé en base.
-    const mailExistenceQuery = await pgPool.query(`SELECT uti_id, uti_mail, uti_tockenfranceconnect FROM utilisateur WHERE uti_mail='${formatedMail}'`).catch(err => {
+    const mailExistenceQuery = await pgPool.query(`SELECT uti_id, lower(uti_mail) uti_mail, uti_tockenfranceconnect FROM utilisateur WHERE lower(uti_mail)=lower('${formatedMail}')`).catch(err => {
         log.w(err)
         throw err
     })
@@ -211,6 +211,7 @@ router.post('/create-account-pwd', async (req, res) => {
                     log.w(err)
                     throw err
                 })
+            log.d(mailExistenceQuery.rows[0])
             await sendValidationMail({
                 email: mailExistenceQuery.rows[0].uti_mail,
                 pwd: crypted,
@@ -231,7 +232,7 @@ router.post('/create-account-pwd', async (req, res) => {
         confirmInscription = true    
         bddRes = await pgPool.query(
             'INSERT INTO utilisateur(rol_id, stu_id, uti_mail, uti_validated, uti_pwd)\
-            VALUES($1, $2, $3, $4, $5) RETURNING *'
+            VALUES($1, $2, lower($3), $4, $5) RETURNING *'
             , [5, 1, formatedMail, false, crypted ]
           ).catch(err => {
             log.w(err)
@@ -276,13 +277,13 @@ router.put('/edit-mon-compte/:id', async function (req, res) {
         ;`    
     */
         const requete = `UPDATE utilisateur SET  
-                        uti_mail = $1, 
+                        uti_mail = lower($1), 
                         uti_nom = $2, 
                         uti_prenom = $3, 
                         uti_validated = true, 
                         uti_eaps = $4, 
                         uti_publicontact = $5, 
-                        uti_mailcontact = $7, 
+                        uti_mailcontact = lower($7), 
                         uti_sitewebcontact = $8, 
                         uti_adrcontact = $9, 
                         uti_compadrcontact = $10, 

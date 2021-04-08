@@ -23,15 +23,52 @@
           />
         <b-form-invalid-feedback id="emailFeedback">Le courriel est obligatoire et doit être valide.</b-form-invalid-feedback>
       </b-form-group>
-
-
-        <b-form-group label="Prénom :" >
-          <b-form-input type="text" v-model="user.prenom" :disabled="isUserRegisteredViaPwd" />
+        <b-form-group 
+          label="Prénom :"
+          id="prenomInputGroup"
+          label-for="prenomInput"
+          required
+          :disabled="isUserRegisteredViaPwd"
+          >
+          <b-form-input
+            id="prenomInput"
+            type="text"
+            v-model="user.prenom"
+            name="prenom"
+            key="prenom-input"
+            v-validate="{ required: true }"
+            aria-describedby="prenomFeedback"
+            placeholder="Prénom"
+            :disabled="isUserRegisteredViaPwd"
+            :state="validateState('prenom')"
+          />
+           <b-form-invalid-feedback id="prenomFeedback"
+            >Le prénom est obligatoire.</b-form-invalid-feedback
+          >
         </b-form-group>
-        <b-form-group label="Nom :">
-          <b-form-input type="text" v-model="user.nom" :disabled="isUserRegisteredViaPwd" />
+        <b-form-group 
+          label="Nom :"
+          id="nomInputGroup"
+          label-for="nomInput"
+          required
+          :disabled="isUserRegisteredViaPwd"
+          >
+          <b-form-input
+            id="nomInput"
+            type="text"
+            v-model="user.nom"
+            name="nom"
+            key="nom-input"
+            v-validate="{ required: true}"
+            aria-describedby="nomFeedback"
+            placeholder="Nom"
+            :disabled="isUserRegisteredViaPwd"
+            :state="validateState('nom')"
+          />
+           <b-form-invalid-feedback id="nomFeedback"
+            >Le nom est obligatoire.</b-form-invalid-feedback
+          >
         </b-form-group>
-
         <b-form-group 
           label="Numéro de carte professionnelle :"
           id="eapsInputGroup"

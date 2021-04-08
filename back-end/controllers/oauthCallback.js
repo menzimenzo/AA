@@ -85,7 +85,7 @@ module.exports = async (req, res, next) => {
            
             const { rows } = await pgPool.query(
               'INSERT INTO utilisateur(rol_id,stu_id, uti_mail, uti_nom, uti_prenom,\
-                uti_tockenfranceconnect) VALUES($1, $2, $3, $4, upper($5), $6) RETURNING *'
+                uti_tockenfranceconnect) VALUES($1, $2, lower($3), $4, upper($5), $6) RETURNING *'
               , [ 5, 1, userInfo.email, nom, userInfo.given_name, userInfo.sub]
             ).catch(err => {
               console.log(err)
