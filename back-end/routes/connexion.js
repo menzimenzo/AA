@@ -74,7 +74,7 @@ router.post('/verify', async (req,res) => {
 
    
     // Vérifier si l'email est déjà utilisé en base.
-    const mailExistenceQuery = await pgPool.query(`SELECT lower(uti_mail),uti_pwd, uti_tockenfranceconnect FROM utilisateur WHERE lower(uti_mail)=lower('${user.uti_mail}')`).catch(err => {
+    const mailExistenceQuery = await pgPool.query(`SELECT lower(uti_mail) uti_mail,uti_pwd, uti_tockenfranceconnect FROM utilisateur WHERE lower(uti_mail)=lower('${user.uti_mail}')`).catch(err => {
         log.w(err)
         throw err
     })
@@ -114,10 +114,10 @@ router.post('/verify', async (req,res) => {
             body: `<p>Bonjour,</p>
                 <p>Votre compte a bien été créé. <br/><br/>
                 Nous vous invitons à faire votre demande auprès de votre formateur Aisance Aquatique la demande d'activation de compte « Aisance Aquatique » .<br/>
-                Le site <a href="www.aisanceaquatique.fr">www.aisanceaquatique.fr</a> est à votre disposition pour toute information sur le programme Aisance Aquatique.<br/></p>`
+                Le site <a href="https://www.sports.gouv.fr/preventiondesnoyades">Prevention des noyades</a> est à votre disposition pour toute information sur le programme Aisance Aquatique.<br/></p>`
             })
         }
-        
+     
     user = formatUtilisateur(bddRes.rows[0])
     req.session.user = bddRes.rows[0]
     
@@ -197,7 +197,7 @@ router.post('/create-account-pwd', async (req, res) => {
     let bddRes
     let confirmInscription
     // Vérifier si l'email est déjà utilisé en base.
-    const mailExistenceQuery = await pgPool.query(`SELECT uti_id, lower(uti_mail), uti_tockenfranceconnect FROM utilisateur WHERE lower(uti_mail)=lower('${formatedMail}')`).catch(err => {
+    const mailExistenceQuery = await pgPool.query(`SELECT uti_id, lower(uti_mail) uti_mail, uti_tockenfranceconnect FROM utilisateur WHERE lower(uti_mail)=lower('${formatedMail}')`).catch(err => {
         log.w(err)
         throw err
     })
@@ -211,6 +211,7 @@ router.post('/create-account-pwd', async (req, res) => {
                     log.w(err)
                     throw err
                 })
+            log.d(mailExistenceQuery.rows[0])
             await sendValidationMail({
                 email: mailExistenceQuery.rows[0].uti_mail,
                 pwd: crypted,
