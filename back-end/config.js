@@ -15,11 +15,26 @@ module.exports = {
   },
   sessionSecret: "vB2P+i@/Uz>+yK%@LK@g9Vb93gZ^c<",
   pathAttestation: process.env.PATH_PDF_ATTESTATION || "../../tmp/",
+  // Ce paramètre permet de déterminer l'emplacement des logs trace de supervision en cas d'erreur
+  // Code 1 sur erreur 400
+  // Code 0 : tout va bien : http 200
+  
   PATH_SUPERVISION_BATCH: process.env.PATH_SUPERVISION_BATCH || "/var/tmp/",
   MAIL_URL: process.env.MAIL_URL,
+  
+  // Ce préfix est utilisé pour pour localiser l'api au niveau du BackEnd
   URL_PREFIX: process.env.URL_PREFIX || '/api',
+
   SENDER_EMAIL: process.env.SENDER_EMAIL || 'nepasrepondreaaq@sports.gouv.fr',
+  // FRONT DOMAIN est utilisé pour les liens dans les mails
   FRONT_DOMAIN: process.env.FRONT_DOMAIN || 'localhost', 
+  // Données de paramétrage pour accéder au serveur FTP ODS (Open Data Soft)
+  // Utilisé pour le transfert du csv des utilisateurs pour publication sur carte
+  FTP_ODS_HOTE: process.env.FTP_ODS_HOTE || 'fr.ftp.opendatasoft.com', 
+  FTP_ODS_USER: process.env.FTP_ODS_USER || 'sgsocialgouv', 
+  FTP_ODS_PASS: process.env.FTP_ODS_PASS || 'mR2NC5lZHHkXwjn2k9bvXcnK', 
+  FTP_ODS_FILE: process.env.FTP_ODS_FILE || 'AisanceAquatiqueUtilisateurs.csv', 
+  FTP_ODS_DIR: process.env.FTP_ODS_DIR || 'AisanceAquatique',
   // FRANCE CONNECT
   franceConnect: {
     "FC_URL": process.env.FC_URL || "https://fcp.integ01.dev-franceconnect.fr",
