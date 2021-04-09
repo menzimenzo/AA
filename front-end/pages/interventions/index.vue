@@ -83,13 +83,7 @@
                       </b-btn>
                      <editable
                         :columns="headers"
-<<<<<<< HEAD
-                        :data="interventions"
-||||||| parent of 3656b7e... manque que le PUT
-                        :data="this.$store.state.interventions"
-=======
                         :data="this.interventionsToDisplay"
->>>>>>> 3656b7e... manque que le PUT
                         :removable="false"
                         :creable="false"
                         :editable="false"
@@ -200,15 +194,8 @@
                             >
                               <i class="material-icons">delete_forever</i>
                             </b-btn>
-<<<<<<< HEAD
-                          </div> </template>
-||||||| parent of 3656b7e... manque que le PUT
-                          </div> </template
-                        >
-=======
                           </div>
                         </template>
->>>>>>> 3656b7e... manque que le PUT
                       </editable>
                       <b-btn
                         @click="editPiscine(null)"
@@ -457,49 +444,6 @@ export default {
         this.loading = false;
       }
     },
-<<<<<<< HEAD
-   deletePiscine: function (piscine) { 
-        this.loading = true;
-        const url = process.env.API_URL + "/piscine/delete/";
-        piscine.uti_id = this.utilisateurCourant.id
-       return this.$axios.$post(url, { piscine }).then((response) => {
-            this.$store.dispatch("get_mesPiscines");
-            this.loading = false;
-            this.$toast.success(`#${piscine.nom} a bien été supprimée de vos piscines favorites`,
-              {}
-            );
-          })
-          .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la suppresion de la piscine favorite",
-              error
-            );
-            this.loading = false;
-          });
-        
-  
-||||||| parent of 3656b7e... manque que le PUT
-   deletePiscine: function (piscine) { 
-        this.loading = true;
-        const url = process.env.API_URL + "/piscine/delete/";
-        piscine.uti_id = this.$store.state.utilisateurCourant.id
-       return this.$axios.$post(url, { piscine }).then((response) => {
-            this.$store.dispatch("get_mesPiscines");
-            this.loading = false;
-            this.$toast.success(`#${piscine.nom} a bien été supprimée de vos piscines favorites`,
-              {}
-            );
-          })
-          .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la suppresion de la piscine favorite",
-              error
-            );
-            this.loading = false;
-          });
-        
-  
-=======
     deletePiscine: function (piscine) {
       this.loading = true;
       const url = process.env.API_URL + "/piscine/delete/";
@@ -521,7 +465,6 @@ export default {
           );
           this.loading = false;
         });
->>>>>>> 3656b7e... manque que le PUT
     },
     downloadPdf: function (id) {
       this.$axios({

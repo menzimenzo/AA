@@ -30,17 +30,6 @@
       </div>
     </b-row>
     <b-row>
-<<<<<<< HEAD
-<<<<<<< HEAD
-          <editable
-            :columns="headersEncadrants"
-            :data="listeMaitreNageur"
-            :removable="false"
-            :creable="false"
-            :editable="false"
-            :noDataLabel="''"
-            tableMaxHeight="none"
-||||||| parent of 551b40d... POST intervention presque bon
           <editable
             :columns="headersEncadrants"
             :data="filteredMN"
@@ -49,17 +38,6 @@
             :editable="false"
             :noDataLabel="''"
             tableMaxHeight="none"
-=======
-||||||| parent of 3656b7e... manque que le PUT
-=======
-      <editable
-        :columns="headersEncadrants"
-        :data="this.formIntervention.utilisateur"
-        :removable="false"
-        :creable="false"
-        :editable="false"
-        :noDataLabel="''"
-        tableMaxHeight="none"
         >
         <template slot-scope="props" slot="actions">
           <b-btn
@@ -74,12 +52,10 @@
       </editable>
     </b-row>
     <b-row>
->>>>>>> 3656b7e... manque que le PUT
       <div class="mb-3">
         <b-form inline>
           <label for="nameFilter"
             >Saissisez le début du nom d'un intervenant pour l'ajouter :</label
->>>>>>> 551b40d... POST intervention presque bon
           >
           <b-input
             class="ml-2"
@@ -88,41 +64,28 @@
             placeholder="Dupond"
           />
         </b-form>
-      </div>
-    </b-row>
-    <b-row>
-<<<<<<< HEAD
-      <div
-        class="input-group-display"
-        v-if="utilisateurCourant.roleId == 3"
-||||||| parent of 551b40d... POST intervention presque bon
-      <div
-        class="input-group-display"
-        v-if="this.$store.state.utilisateurCourant.roleId == 3"
-=======
-      <editable
-        :columns="headersEncadrants"
-        :data="filteredMN"
-        :removable="false"
-        :creable="false"
-        :editable="false"
-        :noDataLabel="''"
-        tableMaxHeight="none"
->>>>>>> 551b40d... POST intervention presque bon
-      >
+         <editable
+            :columns="headersEncadrants"
+            :data="listeMaitreNageur"
+            :removable="false"
+            :creable="false"
+            :editable="false"
+            :noDataLabel="''"
+            tableMaxHeight="none"
+        >
         <template slot-scope="props" slot="actions">
           <b-btn
-            @click="addMN(props.data)"
+            @click="deleteMN(props.data)"
             size="sm"
             class="mr-1"
             variant="primary"
           >
-            <i class="material-icons">add</i>
+            <i class="material-icons">delete</i>
           </b-btn>
         </template>
       </editable>
+      </div>
     </b-row>
-
     <b-row>
       <div class="input-group-display">
         <span>Date d'intervention * :</span>
@@ -304,19 +267,6 @@ export default {
       randomId: "popover-" + Math.floor(Math.random() * 100000),
     };
   },
-  computed: {
-    ...mapState(["utilisateurCourant","mesPiscines"]),
-    filteredMN: function() {
-        console.log(this.listeMaitreNageur)
-        return this.listeMaitreNageur
-        /*return this.listeMaitreNageur.filter(mn => {
-        // Suppression des interventions sans commentaire
-        let isMatch = mn.nom 
-        console.log(isMatch)
-        return isMatch;
-      })
-    }*/
-  },
   methods: {
     addMN: function (mn) {
       let absent = true;
@@ -357,30 +307,12 @@ export default {
       this.erreurformulaire = [];
       var formOK = true;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-      // s le profil est différent de partenaire, on force le maitre nageur avec l'utilisateur courant
-      if (this.utilisateurCourant.roleId != 5) {
-        console.log("utilisateur de type structure");
-        this.formIntervention.maitreNageur = this.utilisateurCourant;
-||||||| parent of 551b40d... POST intervention presque bon
-      // s le profil est différent de partenaire, on force le maitre nageur avec l'utilisateur courant
-      if (this.$store.state.utilisateurCourant.roleId != 5) {
-        console.log("utilisateur de type structure");
-        this.formIntervention.maitreNageur = this.$store.state.utilisateurCourant;
-=======
-      if (!this.formIntervention.utilisateurs) {
-||||||| parent of 3656b7e... manque que le PUT
-      if (!this.formIntervention.utilisateurs) {
-=======
       if (
         !this.formIntervention.utilisateur ||
         this.formIntervention.length == 0
       ) {
->>>>>>> 3656b7e... manque que le PUT
         this.erreurformulaire.push("Les intervenants");
         formOK = false;
->>>>>>> 551b40d... POST intervention presque bon
       }
       if (!this.formIntervention.strId) {
         this.erreurformulaire.push("La structure");
