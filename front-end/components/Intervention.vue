@@ -60,7 +60,7 @@
         :editable="false"
         :noDataLabel="''"
         tableMaxHeight="none"
-      >
+        >
         <template slot-scope="props" slot="actions">
           <b-btn
             @click="deleteMN(props.data)"
@@ -306,7 +306,7 @@ export default {
   },
   computed: {
     ...mapState(["utilisateurCourant","mesPiscines"]),
-    /*filteredMN: function() {
+    filteredMN: function() {
         console.log(this.listeMaitreNageur)
         return this.listeMaitreNageur
         /*return this.listeMaitreNageur.filter(mn => {
