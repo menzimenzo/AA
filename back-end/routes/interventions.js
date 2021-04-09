@@ -3,10 +3,14 @@ const router = express.Router();
 const pgPool = require('../pgpool').getPool();
 const stringify = require('csv-stringify')
 const myPdf = require('../utils/pdf')
+const { getIntervention } = require('../controllers');
+const { getUtilisateursFromIntervention } = require('../controllers');
+//const formatIntervention = require('../utils/utils')
 var moment = require('moment');
 moment().format();
 
-const logger = require('../utils/logger')
+const logger = require('../utils/logger');
+
 const log = logger(module.filename)
 
 const formatIntervention = intervention => {
@@ -140,55 +144,62 @@ router.get('/csv/:utilisateurId', async function (req, res) {
 
 router.get('/:id', async function (req, res) {
     log.i('::get - In')
-    if (!req.session.user) {
-        log.w('::get - User manquant.')
-        return res.sendStatus(403)
-    }
     const id = req.params.id
     const user = req.session.user
-    const utilisateurId = user.uti_id
-
-    // Where condition is here for security reasons.
-    var whereClause = ""
-    if (user.rol_id == 3 || user.rol_id == 4) {
-        whereClause += ` and uti.uti_id=${utilisateurId} `
+    const params = {
+        id: id,
+        user: user
     }
-
-    const requete = `SELECT int.*,pis.*, str.str_libellecourt from intervention int \
-    LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-    LEFT JOIN structure str on str.str_id = int.str_id \
-    LEFT JOIN uti_int ui on ui.int_id = int.int_id \
-    LEFT JOIN utilisateur uti on ui.uti_id = uti.uti_id \
-    where int.int_id=${id} ${whereClause} order by int_id asc`;
-    log.d('::get - récuperation via la requête.', { requete });
-
-    (async () => {
-        try {
-            let result = await pgPool.query(requete)
-            let intervention = result.rows.map(formatIntervention);
-            for (const [key, int] of Object.entries(intervention)) {
-                log.i('::get2 - In' + key)
-                let secondeRequete = `SELECT uti.uti_id AS id, uti.uti_nom AS nom, uti.uti_prenom AS prenom, uti.uti_mail AS mail
-                 from utilisateur uti \
-                LEFT JOIN uti_int ui on uti.uti_id = ui.uti_id \
-                LEFT JOIN intervention int on int.int_id = ui.int_id \
-                WHERE int.int_id = ${int.id}`
-
-                let result2 = await pgPool.query(secondeRequete)
-                log.i('::get2 - Done')
-                intervention[key].utilisateur = result2.rows;
-            }      
-            res.json({ intervention : intervention[0]});
-            //res.json({ intervention });
-        }
-        catch (err) {
-            throw err
-        }
-    })().catch(err => {
-        log.w('::get - Erreur survenue lors de la récupération', err.stack)
-        return res.status(400).json('erreur lors de la récupération de l\'intervention ' + id)
-    }
-    )
+    inter = await getIntervention(params)
+    return res.status('200').json({ intervention: inter[0] })
+    /* if (!req.session.user) {
+         log.w('::get - User manquant.')
+         return res.sendStatus(403)
+     }
+     const utilisateurId = user.uti_id
+ 
+     // Where condition is here for security reasons.
+     var whereClause = ""
+     if (user.rol_id == 3 || user.rol_id == 4) {
+         whereClause += ` and uti.uti_id=${utilisateurId} `
+     }
+ 
+     const requete = `SELECT int.*,pis.*, str.str_libellecourt from intervention int \
+     LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
+     LEFT JOIN structure str on str.str_id = int.str_id \
+     LEFT JOIN uti_int ui on ui.int_id = int.int_id \
+     LEFT JOIN utilisateur uti on ui.uti_id = uti.uti_id \
+     where int.int_id=${id} ${whereClause} order by int_id asc`;
+     log.d('::get - récuperation via la requête.', { requete });
+ 
+     (async () => {
+         try {
+             let result = await pgPool.query(requete)
+             let intervention = result.rows.map(formatIntervention);
+             for (const [key, int] of Object.entries(intervention)) {
+                 log.i('::get2 - In' + key)
+                 let secondeRequete = `SELECT uti.uti_id AS id, uti.uti_nom AS nom, uti.uti_prenom AS prenom, uti.uti_mail AS mail
+                  from utilisateur uti \
+                 LEFT JOIN uti_int ui on uti.uti_id = ui.uti_id \
+                 LEFT JOIN intervention int on int.int_id = ui.int_id \
+                 WHERE int.int_id = ${int.id}`
+ 
+                 let result2 = await pgPool.query(secondeRequete)
+                 log.i('::get2 - Done')
+                 intervention[key].utilisateur = result2.rows;
+             }
+             console.log(intervention[0])
+             res.json({ intervention: intervention[0] });
+             //res.json({ intervention });
+         }
+         catch (err) {
+             throw err
+         }
+     })().catch(err => {
+         log.w('::get - Erreur survenue lors de la récupération', err.stack)
+         return res.status(400).json('erreur lors de la récupération de l\'intervention ' + id)
+     }
+     )*/
 });
 
 router.get('/', async function (req, res) {
@@ -202,12 +213,7 @@ router.get('/', async function (req, res) {
     const utilisateurId = user.uti_id
     var whereClause = ""
 
-    // Utilisateur est partenaire => intervention de la structure
-    //if(user.pro_id == 2){
-    //whereClause += `LEFT JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id where utilisateur.str_id=${user.str_id} `
-    //  whereClause += `LEFT JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id  `
-    // Utilisateur est intervenant => ses interventions
-    //} 
+
     if (user.rol_id == 3 || user.rol_id == 4) {
         whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
          LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
@@ -234,16 +240,11 @@ router.get('/', async function (req, res) {
             let interventions = result.rows.map(formatIntervention);
 
             for (const [key, intervention] of Object.entries(interventions)) {
-                log.i('::list2 - In - ' + key)
-                let secondeRequete = `SELECT uti.uti_id AS id, uti.uti_nom AS nom, uti.uti_prenom AS prenom, uti.uti_mail AS mail
-                 from utilisateur uti \
-                LEFT JOIN uti_int ui on uti.uti_id = ui.uti_id \
-                LEFT JOIN intervention int on int.int_id = ui.int_id \
-                WHERE int.int_id = ${intervention.id}`
+                await Promise.all([getUtilisateursFromIntervention(intervention.id)]).then(values => {
+                    interventions[key].utilisateur = values[0];
+                    //log.d(interventions[key])
+                })
 
-                let result2 = await pgPool.query(secondeRequete)
-                log.i('::list2 - Done - ' + key)
-                interventions[key].utilisateur = result2.rows;
             }
             res.json({ interventions });
         }
@@ -261,70 +262,55 @@ router.get('/', async function (req, res) {
 
 router.put('/:id', async function (req, res) {
     const intervention = req.body.intervention
-
+    const user = req.session.user
     const id = req.params.id
     log.i('::update - In', { id })
+    console.log(intervention)
+    let { strId, nbEnfants, piscine, dateIntervention,
+        utilisateur } = intervention
 
-    let { nbEnfants, commune, dateIntervention,
-        commentaire, cp, utilisateurId, siteintervention,
-        nbmoinssix, nbsixhuit, nbneufdix, nbplusdix } = intervention
-    /*
-        if (nbGarcons == '') { nbGarcons = null }
-        if (nbFilles == '') { nbFilles = null }
-        if (nbmoinssix == '') { nbmoinssix = null }
-        if (nbsixhuit == '') { nbsixhuit = null }
-        if (nbneufdix == '') { nbneufdix = null }
-        if (nbplusdix == '') { nbplusdix = null }
-    */
     //insert dans la table intervention
     const requete = `UPDATE intervention 
-        SET cai_id = $1,
-        blo_id = $2,
-        int_com_codeinsee = $3,
-        int_com_codepostal = $4,
-        int_com_libelle = $5,
-        int_nombreenfant = $6,
-        int_dateintervention = $7,
-        int_datemaj = now(),
-        int_commentaire = $8,
-        int_dep_num = $9,
-        int_reg_num = $10,
-        int_siteintervention = $11
+        SET str_id= $1,
+        int_nombreenfant= $2,
+        pis_id = $3,
+        int_dateintervention = $4,
+        int_datemaj = now()
         WHERE int_id = ${id}
         RETURNING *
         ;`
 
     log.d('::update - requete', { requete })
-    pgPool.query(requete, [cai,
-        blocId,
-        commune.cpi_codeinsee,
-        cp,
-        commune.com_libellemaj,
+    pgPool.query(requete, [strId,
         nbEnfants,
-        dateIntervention,
-        commentaire,
-        commune.dep_num,
-        commune.reg_num,
-        siteintervention], (err, result) => {
-            if (err) {
-                log.w('::update - erreur lors de la récupération', { requete, erreur: err.stack })
-                return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
-            }
-            else {
-                log.i('::update - Done')
-                // generation du pdf (synchrone)
-                if (blocId == 3) {
-                    myPdf.generate(id, nbEnfants, dateIntervention)
-                }
-                return res.status(200).json({ intervention: result.rows.map(formatIntervention)[0] });
+        piscine.id,
+        dateIntervention
+    ], (err, result) => {
+        if (err) {
+            log.w('::update - erreur lors de la sauvegarde', { requete, erreur: err.stack })
+            return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
+        }
+        else {
+            log.i('::update - Done')
+            // generation du pdf (synchrone)
 
+            console.log(result.rows.map(formatIntervention)[0])
+            //return res.status(200).json({ intervention: result.rows.map(formatIntervention)[0] });
+            const params = {
+                id: id,
+                user: user
             }
-        })
+            let inter = getIntervention(params)
+            return res.status(200).json({ intervention: inter });
+
+        }
+    })
 })
 
 router.post('/', async function (req, res) {
     log.i('::post - In')
     const intervention = req.body.intervention
+
 
     //insert dans la table intervention
     const requete = `insert into intervention 
@@ -333,6 +319,7 @@ router.post('/', async function (req, res) {
 
 
     log.d('::post - requete', { requete });
+
 
     await pgPool.query(requete, [intervention.piscine.id,
     intervention.strId,
@@ -345,46 +332,57 @@ router.post('/', async function (req, res) {
             return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
         }
         else {
-            intervention.utilisateur.forEach(async us => {
+            intervention.utilisateur.forEach(us => {
                 const insert = `insert into uti_int(uti_id,int_id) values ($1,${result.rows[0].int_id})`
                 //console.log('REQ:'+insert+ 'US : '+us.id)
-                await pgPool.query(insert, [us.id])
+                pgPool.query(insert, [us.id])
+                console.log('fin insertion users')
+                return result.rows[0].int_id
             })
-            const select = `SELECT int.*,pis.*, str.str_libellecourt from intervention int \
-    LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-    LEFT JOIN structure str on str.str_id = int.str_id \
-    LEFT JOIN uti_int ui on ui.int_id = int.int_id \
-    LEFT JOIN utilisateur uti on ui.uti_id = uti.uti_id \
-    where int.int_id=${result.rows[0].int_id} order by int_id asc`;
-            log.d('::get - récuperation intervention pour formattage via la requête.', { select });
-
-            (async () => {
-                try {
-                    let resultat = await pgPool.query(select)
-                    let intervention = resultat.rows.map(formatIntervention);
-                    for (const [key, int] of Object.entries(intervention)) {
-                        log.i('::get2 - In' + key)
-                        let secondeRequete = `SELECT uti.uti_id AS id, uti.uti_nom AS nom, uti.uti_prenom AS prenom,uti.uti_mail AS mail
-                 from utilisateur uti \
-                LEFT JOIN uti_int ui on uti.uti_id = ui.uti_id \
-                LEFT JOIN intervention int on int.int_id = ui.int_id \
-                WHERE int.int_id = ${int.id}`
-
-                        let result2 = await pgPool.query(secondeRequete)
-                        log.i('::get2 - Done')
-                        intervention[key].utilisateur = result2.rows;
-                    }
-                    res.status(200).json({ intervention :intervention[0]});
-                }
-                catch (err) {
-                    throw err
-                }
-            })().catch(err => {
-                log.w('::get - Erreur survenue lors de la récupération', err.stack)
-                return res.status(400).json('erreur lors de la récupération de l\'intervention ' + id)
+            const user = req.session.user
+            const params = {
+                id: result.rows[0].int_id,
+                user: user
             }
-            )
+            let inter = getIntervention(params)
+            res.status(200).json({ intervention: inter })
         }
     })
 })
-        module.exports = router;
+
+/*const select = `SELECT int.*,pis.*, str.str_libellecourt from intervention int \
+LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
+LEFT JOIN structure str on str.str_id = int.str_id \
+LEFT JOIN uti_int ui on ui.int_id = int.int_id \
+LEFT JOIN utilisateur uti on ui.uti_id = uti.uti_id \
+where int.int_id=${result.rows[0].int_id} order by int_id asc`;
+log.d('::get - récuperation intervention pour formattage via la requête.', { select });
+
+(async () => {
+    try {
+        let resultat = await pgPool.query(select)
+        let intervention = resultat.rows.map(formatIntervention);
+        for (const [key, int] of Object.entries(intervention)) {
+            log.i('::get2 - In' + key)
+            let secondeRequete = `SELECT uti.uti_id AS id, uti.uti_nom AS nom, uti.uti_prenom AS prenom,uti.uti_mail AS mail
+     from utilisateur uti \
+    LEFT JOIN uti_int ui on uti.uti_id = ui.uti_id \
+    LEFT JOIN intervention int on int.int_id = ui.int_id \
+    WHERE int.int_id = ${int.id}`
+
+            let result2 = await pgPool.query(secondeRequete)
+            log.i('::get2 - Done')
+            intervention[key].utilisateur = result2.rows;
+        }
+        res.status(200).json({ intervention: intervention[0] });
+    }
+    catch (err) {
+        throw err
+    }
+})().catch(err => {
+    log.w('::get - Erreur survenue lors de la récupération', err.stack)
+    return res.status(400).json('erreur lors de la récupération de l\'intervention ' + id)
+}
+)*/
+
+module.exports = router;

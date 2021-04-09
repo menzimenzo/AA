@@ -453,6 +453,8 @@ export default {
   },
   watch: {
     intervention(intervention) {
+      console.log('avant')
+      console.log(intervention)
       let formIntervention = JSON.parse(
         JSON.stringify(
           Object.assign(
@@ -473,6 +475,8 @@ export default {
       formIntervention.dateIntervention = new Date(
         formIntervention.dateIntervention
       );
+      console.log('apres')
+      console.log(formIntervention)
       Vue.set(this, "formIntervention", loadFormIntervention(intervention));
     },
     "formIntervention.cp"(cp) {
@@ -481,7 +485,7 @@ export default {
   },
   async mounted() {
     // si le user courant est de profil 3 ou 4 on l'ajoute et que l'intervention courrante est nulle
-    if (
+    /*if (
       (this.$store.state.utilisateurCourant.profilId == 3 ||
         this.$store.state.utilisateurCourant.profilId == 4) &&
       !this.$store.state.interventionCourrante.id
@@ -490,7 +494,7 @@ export default {
         this.$store.state.utilisateurCourant
       );
 
-    }
+    }*/
     const url = process.env.API_URL + "/user/encadrant";
     console.info(url);
     await this.$axios({
