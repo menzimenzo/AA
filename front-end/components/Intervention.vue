@@ -80,7 +80,7 @@
             class="mr-1"
             variant="primary"
           >
-            <i class="material-icons">delete</i>
+            <i class="material-icons">add</i>
           </b-btn>
         </template>
       </editable>

@@ -345,7 +345,8 @@ router.post('/', async function (req, res) {
                 user: user
             }
             let inter = await getIntervention(params)
-            res.status(200).json({ intervention: inter })
+            console.log(inter[0])
+            res.status(200).json({ intervention: inter[0] })
         }
     })
 })
