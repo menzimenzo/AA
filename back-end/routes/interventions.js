@@ -326,7 +326,7 @@ router.post('/', async function (req, res) {
     intervention.nbEnfants,
     intervention.dateIntervention,
     new Date().toISOString(),
-    new Date().toISOString()], (err, result) => {
+    new Date().toISOString()], async (err, result) => {
         if (err) {
             log.w('::post - erreur lors de l\'insertion dans la table des interventions', { requete, erreur: err.stack })
             return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
@@ -344,7 +344,7 @@ router.post('/', async function (req, res) {
                 id: result.rows[0].int_id,
                 user: user
             }
-            let inter = getIntervention(params)
+            let inter = await getIntervention(params)
             res.status(200).json({ intervention: inter })
         }
     })

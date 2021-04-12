@@ -32,7 +32,7 @@
     <b-row>
           <editable
             :columns="headersEncadrants"
-            :data="filteredMN"
+            :data="formIntervention.utilisateur"
             :removable="false"
             :creable="false"
             :editable="false"
@@ -66,7 +66,7 @@
         </b-form>
          <editable
             :columns="headersEncadrants"
-            :data="listeMaitreNageur"
+            :data="filteredMN"
             :removable="false"
             :creable="false"
             :editable="false"
@@ -75,7 +75,7 @@
         >
         <template slot-scope="props" slot="actions">
           <b-btn
-            @click="deleteMN(props.data)"
+            @click="addMN(props.data)"
             size="sm"
             class="mr-1"
             variant="primary"
@@ -107,7 +107,7 @@
         >
           <option :value="null">-- Choix de la Piscine --</option>
           <option
-            v-for="piscine in mesPiscines"
+            v-for="piscine in this.$store.state.mesPiscines"
             :key="piscine.id"
             :value="piscine.id"
           >
@@ -225,7 +225,7 @@ export default {
         return this.listeMaitreNageur.filter((mn) => {
           // Suppression des interventions sans commentaire
           let isMatch = mn.nom;
-          if (this.nameFilter) {
+          if (this.nameFilter.length > 2) {
             isMatch =
               isMatch &&
               mn.nom.toLowerCase().indexOf(this.nameFilter.toLowerCase()) > -1;
