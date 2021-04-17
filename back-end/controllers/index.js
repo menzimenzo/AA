@@ -3,5 +3,6 @@ module.exports = {
     pwdLogin: require('./pwdLogin'),
     generateForgotPasswordEncryption: require('./generateForgotPasswordEncryption'),
     getIntervention: require('./getIntervention'),
-    getUtilisateursFromIntervention: require('./getUtilisateursFromIntervention')
+    getUtilisateursFromIntervention: require('./getUtilisateursFromIntervention'),
+    getEnfantsFromIntervention: require('./getEnfantsFromIntervention')
 }

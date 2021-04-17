@@ -18,7 +18,6 @@ const formatIntervention = intervention => {
         id: intervention.int_id,
         nbEnfants: intervention.int_nombreenfant,
         strId: intervention.str_id,
-        pisId: intervention.pis_id,
         piscine: {
             nom: intervention.pis_nom,
             id: intervention.pis_id,
@@ -28,8 +27,9 @@ const formatIntervention = intervention => {
             x: intervention.pis_x,
             y: intervention.pis_y
         },
+        dateDebutIntervention: new Date(intervention.int_datedebutintervention),
+        dateFinIntervention: new Date(intervention.int_datefinintervention),
         strNom: intervention.str_libellecourt,
-        dateIntervention: new Date(intervention.int_dateintervention),
         dateCreation: new Date(intervention.int_datecreation),
         dateMaj: intervention.int_datemaj
     }
@@ -152,54 +152,6 @@ router.get('/:id', async function (req, res) {
     }
     inter = await getIntervention(params)
     return res.status('200').json({ intervention: inter[0] })
-    /* if (!req.session.user) {
-         log.w('::get - User manquant.')
-         return res.sendStatus(403)
-     }
-     const utilisateurId = user.uti_id
- 
-     // Where condition is here for security reasons.
-     var whereClause = ""
-     if (user.rol_id == 3 || user.rol_id == 4) {
-         whereClause += ` and uti.uti_id=${utilisateurId} `
-     }
- 
-     const requete = `SELECT int.*,pis.*, str.str_libellecourt from intervention int \
-     LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-     LEFT JOIN structure str on str.str_id = int.str_id \
-     LEFT JOIN uti_int ui on ui.int_id = int.int_id \
-     LEFT JOIN utilisateur uti on ui.uti_id = uti.uti_id \
-     where int.int_id=${id} ${whereClause} order by int_id asc`;
-     log.d('::get - récuperation via la requête.', { requete });
- 
-     (async () => {
-         try {
-             let result = await pgPool.query(requete)
-             let intervention = result.rows.map(formatIntervention);
-             for (const [key, int] of Object.entries(intervention)) {
-                 log.i('::get2 - In' + key)
-                 let secondeRequete = `SELECT uti.uti_id AS id, uti.uti_nom AS nom, uti.uti_prenom AS prenom, uti.uti_mail AS mail
-                  from utilisateur uti \
-                 LEFT JOIN uti_int ui on uti.uti_id = ui.uti_id \
-                 LEFT JOIN intervention int on int.int_id = ui.int_id \
-                 WHERE int.int_id = ${int.id}`
- 
-                 let result2 = await pgPool.query(secondeRequete)
-                 log.i('::get2 - Done')
-                 intervention[key].utilisateur = result2.rows;
-             }
-             console.log(intervention[0])
-             res.json({ intervention: intervention[0] });
-             //res.json({ intervention });
-         }
-         catch (err) {
-             throw err
-         }
-     })().catch(err => {
-         log.w('::get - Erreur survenue lors de la récupération', err.stack)
-         return res.status(400).json('erreur lors de la récupération de l\'intervention ' + id)
-     }
-     )*/
 });
 
 router.get('/', async function (req, res) {
@@ -231,7 +183,7 @@ router.get('/', async function (req, res) {
          where uti.uti_id=${utilisateurId}`
     }
 
-    const requete = `SELECT int.*, pis.*, str.str_libellecourt from intervention int ${whereClause} order by int.int_dateintervention desc`;
+    const requete = `SELECT int.*, pis.*, str.str_libellecourt from intervention int ${whereClause} order by int.int_datefinintervention desc`;
     log.d('::list - récuperation via la requête.', { requete });
 
     (async () => {
@@ -244,7 +196,6 @@ router.get('/', async function (req, res) {
                     interventions[key].utilisateur = values[0];
                     //log.d(interventions[key])
                 })
-
             }
             res.json({ interventions });
         }
@@ -311,12 +262,11 @@ router.post('/', async function (req, res) {
     log.i('::post - In')
     const intervention = req.body.intervention
 
-
+    console.log(intervention)
     //insert dans la table intervention
     const requete = `insert into intervention 
-                    (pis_id,str_id,int_nombreenfant,int_dateintervention,int_datecreation,int_datemaj) 
-                    values($1,$2,$3,$4,$5,$6 ) RETURNING int_id AS int_id`;
-
+                    (pis_id,str_id,int_nombreenfant,int_datedebutintervention,int_datefinintervention,int_nbsession, int_cai, int_age,int_datecreation,int_datemaj) 
+                    values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10 ) RETURNING int_id AS int_id`;
 
     log.d('::post - requete', { requete });
 
@@ -324,7 +274,11 @@ router.post('/', async function (req, res) {
     await pgPool.query(requete, [intervention.piscine.id,
     intervention.strId,
     intervention.nbEnfants,
-    intervention.dateIntervention,
+    intervention.dateDebutIntervention,
+    intervention.dateFinIntervention,
+    intervention.nbSession,
+    intervention.cai,
+    intervention.classe,
     new Date().toISOString(),
     new Date().toISOString()], async (err, result) => {
         if (err) {
@@ -332,13 +286,20 @@ router.post('/', async function (req, res) {
             return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
         }
         else {
-            intervention.utilisateur.forEach(us => {
-                const insert = `insert into uti_int(uti_id,int_id) values ($1,${result.rows[0].int_id})`
+            intervention.utilisateur.forEach( async us => {
+                const insertUs = `insert into uti_int(uti_id,int_id) values ($1,${result.rows[0].int_id})`
                 //console.log('REQ:'+insert+ 'US : '+us.id)
-                pgPool.query(insert, [us.id])
-                console.log('fin insertion users')
-                return result.rows[0].int_id
+                await pgPool.query(insertUs, [us.id])
+                //return result.rows[0].int_id
             })
+            console.log('fin insertion users')
+            for( let i=1; i <= intervention.nbEnfants; i++) {
+                const insertEnf = `insert into int_enf(int_id) values (${result.rows[0].int_id}) `
+                pgPool.query(insertEnf, [])
+                console.log(result.rows[0])
+                //return result.rows[0].int_id
+            }
+            console.log('fin insertion enfants')
             const user = req.session.user
             const params = {
                 id: result.rows[0].int_id,

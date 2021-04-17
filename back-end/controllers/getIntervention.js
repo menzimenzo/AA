@@ -3,6 +3,7 @@ const { formatIntervention } = require('../utils/utils')
 
 const logger = require('../utils/logger')
 const getUtilisateursFromIntervention = require('./getUtilisateursFromIntervention')
+const getEnfantsFromIntervention = require('./getEnfantsFromIntervention')
 const log = logger(module.filename)
 
 module.exports = async function (req, res) {
@@ -40,10 +41,11 @@ module.exports = async function (req, res) {
     log.d('::select from intervention - récuperation via la requête.', { requete });
 
     let intervention = []
-    await Promise.all([pgPool.query(requete), getUtilisateursFromIntervention(id)]).then(values => {
+    await Promise.all([pgPool.query(requete), getUtilisateursFromIntervention(id), getEnfantsFromIntervention(id)]).then(values => {
         intervention = values[0].rows.map(formatIntervention)
         intervention[0].utilisateur = values[1]
-        //log.d(intervention)
+        intervention[0].enfant = values[2]
+        log.d(intervention)
     }).catch(reason => {console.log(reason)})
     return intervention
 }

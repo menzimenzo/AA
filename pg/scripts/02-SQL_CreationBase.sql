@@ -121,9 +121,12 @@ create table INTERVENTION (
    INT_ID               SERIAL               not null,
    PIS_ID               BIGINT               not null,
    STR_ID               BIGINT               not null,
-   /*UTI_ID               BIGINT               not null,*/
    INT_NOMBREENFANT     INT                  not null,
-   INT_DATEINTERVENTION DATE                 not null,
+   INT_DATEDEBUTINTERVENTION DATE            not null,
+   INT_DATEFININTERVENTION DATE              not null,
+   INT_NBSESSION        BIGINT               not null,
+   INT_CAI              BIGINT               not null,
+   INT_AGE              BIGINT               null,
    INT_DATECREATION     timestamp            not null,
    INT_DATEMAJ          timestamp            null,
    INT_COMMENTAIRE      TEXT                 null,
@@ -274,7 +277,10 @@ create table ENFANT (
 /*==============================================================*/
 create table INT_ENF (
    ENF_ID               BIGINT               not null,
-   INT_ID               BIGINT               not null
+   INT_ID               BIGINT               not null,
+   NIV_INI              BIGINT               null,
+   NIV_FIN              BIGINT               null,
+   constraint PK_INT_ENF primary key (enf_id,int_id)
 );
 
 
@@ -305,6 +311,10 @@ alter table UTI_INT
       references INTERVENTION (INT_ID)
       on delete CASCADE ;
 
+alter table INT_ENF 
+  add constraint FK_INTERVEN_REFERENCE_ENFANT foreign key (INT_ID)
+      references INTERVENTION (INT_ID)
+      on delete CASCADE ;
 /*
 alter table UTILISATEUR
    add constraint FK_UTILISAT_REFERENCE_PROFIL foreign key (ROL_ID)

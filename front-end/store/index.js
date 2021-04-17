@@ -238,7 +238,7 @@ export const actions = {
     maPiscine.utilisateurId = state.utilisateurCourant.id
     const url = process.env.API_URL + "/piscine/"
     return await this.$axios.$post(url, { maPiscine }).then(({ maPiscine }) => {
-      commit('add_maPiscine', { maPiscine })
+      commit('add_piscine', { maPiscine })
       return maPiscine
     })
   },

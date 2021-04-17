@@ -65,14 +65,30 @@ router.post('/', function (req, res) {
                         values($1,$2 ) RETURNING *`;
 
     log.d('::post - requete', { requete });
-    pgPool.query(requete, [maPiscine.utilisateurId, maPiscine.id], (err, result) => {
+    pgPool.query(requete, [maPiscine.utilisateurId,maPiscine.id], (err, result) => {
         if (err) {
             log.w('::post - Erreur lors de la requête.', err.stack);
             return res.status(400).json('erreur lors de la sauvegarde de la piscine favorite');
         }
         else {
             log.i('::post - Done', { rows: result.rows })
-            return res.status(200).json({ maPiscine: result.rows[0] });
+            pgPool.query(`select pis.pis_id AS id, pis.pis_nom AS nom, pis.pis_x AS x, pis.pis_y AS y, typ.typ_libelle AS type, pis.pis_cp AS cp, \
+         pis.pis_adr AS adresse
+                        from piscine pis  
+                        inner join type_piscine typ on typ.typ_id = pis.typ_id
+                    where pis.pis_id = $1`,
+                [$1 = maPiscine.id],  (err, resu) => {
+                if(err) {
+                    console.log(err);
+                    return res.status(400).json({ message: 'erreur sur la requete de récupération des piscines de l\'utilsateur' + uti_id });
+                }
+            else {
+                    const mesPiscines = resu.rows[0];
+                    console.log(mesPiscines)
+                    return res.status(200).json({ maPiscine: mesPiscines });
+                }
+            });
+            //return res.status(200).json({ maPiscine: result.rows[0] });
         }
     })
 });

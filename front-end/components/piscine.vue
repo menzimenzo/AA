@@ -30,13 +30,13 @@
     </b-form-group>
     &nbsp;
     <div v-if="selectedPiscine">
-      Adressee : {{ this.selectedPiscine.adresse }}
+      Adresse : {{ this.selectedPiscine.adresse }}
     </div>
     <b-row> </b-row>
     <b-row> </b-row>
     <b-row>
       <p class="modal-btns">
-        <b-button v-on:click="$modal.hide('editPiscine')">Annuler</b-button>
+        <b-button v-on:click="cancel">Annuler</b-button>
         <b-button variant="success" v-on:click="addPiscine">Ajouter</b-button>
       </p>
     </b-row>
@@ -44,9 +44,16 @@
 </template>
 <script>
 import Vue from "vue";
-import { mapState } from "vuex";
 
 export default {
+  props: {
+    intervention: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
+  },
   data() {
     return {
       cp: null,
@@ -93,8 +100,14 @@ export default {
               `${this.selectedPiscine.nom} ajoutée aux piscines favorites`,
               []
             );
+            
+            if (this.intervention.utilisateur) {
+              this.intervention.piscine = this.selectedPiscine;
+              this.$modal.hide("newPiscine");
+            } else {
+              this.$modal.hide("editPiscine");
+            }
             this.$store.dispatch("get_mesPiscines");
-            this.$modal.hide("editPiscine");
           })
           .catch((error) => {
             console.error(
@@ -112,6 +125,14 @@ export default {
         this.$toast.error(`veuillez sélectionner une piscine`, []);
       }
     },
+    cancel: function () {
+      if (this.intervention.utilisateur) {
+        this.$modal.hide("newPiscine");
+      }
+      else  {
+        this.$modal.hide("editPiscine");
+      }
+    }
   },
 };
 </script>

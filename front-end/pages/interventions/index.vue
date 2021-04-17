@@ -412,7 +412,7 @@ export default {
           );
         });
     },
-    editPiscine: function (id) {
+    editPiscine: function () {
       this.$modal.show("editPiscine");
     },
 
