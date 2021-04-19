@@ -10,10 +10,9 @@
       </b-col>
     </b-row>
     <b-row>
-      <b-col style="border-right: 1px solid #252195">
+      <b-col cols="8">
         <div class="mb-3 mt-3">
           Nom :
-
           <b-form-input
             readonly
             aria-describedby="inputFormatterHelp"
@@ -42,82 +41,25 @@
           ></b-form-input>
         </div>
         <div class="mb-3 mt-3">
-          Statut utilisateur :
-          <b-form-select v-model="formUser.statut" :options="liststatus" />
-        </div>
-        <div class="mb-3 mt-3">
-          <b-form-checkbox
-            switch
-            v-model="formUser.validated"
-            name="check-button"
-          >
-            Utilisateur validé <b></b>
-          </b-form-checkbox>
-        </div>
-      </b-col>
-      <b-col>
-        <div class="mb-3 mt-3">
           Profil :
           <b-form-select
             v-model="formUser.role"
             :options="listeprofil"
-            :disabled="!isAdmin()"
           />
         </div>
-        <div class="mb-3 mt-3">
-          Structure :
-          <b-form-select v-model="formUser.structure" :disabled="!isAdmin()">
-            <option :value="'0'">Collectivités territoriales</option>
-            <option
-              v-for="structure in structures"
-              :key="structure.str_id"
-              :value="structure.str_id"
-            >
-              {{ structure.str_libelle }}
-            </option>
-          </b-form-select>
-        </div>
-        <div v-if="formUser.structure > 0" class="mb-3 mt-3">
-          Structure locale :
-          <b-form-input
-            id="structLocaleInput"
-            type="text"
-            v-model="formUser.structureLocale"
-            required
-            placeholder="Nom de la structure"
-          />
-        </div>
-        <div v-else class="mb-3 mt-3">
+        <div v-if="isAdmin()">
           <div class="mb-3 mt-3">
-            Type de collectivités:<br />
-            <b-form-select v-model="formUser.typecol" :options="listtypecol" />
+            Statut utilisateur :
+            <b-form-select v-model="formUser.statut" :options="liststatus" />
           </div>
-          <div v-if="formUser.typecol == 1" class="mb-3 mt-3">
-            <b-form-input
-            id="CollectiviteTerritoraileInput"
-            type="text"
-            v-model="formUser.collectiviteTerritoriale"
-            required
-            placeholder="Nom de la commune"
-          />
-          </div>
-          <div v-if="formUser.typecol == 2" class="mb-3 mt-3">
-            <b-form-input
-            id="CollectiviteTerritoraileInput"
-            type="text"
-            v-model="formUser.collectiviteTerritoriale"
-            required
-            placeholder="Nom du département"
-          />
-          </div>
-          <div v-if="formUser.typecol == 3" class="mb-3 mt-3">
-            <b-form-input
-            id="CollectiviteTerritoraileInput"
-            type="text"
-            v-model="formUser.collectiviteTerritoriale"
-            required
-            placeholder="Nom de la comcom"
-          />
+          <div class="mb-3 mt-3">
+            <b-form-checkbox
+              switch
+              v-model="formUser.validated"
+              name="check-button"
+            >
+              Utilisateur validé <b></b>
+            </b-form-checkbox>
           </div>
         </div>
       </b-col>
@@ -178,12 +120,7 @@ export default {
       liststatus: [
         { text: "Actif", value: "1" },
         { text: "Bloqué", value: "2" },
-      ],
-      listtypecol: [
-        { text: "Commune", value: "1" },
-        { text: "Département", value: "2" },
-        { text: "Communauté de communes", value: "3" },
-      ],
+      ]
     };
   },
   methods: {

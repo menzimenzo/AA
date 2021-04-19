@@ -31,7 +31,7 @@
                   </b-form-select>
                 <b-button variant="success" v-on:click="validerFormateur()">Valider</b-button>
               </b-form-group>    
-          </b-form>
+          </b-form>s
         </b-card>            
         <b-card class="mb-3" v-else>
           <b-form> 
@@ -56,17 +56,50 @@
 <script>
 //import Intervention from "~/components/Intervention.vue";
 import { mapState } from "vuex";
+import moment from "moment";
 //import Editable from "~/components/editable/index.vue";
 
+/*
+var loadFormDemandeaaq = function(demandeaaq) {
+  let formDemandeaaq = JSON.parse(
+    JSON.stringify(
+      Object.assign(
+        {
+          id: null,
+          formateurid: null,
+          demandeurid: null,
+          tockendemandeaccord: "",
+          tockendemanderefus: "",
+          datedemande: null,
+          daterelance: null,
+          nbrelance: null,
+          dateaccord: null,
+          daterefus: null,
+          motifrefus: null,
+          dmsid: null
+        },
+        demandeaaq
+      )
+    )
+  );
+  //let datedemande = moment(demandeaaq.datedemande);
+  //formDemandeaaq.datedemande = datedemande.format("YYYY-MM-DD");
+
+  return formDemandeaaq;
+};
+*/
 export default {
   components: {
-    
-    
+    //Editable,
+    /*user */
+    /*demandeaaq*/
+    //fileUpload
   },
   data() {
     return {
       loading: false,
       formateurid: null,
+      iddemande: null,
       maDemande: null,        
       listeformateur: [
           {
@@ -78,189 +111,95 @@ export default {
             mail: null
           },
         ],
+
     };
   },
   watch: {
-    interventions: function() {
-      this.loading = true;
-      if (this.utilisateurCourant.profilId == 2) {
-       //console.info('suppression interventions hors structure_id : '+this.utilisateurCourant.structureId)
-       //console.info('nb inter avant: '+ this.interventions.length)
-        this.interventionsToDisplay = this.interventions.filter(x => {
-          var isMatch = true;
-          isMatch =
-            isMatch &&
-            (String(x.structureId) == this.utilisateurCourant.structureId ||
-              String(x.utiId) == this.utilisateurCourant.id);
-          return isMatch;
-        });
-        //console.info('nb inter apres filtrage structure: '+ this.interventionsToDisplay.length)
-      } else {
-        this.interventionsToDisplay = this.interventions;
-      }
-      this.loading = false;
+
+    "formateurid"() {
+      console.info("Saisie Formateur (id) : " + this.formateurid);
     }
+
   },
   computed: mapState([
-    "interventions",
-    "interventionCourrante",
     "utilisateurCourant",
-    "documents"
+    "demandeaaq"
   ]),
-  methods: {
-    //
-    //  fonction de recupération des infos d'une intervention par id
-    //
-    editIntervention: function(idIntervention) {
-      return this.$store
-        .dispatch("get_intervention", idIntervention)
-        .then(() => {
-          this.$modal.show("editIntervention");
+  methods: 
+  {
+  rechercheformateur: function() 
+    {
+      console.info("Recherche des formateurs");
+      // Lance la recherche sur la liste des formateurs 
+      const url = process.env.API_URL + "/user/liste/3"
+      console.info(url);
+      return this.$axios
+        .$get(url)
+        .then(response => {
+          this.listeformateur = response.users;
+          console.info("rechercheformateur : this.listeformateur " + this.listeformateur );
         })
         .catch(error => {
           console.error(
-            "Une erreur est survenue lors de la récupération du détail de l'intervention",
+            "Une erreur est survenue lors de la récupération des formateurs",
             error
           );
         });
-    },
-    deleteIntervention: function(idIntervention) {
-      console.info("Suppression d'une intervention : " + idIntervention);
-      //this.$dialog.confirm({ text: 'Confirmez-vous la suppression définitive d\'intervention', title: 'Suppression'});
-      if (confirm("Confirmez-vous la suppression définitive d'intervention")) {
-        this.loading = true;
-        const url =
-          process.env.API_URL + "/interventions/delete/" + idIntervention;
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then(response => {
-            this.$store.dispatch("get_interventions");
-            //this.resetform();
-            this.clearIntervention();
-            this.$toast.success(
-              `Intervention #${idIntervention} a bien été supprimée`,
-              {}
-            );
-          })
-          .catch(error => {
-            console.error(
-              "Une erreur est survenue lors de la suppresion de l'intervention",
-              error
-            );
-          });
-        this.loading = false;
-      }
-    },
-    downloadPdf: function(id) {
-      this.$axios({
-        url: process.env.API_URL + "/pdf/" + id,
-        method: "GET",
-        responseType: "blob" // important
-      }).then(response => {
-        // Crée un objet blob avec le contenue du CSV et un lien associé
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        // Crée un lien caché pour télécharger le fichier
-        const link = document.createElement("a");
-        link.href = url;
-        var idformate = "";
-        var nbzero;
-        idformate = id.toString();
-        for (nbzero = 0; nbzero < 7 - id.toString().length; nbzero++) {
-          idformate = "0" + idformate;
+      },
+  chargedemande: function() {
+      console.log("Charge demande AAQ");
+      // Lance la recherche sur la liste des formateurs 
+      const url = process.env.API_URL + "/demandeaaq?demandeurid=" + this.utilisateurCourant.id
+      console.info(url);
+      return this.$axios
+        .$get(url)
+        .then( response => {
+          if(response && response.demandeaaq) {
+            console.log("Une demande en cours")
+            this.maDemande = response.demandeaaq;
+          }
+          else
+          {
+            console.log("Aucune demande en cours")
+          }
+        })
+        .catch(error => {
+          console.error(
+            "Une erreur est survenue lors de la récupération des formateurs",
+            error
+          );
+        });
+      },
+  validerFormateur: function() {
+      console.log('Formateur choisi' + this.formateurid)
+      if (this.formateurid) {
+        const url = process.env.API_URL + '/demandeaaq/'
+        const body = {
+          formateurId: this.formateurid,
+          demandeurId: this.utilisateurCourant.id
         }
-        idformate = "AAQ_Attestation-" + idformate;
-        console.log(idformate);
-        link.setAttribute("download", `${idformate}.pdf`); //or any other extension
-        document.body.appendChild(link);
-        // Télécharge le fichier
-        link.click();
-        link.remove();
-      });
-    },
-    downloadDoc: function(doc) {
-      this.$axios({
-        url: process.env.API_URL + "/documents/" + doc.doc_id,
-        method: "GET",
-        responseType: "blob"
-      })
-        .then(response => {
-          // https://gist.github.com/javilobo8/097c30a233786be52070986d8cdb1743
-          // Crée un objet blob avec le contenue du CSV et un lien associé
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          // Crée un lien caché pour télécharger le fichier
-          const link = document.createElement("a");
-          link.href = url;
-          const fileName = doc.doc_filename;
-          link.setAttribute("download", fileName);
-          // Télécharge le fichier
-          link.click();
-          link.remove();
-          console.log("Done - Download", { fileName });
-        })
-        .catch(err => {
-          console.log(JSON.stringify(err));
-          this.$toasted.error("Erreur lors du téléchargement: " + err.message);
-        });
-    },
-    clearIntervention() {
-      this.$store.commit("reset_interventions");
-    },
-    exportCsv() {
-      this.$axios({
-        url:
-          process.env.API_URL +
-          "/interventions/csv/" +
-          this.utilisateurCourant.id,
-        // url: apiUrl + '/droits/' + 17,
-        method: "GET",
-        responseType: "blob"
-      })
-        .then(response => {
-          // https://gist.github.com/javilobo8/097c30a233786be52070986d8cdb1743
-          // Crée un objet blob avec le contenue du CSV et un lien associé
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          // Crée un lien caché pour télécharger le fichier
-          const link = document.createElement("a");
-          link.href = url;
-          const fileName = "Aisance Aquatique - Interventions.csv";
-          link.setAttribute("download", fileName);
-          // Télécharge le fichier
-          link.click();
-          link.remove();
-          console.log("Done - Download", { fileName });
-        })
-        .catch(err => {
-          console.log(JSON.stringify(err));
-          this.$toasted.error("Erreur lors du téléchargement: " + err.message);
-        });
+        return this.$axios.$post(url, body)
+          .then(async response => {
+              this.$toast.success('Votre demande a été envoyée.')
+          if (response && response.maDemande) {
+            this.maDemande = response.maDemande;
+          }
+          }).catch(error => {
+            console.log(error)
+            this.$toast.error(error)
+          })      
+      }
     }
   },
   //
   //  CHARGEMENT ASYNCHRONE DES INTERVENTIONS
   //
-  async mounted() {
-    //await Promise.all([
-    //  this.$store.dispatch("get_interventions"),
-    //  this.$store.dispatch("get_documents")
-    //]);
-    //console.info("mounted", { interventions: this.interventions});
-    // on supprime les interventions ne relevant pas de la structure si prod_id = 2 (partenaire)
-    /*if (this.utilisateurCourant.profilId == 2) {
-      console.info('2 - suppression interventions hors structure_id : '+this.utilisateurCourant.structureId)
-      console.info('2 - nb inter avant: '+ this.interventions.length)
-      this.interventionsToDisplay = this.interventions.filter(x => {
-        var isMatch = true;
-        isMatch =
-          isMatch &&
-          String(x.structureId) == this.utilisateurCourant.structureId;
-        return isMatch;
-      });
-      console.info('2 - nb inter apres filtrage structure: '+ this.interventionsToDisplay.length)
-    } else {
-      this.interventionsToDisplay = this.interventions;
-    }*/
-    this.loading = false;
+  async created() {
+   this.loading = true;
+    // Chargement de la liste des formateurs
+   await this.rechercheformateur()   
+   await  this.chargedemande() 
+   this.loading = false;
   }
 };
 </script>

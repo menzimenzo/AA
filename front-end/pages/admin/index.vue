@@ -138,6 +138,13 @@ export default {
           type: "text",
           sortable: true
         },
+        
+        {
+          path: "__slot:actions",
+          title: "Actions",
+          type: "__slot:actions",
+          sortable: false,
+        }
       ],
       headersCommentaires: [
         { path: "nom", title: "Intervenant", type: "text", sortable: true },

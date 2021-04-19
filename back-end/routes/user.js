@@ -51,9 +51,38 @@ const formatUserCSV = user => {
         compadrcontact: user.uti_compadrcontact,
         cpi_codeinsee: user.uti_com_codeinseecontact,
         cp: user.uti_com_cp_contact,
-        telephonecontact: user.uti_telephonecontact        
+        telephonecontact: user.uti_telephonecontact 
     }
 }
+
+
+
+// Récupération de la liste des formateurs filtré par rôle
+// Essenciellement utilisé pour lister la liste des formateurs
+router.get('/liste/:roleid', async function (req, res) {
+    log.i('::list-roleid - In')
+    var roleid = req.params.roleid
+    //log.d('::list-roleid - roleid : ',{ req.roleid})
+
+    // si on est admin, on affiche tous les utilisateurs
+    requete = `SELECT uti.*
+    from utilisateur uti 
+    where rol_id = ${roleid}
+    order by uti_nom, uti_prenom asc`;
+
+    log.d('::list-roleid - requete',{ requete })
+    pgPool.query(requete, (err, result) => {
+        if (err) {
+            log.w('::list-roleid - erreur lors de la récupération.',err.stack);
+            return res.status(400).json('erreur lors de la récupération des utilisateurs par role');
+        }
+        else {
+            log.i('::list-roleid - Done')
+            const users = result.rows.map(formatUser);
+            res.json({ users });
+        }
+    })
+});
 
 /* route d'extraction de la liste d'utilisateurs pour le CSV */
 /* Pas d'argument, on utilise la structure de l'utilisateur en session */
@@ -118,23 +147,11 @@ router.get('/csv', async function (req, res) {
 router.get('/:id', async function (req, res) {
     const id = req.params.id;
     log.i('::get - In', { id })
-    const utilisateurCourant = req.session.user
-    if ( utilisateurCourant.rol_id == 1) {
-        // si on est admin, on affiche l'utilisateur
-        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, rol.rol_libelle from utilisateur uti 
+    const requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, pro.rol_libelle from utilisateur uti 
         join profil pro on pro.rol_id = uti.rol_id
         where uti_id=${id} order by uti_id asc`;
-    }
-    else 
-    {
-        // si on est partenaire, on affiche l'utilisateur s'il appartient à ma structure
-        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, str.str_libellecourt,pro.rol_libelle from utilisateur uti 
-        join role pro on pro.rol_id = uti.rol_id
-        where uti_id=${id} and uti.str_id = ${utilisateurCourant.str_id}
-        order by uti_id asc `;
-    }
 
-    log.d('::get - select un USER'+requete)
+    log.d('::get - select un USER, requête = '+requete)
     pgPool.query(requete, (err, result) => {
         if (err) { 
             log.w('::get - Erreur lors de la requête', err.stack)
@@ -168,14 +185,14 @@ router.get('/', async function (req, res) {
     }
     else 
     {
-        // si on est partenaire, on affiche seulements les utilisateurs de la structure
+        // si on est formateur, on affiche seulements les utilisateurs qui on une demande en cours
         // Sauf les Admin créés sur structure
-        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,str.str_libellecourt,pro.rol_libelle
+        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,pro.rol_libelle
         from utilisateur uti 
-        join uti_str ust on ust.uti_id = uti.uti_id
-        join structure str on str.str_id = ust.str_id 
-        join profil pro on pro.rol_id = uti.rol_id and pro.rol_id <> 1
-        where uti.str_id=${utilisateurCourant.str_id} order by uti_id asc  `;
+        inner join demande_aaq dem on dem.dem_uti_formateur_id = ${utilisateurCourant.uti_id} and uti.uti_id = dem_uti_demandeur_id
+        join profil pro on pro.rol_id = uti.rol_id
+        order by uti_id asc`;
+        
     }
     log.d('::list - requete',{ requete })
     pgPool.query(requete, (err, result) => {
