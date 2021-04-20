@@ -6,12 +6,48 @@
         <b-img :src="require('assets/MainAisAqua.png')" width="365%"/>
 
       </b-col>
-      <b-col   class="col-4 col-md-8" >
-        <b-row >
-          <p class="InfoMN" ><b>Vous êtes connecté avec un rôle "Maître Nageur"</b><br><br>
-          Vous pouvez modifier les informations de votre compte<br>
-          Des formations de qualification Maître Nageur Aisance Aquatique sont disponibles sur le site : <br><a href="https://www.sports.gouv.fr/accueil-du-site/actualites/Lancement-du-plan-aisance-aquatique">Formations aisance aquatique</a><br></p>
-        </b-row>
+      <b-col  class="col-12 col-md-8" v-if="!loading">
+        <b-card class="mb-3" v-if="!maDemande">
+          <b-form>          
+            Vous êtes connecté avec un rôle "Maître Nageur"<br><br>
+            Vous suivez ou avez suivi une formation Aisance Aquatique :<br><br>
+            Précisez le formateur ayant dispensé la formation :<br>
+            <b-form-group 
+                label-for="lstformateur" 
+                require
+                >
+                  <b-form-select 
+                    class="liste-deroulante"
+                    v-model="formateurid"
+                    name="lstformateur"
+                    aria-describedby="lstformateurFeedback">
+                  
+                    <option :value="null">-- Choix du formateur --</option>
+                    <option
+                      v-for="formateur in listeformateur"
+                      :key="formateur.id"
+                      :value="formateur.id"
+                    >{{ formateur.nom }} {{ formateur.prenom }} | {{ formateur.mail }}</option>
+                  </b-form-select>
+                <b-button variant="success" v-on:click="validerFormateur()">Valider</b-button>
+              </b-form-group>    
+          </b-form>
+        </b-card>            
+        <b-card class="mb-3" v-else>
+          <b-form> 
+            
+            Vous êtes connecté avec un rôle "Maître Nageur"<br><br>
+            Vous avez une demande en cours pour passer en "Maître Nageur Aisance Aquatique".
+            Demande effectuée le {{ this.maDemande.datedemandeaaq}} auprès de {{ this.maDemande.uti_prenom}} {{ this.maDemande.uti_nom}} ({{ this.maDemande.uti_mail}})<br><br>
+          </b-form>
+          <!-- // TODO Implémentation du bouton Annuler la demande à faire
+               // Ajouter le statut "Annulé"
+            <b-button variant="danger" v-on:click="annulerDemande()">Annuler ma demande</b-button>
+          -->
+        </b-card>            
+      </b-col>
+      <b-col class="col-12 col-md-8" v-else>
+        Chargement en cours ... veuillez patienter
       </b-col>
     </b-row>
   </b-container>
@@ -29,56 +65,19 @@ export default {
   },
   data() {
     return {
-      loading: true,
-      interventionsToDisplay: null,
-      headers: [
-        {
-          path: "id",
-          title: "N° d'intervention",
-          type: "text",
-          sortable: true
-        },
-        { path: "blocId", title: "Bloc", type: "text", sortable: true },
-        {
-          path: "commune.com_libellemaj",
-          title: "Commune",
-          type: "text",
-          sortable: true
-        },
-        {
-          path: "dateIntervention",
-          title: "Date d'intervention",
-          type: "date",
-          sortable: true,
-          filter: "date"
-        },
-        {
-          path: "dateCreation",
-          title: "Création",
-          type: "date",
-          sortable: true,
-          filter: "timestamp"
-        },
-        {
-          path: "dateMaj",
-          title: "Modification",
-          type: "date",
-          sortable: true,
-          filter: "timestamp"
-        },
-        {
-          path: "nbEnfants",
-          title: "Nombre d'enfants",
-          type: "text",
-          sortable: true
-        },
-        {
-          path: "__slot:actions",
-          title: "Actions",
-          type: "__slot:actions",
-          sortable: false
-        }
-      ]
+      loading: false,
+      formateurid: null,
+      maDemande: null,        
+      listeformateur: [
+          {
+            text: "Veuillez sélectionner un formateur",
+            value: null,
+            id: null,
+            nom: null,
+            prenom: null,
+            mail: null
+          },
+        ],
     };
   },
   watch: {
