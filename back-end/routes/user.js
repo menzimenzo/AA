@@ -195,9 +195,20 @@ router.put('/:id', async function (req, res) {
     const user = req.body.utilisateurSelectionne
     const id = req.params.id
     log.i('::update - In', { id })
-    let { nom, prenom, mail, profil, validated,structure, structureLocale, statut } = user
+    let { nom, prenom, mail, role, validated,structure, structureLocale, statut } = user
 
-    //insert dans la table intervention
+    //insert dans la table utilisateur
+    const requete = `UPDATE utilisateur 
+    SET uti_nom = $1,
+    uti_prenom = $2,
+    uti_mail = lower($3),
+    uti_validated = $4,
+    rol_id = $5,
+    stu_id = $6
+    WHERE uti_id = ${id}
+    RETURNING *
+    ;`
+    /*
     const requete = `UPDATE utilisateur 
         SET uti_nom = $1,
         uti_prenom = $2,
@@ -209,14 +220,12 @@ router.put('/:id', async function (req, res) {
         stu_id = $8
         WHERE uti_id = ${id}
         RETURNING *
-        ;`    
+        ;`    */
     pgPool.query(requete,[nom,
         prenom,
         mail,
         validated,
-        profil,
-        structure,
-        structureLocale,
+        role,
         statut], (err, result) => {
         if (err) {
             log.w('::update - erreur lors de l\'update', {requete, erreur: err.stack});

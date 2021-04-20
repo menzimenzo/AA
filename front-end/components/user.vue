@@ -59,7 +59,7 @@
         <div class="mb-3 mt-3">
           Profil :
           <b-form-select
-            v-model="formUser.profil"
+            v-model="formUser.role"
             :options="listeprofil"
             :disabled="!isAdmin()"
           />
@@ -172,6 +172,8 @@ export default {
         { text: "Administrateur", value: "1" },
         { text: "Partenaire", value: "2" },
         { text: "Intervenant", value: "3" },
+        { text: "MNAAQ", value: "4" },
+        { text: "MN", value: "5" },
       ],
       liststatus: [
         { text: "Actif", value: "1" },
