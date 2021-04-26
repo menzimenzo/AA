@@ -42,8 +42,7 @@ module.exports = {
             sitewebcontact: utilisateur.uti_sitewebcontact,
             adrcontact: utilisateur.uti_adrcontact,
             compadrcontact: utilisateur.uti_compadrcontact,
-
-              cpi_codeinsee: utilisateur.uti_com_codeinseecontact,
+            cpi_codeinsee: utilisateur.uti_com_codeinseecontact,
             cp: utilisateur.uti_com_cp_contact,
             telephonecontact: utilisateur.uti_telephonecontact
       }

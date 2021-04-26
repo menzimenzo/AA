@@ -58,6 +58,7 @@ const pdf           = require('./routes/pdf');
 const user          = require('./routes/user');
 const documents     = require('./routes/documents');
 const batch         = require('./routes/batch');
+const demandeaaq         = require('./routes/demandeaaq');
 
 // Route vers la page de connexion
 app.use(config.URL_PREFIX + '/connexion', connexion);
@@ -81,6 +82,9 @@ app.use(config.URL_PREFIX + '/documents', documents);
 app.use(config.URL_PREFIX + '/pdf', pdf);
 
 app.use(config.URL_PREFIX + '/user', user);
+
+app.use(config.URL_PREFIX + '/demandeaaq', demandeaaq);
+
 
 app.get(config.URL_PREFIX + '', function (req, res) {
     res.send('Bienvenue sur le backend d Aisance Aquatique');
