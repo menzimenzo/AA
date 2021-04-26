@@ -3,8 +3,7 @@
     <b-row>
       <b-col cols="12" class="text-center">
         <h2 class="mb-3 interventionTitle">
-          Edition de l'utilisateur <br /><b
-            >{{ formUser.prenom }} {{ formUser.nom }}</b
+          Edition de l'utilisateur <b>{{ formUser.prenom }} {{ formUser.nom }}</b
           >
         </h2>
       </b-col>
