@@ -3,6 +3,7 @@ const router = express.Router();
 const pgPool = require('../pgpool').getPool();
 const logger = require('../utils/logger')
 const log = logger(module.filename)
+const {sendEmail } = require('../utils/mail-service')
 /*
 Test : 
     Sur serveur web backend : 
@@ -110,6 +111,30 @@ router.post('/', function (req, res) {
                 log.d("result.rows : " + result.rows)
                 log.i('::post - Done', result);
                 const demandeclient = formatreversDemandeAAQ( result.rows[0])
+
+                const requete = `select uti_mail,uti_prenom from utilisateur where uti_id = ${formateurId}`
+
+                log.d(requete)
+                // Recherche des communes correspondant au codepostal
+                pgPool.query(requete,(err, result) => {
+                    if (err) {
+                        console.log(err);
+                        return res.status(400).json({ message: 'erreur sur la requete de recherche du mail du formateur' });
+                    }
+                    else {
+                        const formateuraaq = result.rows && result.rows[0];
+                        sendEmail({
+                            to: formateuraaq.uti_mail,
+                            subject: 'Demande de compte Aisance Aquatique',
+                            body: `<p>Bonjour ${formateuraaq.uti_prenom},</p>
+                                <p>Vous avez une nouvelle demande pour changer le profil d'un utilisateur. <br/><br/>
+                                Nous vous invitons à vous rendre sur le site « Aisance Aquatique » pour changer le profil du demandeur.<br/>
+                                Rappel du site <a href="https://www.sports.gouv.fr/preventiondesnoyades/intervenation">SI Aisance Aquatique.<br/></p>`
+                            })
+                            }
+                });
+                
+
                 return res.status(200).json({ maDemande: demandeclient });
             }
         })
