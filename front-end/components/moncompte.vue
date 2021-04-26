@@ -181,7 +181,7 @@
             >
               <b-form-select 
                 class="liste-deroulante"
-                v-model="user.cpi_codeinsee"
+                v-model="user.codeinsee"
                 name="lstcommune"
                 v-validate="{ required: true, min:5, max:5}"
                 :state="validateState('lstcommune')"
@@ -199,9 +199,9 @@
           </b-form-group>
 
           
-       </b-form>
+        </b-form>
 
-             <b-form>
+      <b-form>
         <b-form-group id="publiCheckGroup" >
           <b-form-checkbox-group
             v-model="user.publicontact"

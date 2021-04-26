@@ -18,6 +18,7 @@ const formatUser = user => {
         mail: user.uti_mail,
         nom: user.uti_nom,
         prenom: user.uti_prenom,
+        eaps: user.uti_eaps,
         rolLibelle:user.rol_libelle,
         inscription: user.inscription,
         publicontact: user.uti_publicontact,

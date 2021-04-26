@@ -30,6 +30,23 @@ const formatDemandeAAQ = demandeaaq => {
     return result
 }
 
+const formatreversDemandeAAQ = demandeaaq => {
+    var result = {
+        dem_id: demandeaaq.id,
+        dem_uti_formateur_id : demandeaaq.formateurid,
+        dem_uti_demandeur_id : demandeaaq.demandeurid,
+        dem_tockendemandeaccord : demandeaaq.tockendemandeaccord,
+        dem_tockendemanderefus : demandeaaq.tockendemanderefus,
+        dem_datedemande : demandeaaq.datedemande,
+        dem_daterelance : demandeaaq.daterelance,
+        dem_nbrelance : demandeaaq.nbrelance,
+        dem_dateaccord : demandeaaq.dateaccord,
+        dem_daterefus : demandeaaq.daterefus,
+        dem_motifrefus : demandeaaq.motifrefus,
+        dem_dms_id : demandeaaq.dmsid
+    }
+    return result
+}
 
 
 router.get('/', function (req, res) {
@@ -90,8 +107,10 @@ router.post('/', function (req, res) {
                 return res.status(400).json('erreur lors de la sauvegarde de la la demande au formateur');
             }
             else {
+                log.d("result.rows : " + result.rows)
                 log.i('::post - Done', result);
-                return res.status(200).json({ maDemande: result.rows[0] });
+                const demandeclient = formatreversDemandeAAQ( result.rows[0])
+                return res.status(200).json({ maDemande: demandeclient });
             }
         })
 });

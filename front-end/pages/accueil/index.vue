@@ -155,7 +155,7 @@ export default {
         .$get(url)
         .then( response => {
           if(response && response.demandeaaq) {
-            console.log("Une demande en cours")
+            console.log("Une demande en cours: " + response.demandeaaq.dem_id)
             this.maDemande = response.demandeaaq;
           }
           else
@@ -181,8 +181,14 @@ export default {
         return this.$axios.$post(url, body)
           .then(async response => {
               this.$toast.success('Votre demande a été envoyée.')
+              
           if (response && response.maDemande) {
             this.maDemande = response.maDemande;
+            //console.log("Une créée: " + this.maDemande.demandeurId)
+            // J'ai fait l'inverse de ce que Glenn a dit, je refais un appel serveur
+            // TODO : Récupérer les valeur du Post ... et non refaire un appel serveur
+            this.chargedemande()
+
           }
           }).catch(error => {
             console.log(error)
