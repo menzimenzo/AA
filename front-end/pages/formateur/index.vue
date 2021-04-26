@@ -45,11 +45,11 @@
                     v-model="prenomFilter"
                     placeholder="Prénom"
                   />
-                  <label class="ml-3" for="inscriptionFilter">Validité Inscription :</label>
+                  <label class="ml-3" for="inscriptionFilter">Rôle :</label>
                   <b-form-select
                     class="ml-3"
-                    v-model="inscriptionFilter"
-                    :options="listeValidInscrip"
+                    v-model="roleFilter"
+                    :options="listeRole"
                   />
                 </b-form>
               </div>
@@ -101,24 +101,17 @@ export default {
         { path: "nom", title: "Nom", type: "text", sortable: true },
         { path: "prenom", title: "Prénom", type: "text", sortable: true },
         { path: "rolLibelle", title: "Rôle", type: "text", sortable: true },
-        {
-          path: "inscription",
-          title: "Inscription",
-          type: "text",
-          sortable: true
-        },
-        {
-          path: "__slot:actions",
-          title: "Actions",
-          type: "__slot:actions",
-          sortable: false,
-        }
+        { path: "datedemandeaaq", title: "Date demande", type: "text", sortable: true },
+//        { path: "inscription", title: "Inscription",type: "text",sortable: true },
+        { path: "__slot:actions", title: "Actions",type: "__slot:actions",sortable: false}
       ],
       nameFilter: "",
       placeFilter: "",
       nomFilter: "",
       prenomFilter: "",
       inscriptionFilter: "",
+      roleFilter:"MaitreNageur",
+      datedemandeaaq:"",
       profilFilter: "",
       statusFilter: "",
       structureFilter: "",
@@ -130,6 +123,11 @@ export default {
       liststatus: [
         { text: "Actif", value: "Actif" },
         { text: "Bloqué", value: "Actif" },
+        { text: "Tous", value: "Tous" }
+      ],
+      listeRole: [
+        { text: "Maitre Nageur AAQ", value: "MaitreNageurAAQ" },
+        { text: "Maitre Nageur", value: "MaitreNageur" },
         { text: "Tous", value: "Tous" }
       ],
       nbdemandeaaq: 0
@@ -208,7 +206,7 @@ export default {
     filteredUtilisateurs: function() {
       return this.users.filter(user => {
         var isMatch = true;
-        console.log(this.nomFilter);
+        //console.log(this.nomFilter);
         if (this.nomFilter != "") {
           isMatch =
             isMatch &&
@@ -221,6 +219,25 @@ export default {
               -1;
         }
         if (
+          this.roleFilter != "Tous" &&
+          this.roleFilter != undefined &&
+          this.roleFilter != ""
+        ) {
+          console.log ("user.rolLibelle : " + user.rolLibelle)
+          console.log ("this.roleFilter : " + this.roleFilter)
+            if (user.rolLibelle == this.roleFilter) {
+              isMatch = isMatch && true
+            //isMatch =
+            //isMatch && user.rolLibelle.indexOf(this.roleFilter) > -1;
+            }
+            else
+            {
+              isMatch = isMatch && false
+
+            }
+        }
+        /*
+        if (
           this.inscriptionFilter != "Tous" &&
           this.inscriptionFilter != undefined &&
           this.inscriptionFilter != ""
@@ -228,6 +245,8 @@ export default {
           isMatch =
             isMatch && user.inscription.indexOf(this.inscriptionFilter) > -1;
         }
+        */
+       console.log(isMatch)
         return isMatch;
       });
     },
@@ -253,7 +272,7 @@ export default {
       })
     ]);
 */
-    this.nbdemandeaaq = this.users.length;
+    this.nbdemandeaaq = this.filteredUtilisateurs.length;
     this.loading = false;
   }
 };

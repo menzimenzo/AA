@@ -28,7 +28,8 @@ const formatUser = user => {
         compadrcontact: user.uti_compadrcontact,
         cpi_codeinsee: user.uti_com_codeinseecontact,
         cp: user.uti_com_cp_contact,
-        telephonecontact: user.uti_telephonecontact
+        telephonecontact: user.uti_telephonecontact,
+        datedemandeaaq: user.datedemandeaaq
     }
 }
 
@@ -148,7 +149,8 @@ router.get('/csv', async function (req, res) {
 router.get('/:id', async function (req, res) {
     const id = req.params.id;
     log.i('::get - In', { id })
-    const requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, pro.rol_libelle from utilisateur uti 
+    const requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, pro.rol_libelle 
+        from utilisateur uti 
         join profil pro on pro.rol_id = uti.rol_id
         where uti_id=${id} order by uti_id asc`;
 
@@ -188,7 +190,7 @@ router.get('/', async function (req, res) {
     {
         // si on est formateur, on affiche seulements les utilisateurs qui on une demande en cours
         // Sauf les Admin créés sur structure
-        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,pro.rol_libelle
+        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,pro.rol_libelle, to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
         from utilisateur uti 
         inner join demande_aaq dem on dem.dem_uti_formateur_id = ${utilisateurCourant.uti_id} and uti.uti_id = dem_uti_demandeur_id
         join profil pro on pro.rol_id = uti.rol_id
