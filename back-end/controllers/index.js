@@ -4,5 +4,7 @@ module.exports = {
     generateForgotPasswordEncryption: require('./generateForgotPasswordEncryption'),
     getIntervention: require('./getIntervention'),
     getUtilisateursFromIntervention: require('./getUtilisateursFromIntervention'),
-    getEnfantsFromIntervention: require('./getEnfantsFromIntervention')
+    getEnfantsFromIntervention: require('./getEnfantsFromIntervention'),
+    postUtilisateursForIntervention: require('./postUtilisateursForIntervention'),
+    postEnfantsForIntervention: require('./postEnfantsForIntervention')
 }

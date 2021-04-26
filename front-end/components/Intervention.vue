@@ -8,11 +8,12 @@
       >
         <h2 class="mb-3 interventionTitle">
           Intervention n°{{ intervention.id }} du
-          {{ intervention.dateIntervention | date }} à
-          {{ intervention.pisNom }}
+          {{ intervention.dateDebutIntervention | date }} au
+          {{ intervention.dateFinIntervention  | date}}
         </h2>
       </b-col>
     </b-row>
+    <div v-if="this.step===1">
     <b-row>
       <div class="mb-3">
         Liste des intervenants présents durant l'intervention
@@ -60,7 +61,7 @@
           v-model="formIntervention.strId"
           :options="listebloc"
         />
-        </div>
+      </div>
     </b-row>
     <b-row>
       <br />
@@ -68,47 +69,41 @@
     </b-row>
     <b-row>
       <div class="input-group-display">
-      <b-col 
-      cols="10">
-        <span>Lieu d'intervention * :</span>
-        <b-form-select
-          class="liste-deroulante"
-          v-model="formIntervention.piscine"
-        >
-          <option :value="null">-- Choix de la Piscine --</option>
-          <option
-            v-for="piscine in this.$store.state.mesPiscines"
-            :key="piscine.id"
-            :value="piscine"
+        <b-col cols="10">
+          <span>Lieu d'intervention * :</span>
+          <b-form-select
+            class="liste-deroulante"
+            v-model="formIntervention.piscine"
           >
-            {{ piscine.nom }}
-          </option>
-        </b-form-select>
-      </b-col>
-      <b-col cols="2">
-        <b-btn
-          @click="addPiscine()"
-          class="btn btn-primary btn-lg btn-block"
-        >
-          <i class="material-icons">add</i>
-        </b-btn>
-      </b-col>
+            <option :value="null">-- Choix de la Piscine --</option>
+            <option
+              v-for="piscine in this.$store.state.mesPiscines"
+              :key="piscine.id"
+              :value="piscine"
+            >
+              {{ piscine.nom }}
+            </option>
+          </b-form-select>
+        </b-col>
+        <b-col cols="2">
+          <b-btn @click="addPiscine()" class="btn btn-primary btn-lg btn-block">
+            <i class="material-icons">add</i>
+          </b-btn>
+        </b-col>
       </div>
     </b-row>
-    <b-row>
-      <br>
-    </b-row>
-     <div v-if="formIntervention.piscine">
-      Nom : {{ formIntervention.piscine.nom}} <br>
-      Type : {{formIntervention.piscine.type}} <br>
-      Adresse : {{ formIntervention.piscine.adresse }} {{ formIntervention.piscine.cp}}
+    <div v-if="formIntervention.piscine">
+      Nom : {{ formIntervention.piscine.nom }} <br />
+      Type : {{ formIntervention.piscine.type }} <br />
+      Adresse : {{ formIntervention.piscine.adresse }}
+      {{ formIntervention.piscine.cp }}
     </div>
     <b-row>
       <br />
       <br />
     </b-row>
     <b-row>
-        <span>Période d'intervention * :</span>
+      <span>Période d'intervention * :</span>
     </b-row>
     <b-row>
       <div class="input-group-display">
@@ -136,35 +131,38 @@
       </div>
     </b-row>
     <b-row>
-    <br />
-    <br />
+      <br />
+      <br />
     </b-row>
     <b-row>
       <div class="input-group-display">
         <span> Cadre d'intervention :&nbsp;</span>
-        
-<i class="material-icons" :id="randomId" style="cursor: pointer;">info</i> :
-          <b-popover :target="randomId" triggers="hover focus">
-            <b>Péri-scolaire</b> : concerne les activités organisées durant les jours d’école ainsi que le mercredi, qu’il y ait ou non école le matin.
-            <br>
-            <b>Extra-scolaire</b> : concerne les accueils organisés les samedis sans école, les dimanches et pendant les congés scolaires.
-          </b-popover>
-          <b-form-group class="ml-3">
-            <b-form-radio-group
-              v-model="formIntervention.cai"
-              :options="listecadreintervention"
-              plain
-              name="plainStacked"
-            />
-          </b-form-group>
+
+        <i class="material-icons" :id="randomId" style="cursor: pointer"
+          >info</i
+        >
+        :
+        <b-popover :target="randomId" triggers="hover focus">
+          <b>Péri-scolaire</b> : concerne les activités organisées durant les
+          jours d’école ainsi que le mercredi, qu’il y ait ou non école le
+          matin.
+          <br />
+          <b>Extra-scolaire</b> : concerne les accueils organisés les samedis
+          sans école, les dimanches et pendant les congés scolaires.
+        </b-popover>
+        <b-form-group class="ml-3">
+          <b-form-radio-group
+            v-model="formIntervention.cai"
+            :options="listecadreintervention"
+            plain
+            name="plainStacked"
+          />
+        </b-form-group>
       </div>
-      </b-row>
-<b-row>
-    <br />
-</b-row>
-<b-row >
-   <div class="input-group-display" v-if="formIntervention.cai==1">
-   <span>Classe concernée * :</span>
+    </b-row>
+    <b-row>
+      <div class="input-group-display" v-if="formIntervention.cai == 1">
+        <span>Classe concernée * :</span>
         <b-form-select
           class="liste-deroulante"
           v-model="formIntervention.classe"
@@ -178,22 +176,22 @@
             {{ classe.text }}
           </option>
         </b-form-select>
-   </div>
-</b-row>
-<b-row>
-    <br />
-    <br />
-</b-row>
+      </div>
+    </b-row>
     <b-row>
-        <div class="input-group-display">
-          <span>Nombre d'enfants * :&nbsp;</span>
-          <b-form-input
-            v-model="formIntervention.nbEnfants"
-            type="number"
-            min="0"
-            class="text-cinq-car"
-          ></b-form-input>
-        </div>
+      <br />
+      <br />
+    </b-row>
+    <b-row>
+      <div class="input-group-display">
+        <span>Nombre d'enfants * :&nbsp;</span>
+        <b-form-input
+          v-model="formIntervention.nbEnfants"
+          type="number"
+          min="0"
+          class="text-cinq-car"
+        ></b-form-input>
+      </div>
     </b-row>
     <br />
     <br />
@@ -213,6 +211,8 @@
         </ul>
       </b-row>
     </div>
+    </div>
+
     <b-row>
       <p class="modal-btns">
         <b-button
@@ -225,13 +225,21 @@
           >Annuler</b-button
         >
         <b-button
-          v-on:click="resetform()"
+          v-on:click="resetform();"
           v-if="!intervention.id"
           title="Réinitialiser le formulaire"
           >Réinitialiser le formulaire</b-button
         >
-        <b-button variant="success" v-on:click="checkform"
-          >Enregistrer</b-button
+        <b-button v-on:click="checkform;" v-if="this.step === 2"
+          >Précédent</b-button
+        >
+        <b-button variant="success" v-on:click="checkform" v-if="this.step === 1 && this.newIntervention"
+          >Suivant</b-button
+        >
+         <b-button variant="success" v-on:click="checkform;" v-if="this.step === 1 && !this.newIntervention"
+          >Suivant</b-button
+        >
+         
         >
       </p>
     </b-row>
@@ -243,12 +251,7 @@
     >
       <Intervenant :intervention="this.formIntervention" />
     </modal>
-    <modal
-      name="newPiscine"
-      height="auto"
-      width="1100px"
-      :scrollabe="true"
-    >
+    <modal name="newPiscine" height="auto" width="1100px" :scrollabe="true">
       <Piscine :intervention="this.formIntervention" />
     </modal>
   </b-container>
@@ -270,10 +273,10 @@ var loadFormIntervention = function (intervention) {
           dateDebutIntervention: null,
           dateFinIntervention: null,
           nbSession: "",
-          cadreIntervention: "",
+          cai: "",
           classe: "",
           nbEnfants: "",
-          Enfants: [],
+          enfant: [],
           utilisateur: [],
         },
         intervention
@@ -299,6 +302,7 @@ export default {
         return {};
       },
     },
+    step: null
   },
   computed: {
     filteredMN: function () {
@@ -325,6 +329,7 @@ export default {
   },
   data() {
     return {
+      newIntervention: true,
       erreurformulaire: [],
       headersEncadrants: [
         { path: "nom", title: "Nom", type: "text", sortable: true },
@@ -349,20 +354,23 @@ export default {
       listecadreintervention: [
         { text: `Scolaire`, value: "1" },
         { text: `Péri-scolaire`, value: "2" },
-        { text: `Extra-scolaire (clubs, associations ...)`, value: "3" },
-        { text: `Privé`, value: "4" }
+        { text: `Extra-scolaire`, value: "3" },
+        { text: `Privé`, value: "4" },
       ],
-        listeclasse: [
+      listeclasse: [
         { text: `Petite section`, value: "3" },
         { text: `Moyenne section`, value: "4" },
         { text: `Grande section`, value: "5" },
-        { text: `Cours préparatoire`, value: "6" }
+        { text: `Cours préparatoire`, value: "6" },
       ],
       // Nécessaire pour le fonctionnement des popovers quand plusieurs composants intervention sont sur la page
       randomId: "popover-" + Math.floor(Math.random() * 100000),
     };
   },
   methods: {
+    back: function () {
+      //this.step=1;
+    },
     addPiscine: function () {
       this.$modal.show("newPiscine");
     },
@@ -434,6 +442,7 @@ export default {
         console.info("Formulaire invalide", this.erreurformulaire);
         return;
       }
+      
       const url = process.env.API_URL + "/interventions";
       const intervention = {
         id: this.formIntervention.id,
@@ -470,8 +479,12 @@ export default {
           this.$toast.success(`Intervention ${interventionLabel} enregistrée`, {
             action,
           });
-          this.resetform();
+          //this.resetform();
+          this.newIntervention= false;
+          //this.step=2;
+          this.$store.dispatch("get_intervention",serverIntervention.id)
           this.$modal.hide("editIntervention");
+          //this.$modal.show("editInterventionSuite");
         })
         .catch((error) => {
           console.error(
@@ -483,30 +496,31 @@ export default {
   },
   watch: {
     intervention(intervention) {
-      console.log("avant");
-      console.log(intervention);
       let formIntervention = JSON.parse(
         JSON.stringify(
           Object.assign(
             {
-              structureId: "",
-              piscine: {},
-              maitreNageur: {},
-              dateIntervention: null,
+              structureId: null,
+              piscine: null,
+              dateDebutIntervention: null,
+              dateFinIntervention: null,
+              nbSession: "",
+              cadreIntervention: "",
+              classe: "",
               nbEnfants: "",
-              nbNouveauxEnfants: "",
-              listeEnfants: [],
+              enfants: [],
               utilisateur: [],
             },
             intervention
           )
         )
       );
-      formIntervention.dateIntervention = new Date(
-        formIntervention.dateIntervention
+      formIntervention.dateDebutIntervention = new Date(
+        formIntervention.dateDebutIntervention
       );
-      console.log("apres");
-      console.log(formIntervention);
+            formIntervention.dateFinIntervention = new Date(
+        formIntervention.dateFinIntervention
+      );
       Vue.set(this, "formIntervention", loadFormIntervention(intervention));
     },
     "formIntervention.cp"(cp) {

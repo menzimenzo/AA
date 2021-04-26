@@ -4,6 +4,7 @@ const { formatIntervention } = require('../utils/utils')
 const logger = require('../utils/logger')
 const getUtilisateursFromIntervention = require('./getUtilisateursFromIntervention')
 const getEnfantsFromIntervention = require('./getEnfantsFromIntervention')
+const { Cookie } = require('express-session')
 const log = logger(module.filename)
 
 module.exports = async function (req, res) {
@@ -26,14 +27,14 @@ module.exports = async function (req, res) {
         whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
          LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-         LEFT JOIN structure str on str.str_id = int.str_id
+         LEFT JOIN structure str on str.str_id = int.str_id \
          where uti.uti_id=${user.uti_id} and int.int_id=${id}`
     } else {
         // Laurent : Pour le moment on met la même chose pour les admin pour éviter que ça plante.
         whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
         LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-         LEFT JOIN structure str on str.str_id = int.str_id
+         LEFT JOIN structure str on str.str_id = int.str_id \
          where uti.uti_id=${user.uti_id} and int.int_id=${id}`
     }
 
@@ -45,7 +46,6 @@ module.exports = async function (req, res) {
         intervention = values[0].rows.map(formatIntervention)
         intervention[0].utilisateur = values[1]
         intervention[0].enfant = values[2]
-        log.d(intervention)
-    }).catch(reason => {console.log(reason)})
+     }).catch(reason => {console.log(reason)})
     return intervention
 }

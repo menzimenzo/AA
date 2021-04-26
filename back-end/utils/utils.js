@@ -76,8 +76,6 @@ module.exports = {
     const result = {
       id: intervention.int_id,
       nbEnfants: intervention.int_nombreenfant,
-      strId: intervention.str_id,
-      pisId: intervention.pis_id,
       piscine: {
         nom: intervention.pis_nom,
         id: intervention.pis_id,
@@ -87,8 +85,12 @@ module.exports = {
         x: intervention.pis_x,
         y: intervention.pis_y
       },
+      strId: intervention.str_id,
       strNom: intervention.str_libellecourt,
-      dateIntervention: new Date(intervention.int_dateintervention),
+      cai: intervention.int_cai,
+      classe:intervention.int_age,
+      dateDebutIntervention: new Date(intervention.int_datedebutintervention),
+      dateFinIntervention: new Date(intervention.int_datefinintervention),
       dateCreation: new Date(intervention.int_datecreation),
       dateMaj: intervention.int_datemaj
     }

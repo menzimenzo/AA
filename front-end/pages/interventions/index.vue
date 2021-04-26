@@ -31,8 +31,11 @@
               </b-col>
             </b-form-row>
           </b-card-header>
-          <b-collapse id="accordion1" accordion="my-accordion" role="tabpanel">
-            <Intervention :intervention="interventionCourrante" />
+          <b-collapse id="accordion1" accordion="my-accordion" role="tabpanel" v-if="interventionCourrante.id == null ">
+            <Intervention :intervention="interventionCourrante" :step="step" />
+          </b-collapse>
+          <b-collapse id="accordion1" accordion="my-accordion" role="tabpanel" v-else>
+            <TableauEnfant :intervention="interventionCourrante" :step="step"/>
           </b-collapse>
         </b-card>
         <!--  ACCORDEON -- MES INTERVENTIONS -->
@@ -86,7 +89,7 @@
                         :data="this.interventionsToDisplay"
                         :removable="false"
                         :creable="false"
-                        :editable="false"
+                        :editable="true"
                         :noDataLabel="''"
                         tableMaxHeight="none"
                         :loading="loadingInt"
@@ -280,6 +283,7 @@
 
 <script>
 import Intervention from "~/components/Intervention.vue";
+import TableauEnfant from "~/components/tableauEnfant.vue";
 import Piscine from "~/components/piscine.vue";
 import { mapState } from "vuex";
 import Editable from "~/components/editable/index.vue";
@@ -289,9 +293,11 @@ export default {
     Intervention,
     Editable,
     Piscine,
+    TableauEnfant
   },
   data() {
     return {
+      step: 1,
       loadingInt: false,
       interventionsToDisplay: null,
       headers: [
@@ -556,8 +562,8 @@ export default {
   async mounted() {
     await Promise.all([
       this.$store.dispatch("get_mesPiscines"),
-      this.$store.dispatch("get_interventions"),
     ]);
+    this.$store.dispatch("get_interventions")
   },
 };
 </script>
