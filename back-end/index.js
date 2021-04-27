@@ -63,7 +63,9 @@ const demandeaaq         = require('./routes/demandeaaq');
 // Route vers la page de connexion
 app.use(config.URL_PREFIX + '/connexion', connexion);
 
-app.use(config.URL_PREFIX + '/interventions', interventions);
+//app.use(config.URL_PREFIX + '/interventions', interventions);
+app.use(config.URL_PREFIX + '/pageenconstruction', interventions);
+
 
 app.use(config.URL_PREFIX + '/listecommune', listecommune);
 

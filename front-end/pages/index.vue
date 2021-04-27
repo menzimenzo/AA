@@ -90,7 +90,8 @@ export default {
               return this.$router.push('/formateur')
             }
             if (this.$store.state.utilisateurCourant.profilId == 4) {
-              return this.$router.push('/interventions')
+              //return this.$router.push('/interventions')
+              return this.$router.push('/pageenconstruction')
             } else
             {
               return this.$router.push('/accueil')

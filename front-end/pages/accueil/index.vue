@@ -31,7 +31,7 @@
                   </b-form-select>
                 <b-button variant="success" v-on:click="validerFormateur()">Valider</b-button>
               </b-form-group>    
-          </b-form>s
+          </b-form>
         </b-card>            
         <b-card class="mb-3" v-else>
           <b-form> 

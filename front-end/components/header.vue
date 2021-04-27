@@ -12,7 +12,9 @@
     </b-row>
     <div class="accountMenu" v-if="utilisateurCourant">
       <div >
-        <nuxt-link to="/interventions" v-if="utilisateurCourant.profilId == 3 || utilisateurCourant.profilId == 4">
+        <nuxt-link to="/pageenconstruction" v-if="utilisateurCourant.profilId == 3 || utilisateurCourant.profilId == 4">
+<!--        <nuxt-link to="/interventions" v-if="utilisateurCourant.profilId == 3 || utilisateurCourant.profilId == 4">
+-->
           <b-img fluid :src="require('assets/ico_nage.png')" blank-color="rgba(0,0,0,0.5)" img-alt="Interventions" />
           Interventions 
         </nuxt-link>
