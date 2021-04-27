@@ -5,7 +5,9 @@ const logedOutRoutes = ['/']
 const adminRoutes = ['/admin']
 const partenaireRoutes = ['/partenaire']
 const fournisseurRoutes = ['/fournisseur']
-const interventionsRoutes = ['/interventions']
+//const interventionsRoutes = ['/interventions']
+const interventionsRoutes = ['/pageenconstruction']
+
 const accueilRoutes = ['/accueil']
 
 export default async function({ env, route, store, req, res, redirect, app, isServer }) {
@@ -55,7 +57,7 @@ export default async function({ env, route, store, req, res, redirect, app, isSe
 
             // Formateur ou MN AAQ On redirige vers interventions
             if (store.state.utilisateurCourant.profilId == 3 || store.state.utilisateurCourant.profilId == 4 ) {
-                return redirect('/interventions')
+                return redirect(interventionsRoutes)
             }
             // Maitre nageur de base sans autorisation, on redirige vers la page d'accueil MN
             if (store.state.utilisateurCourant.profilId == 5) {
