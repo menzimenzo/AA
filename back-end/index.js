@@ -58,7 +58,7 @@ const pdf           = require('./routes/pdf');
 const user          = require('./routes/user');
 const documents     = require('./routes/documents');
 const batch         = require('./routes/batch');
-const exp         = require('./routes/exp');
+const exp         = require('./routes/export');
 const demandeaaq         = require('./routes/demandeaaq');
 
 // Route vers la page de connexion
@@ -95,7 +95,7 @@ app.get(config.URL_PREFIX + '', function (req, res) {
 
 app.use(config.URL_PREFIX + '/batch', batch);
 
-app.use(config.URL_PREFIX + '/exp', exp);
+app.use(config.URL_PREFIX + '/export', exp);
 
 app.listen(3001, function () {
     console.log('Example app listening on port 3001!')

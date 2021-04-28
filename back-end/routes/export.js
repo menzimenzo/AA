@@ -62,7 +62,8 @@ router.get('/', async function (req, res) {
     })
 
     log.i('::export - Done')
-    return res.status(200).json('OK')
+    return res.status(200).csv({ csvContent });
+
 });
 
 // V1.0.1 : Création du socle technique pour l'envoie de mail de relance
