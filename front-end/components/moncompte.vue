@@ -181,7 +181,7 @@
             >
               <b-form-select 
                 class="liste-deroulante"
-                v-model="user.codeinsee"
+                v-model="user.cpi_codeinsee"
                 name="lstcommune"
                 v-validate="{ required: true, min:5, max:5}"
                 :state="validateState('lstcommune')"
