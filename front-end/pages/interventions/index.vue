@@ -378,8 +378,6 @@ export default {
     interventions: function () {
       this.loadingInt = true;
       if (this.utilisateurCourant.profilId == 2) {
-        //console.info('suppression interventions hors structure_id : '+this.utilisateurCourant.structureId)
-        //console.info('nb inter avant: '+ this.interventions.length)
         this.interventionsToDisplay = this.interventions.filter((x) => {
           var isMatch = true;
           isMatch =
@@ -388,7 +386,6 @@ export default {
               String(x.utiId) == this.utilisateurCourant.id);
           return isMatch;
         });
-        //console.info('nb inter apres filtrage structure: '+ this.interventionsToDisplay.length)
       } else {
         this.interventionsToDisplay = this.interventions;
       }
@@ -407,7 +404,6 @@ export default {
       return this.$store
         .dispatch("get_intervention", idIntervention)
         .then(() => {
-          console.log('_________________')
           console.log(this.$store.state.interventionCourrante)
           this.$modal.show("editIntervention");
         })

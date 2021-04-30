@@ -84,7 +84,6 @@ router.post('/', function (req, res) {
                 }
             else {
                     const mesPiscines = resu.rows[0];
-                    console.log(mesPiscines)
                     return res.status(200).json({ maPiscine: mesPiscines });
                 }
             });

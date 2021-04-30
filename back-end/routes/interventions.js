@@ -224,7 +224,6 @@ router.put('/:id', async function (req, res) {
     const user = req.session.user
     const id = req.params.id
     log.i('::update - In', { id })
-    console.log(intervention)
     let { strId, nbEnfants, piscine, dateIntervention,
         utilisateur } = intervention
 
@@ -253,7 +252,6 @@ router.put('/:id', async function (req, res) {
             log.i('::update - Done')
             // generation du pdf (synchrone)
 
-            console.log(result.rows.map(formatIntervention)[0])
             //return res.status(200).json({ intervention: result.rows.map(formatIntervention)[0] });
             const params = {
                 id: id,
@@ -279,6 +277,7 @@ router.post('/', async function (req, res) {
 
     log.d('::post - requete', { requete });
 
+    
 
     await pgPool.query(requete, [intervention.piscine.id,
     intervention.strId,
@@ -305,7 +304,6 @@ router.post('/', async function (req, res) {
                     user: user
                 }
                 let inter = await getIntervention(params)
-                console.log(inter[0])
                 return res.status(200).json({ intervention: inter[0] })
             })
             

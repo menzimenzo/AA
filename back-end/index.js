@@ -52,6 +52,7 @@ const listecommune  = require('./routes/listecommune');
 const listedepartement  = require('./routes/listedepartement');
 const listepci  = require('./routes/listepci');
 const piscine  = require('./routes/piscine');
+const enfant  = require('./routes/enfant');
 const attestations  = require('./routes/attestations');
 const structures    = require('./routes/structures');
 const pdf           = require('./routes/pdf');
@@ -71,6 +72,8 @@ app.use(config.URL_PREFIX + '/listedepartement', listedepartement);
 app.use(config.URL_PREFIX + '/listepci', listepci);
 
 app.use(config.URL_PREFIX + '/piscine', piscine);
+
+app.use(config.URL_PREFIX + '/enfant', enfant);
 
 app.use(config.URL_PREFIX + '/attestations', attestations);
 

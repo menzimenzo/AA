@@ -304,24 +304,7 @@ export default {
     },
     step: null
   },
-  computed: {
-    filteredMN: function () {
-      if (this.nameFilter.length > 2) {
-        return this.listeMaitreNageur.filter((mn) => {
-          // Suppression des interventions sans commentaire
-          let isMatch = mn.nom;
-          if (this.nameFilter.length > 2) {
-            isMatch =
-              isMatch &&
-              mn.nom.toLowerCase().indexOf(this.nameFilter.toLowerCase()) > -1;
-          }
-          return isMatch;
-        });
-      } else {
-        return [];
-      }
-    },
-  },
+ 
   components: {
     Editable,
     Intervenant,
@@ -403,7 +386,6 @@ export default {
     },
     checkform: function () {
       console.info("Validation du formulaire");
-      console.log(this.formIntervention.piscine);
       this.erreurformulaire = [];
       var formOK = true;
 

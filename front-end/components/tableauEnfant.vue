@@ -43,22 +43,6 @@
       </div>
     </b-row>
 
-    <div id="error" v-if="erreurformulaire.length == 1">
-      <b-row>
-        Veuillez renseigner le champ :
-        <ul>
-          <li v-for="erreur in erreurformulaire" :key="erreur">{{ erreur }}</li>
-        </ul>
-      </b-row>
-    </div>
-    <div id="error" v-if="erreurformulaire.length > 1">
-      <b-row>
-        Veuillez renseigner les champs suivants :
-        <ul>
-          <li v-for="erreur in erreurformulaire" :key="erreur">{{ erreur }}</li>
-        </ul>
-      </b-row>
-    </div>
     <b-row>
       <p class="modal-btns">
         <b-button
@@ -72,13 +56,21 @@
        
       </p>
     </b-row>
-    
+   <modal
+      name="editEnfant"
+      height="auto"
+      width="1100px"
+      :scrollabe="true"
+    >
+      <Enfant :enfant="this.enfantToDisplay" :intervention="intervention"/>
+    </modal>
   </b-container>
 </template>
 <script>
 import Vue from "vue";
 import moment from "moment";
 import Editable from "~/components/editable/index.vue";
+import Enfant from "~/components/enfant.vue";
 
 var loadFormIntervention = function (intervention) {
   let formIntervention = JSON.parse(
@@ -121,11 +113,13 @@ export default {
     },
   },
   components: {
-    Editable
+    Editable,
+    Enfant
   },
   data() {
     return {
       step: null,
+      enfantToDisplay:null,
       erreurformulaire: [],
       headersEnfants: [
         { path: "enf_id", title: "Identifiant", type: "text", sortable: true },
@@ -147,11 +141,11 @@ export default {
   },
   methods: {
     editEnfant: function (enfant) {
-      console.log(enfant)
+      this.enfantToDisplay=enfant
+      this.$modal.show('editEnfant')
     },
     checkform: function () {
       console.info("Validation du formulaire");
-      console.log(this.formIntervention.piscine);
       this.erreurformulaire = [];
       var formOK = true;
 
@@ -241,6 +235,7 @@ export default {
   },
   watch: {
     intervention(intervention) {
+      console.log('watch')
       let formIntervention = JSON.parse(
         JSON.stringify(
           Object.assign(
@@ -253,7 +248,7 @@ export default {
               cadreIntervention: "",
               classe: "",
               nbEnfants: "",
-              enfants: [],
+              enfant: [],
               utilisateur: [],
             },
             intervention
