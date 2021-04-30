@@ -22,13 +22,14 @@ router.get('/', async function (req, res) {
     var requete = "";
 
     log.d('::export - Recherche des données : ' + requete);
-    requete =`SELECT uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, lower(uti_mail) as Courriel,  
-    replace(replace(uti_validated::text,'true','Validée'),'false','Non validée') as inscription, replace(replace(uti_publicontact::text,'true','Oui'),'false','Non') AutorisePublicationContact, 
+    requete =`SELECT uti.uti_id As Identifiant, rol_libelle as Role, lower(uti_mail) as Courriel, replace(replace(uti_publicontact::text,'true','Oui'),'false','Non') AutorisePublicationContact, 
     lower(uti_mailcontact) MailContact, uti_sitewebcontact SiteInternetContact, uti_telephonecontact TelephoneContact, uti_adrcontact AdresseContact,
     uti_compadrcontact ComplementAdresseContact, uti_com_cp_contact CodePostalContact, uti_com_codeinseecontact CodeInseeContact, com_art ArtCommune, com_libelle LibelleCommune, dep_num Departement
     from utilisateur  uti
-    join profil rol on rol.rol_id = uti.rol_id 
+    inner join profil rol on rol.rol_id = uti.rol_id  and rol.rol_id in (3,4,5)
+    inner join ref_eaps eaps on eaps.eap_numero = uti.uti_eaps
     left join commune com on cpi_codeinsee = uti.uti_com_codeinseecontact
+    where uti.uti_validated = true and uti.uti_publicontact = true
     order by 3,4 asc`;
 
     pgPool.query(requete, (err, result) => {
