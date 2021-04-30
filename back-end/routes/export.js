@@ -26,7 +26,6 @@ router.get('/', async function (req, res) {
     replace(replace(uti_validated::text,'true','Validée'),'false','Non validée') as inscription, replace(replace(uti_publicontact::text,'true','Oui'),'false','Non') AutorisePublicationContact, 
     lower(uti_mailcontact) MailContact, uti_sitewebcontact SiteInternetContact, uti_telephonecontact TelephoneContact, uti_adrcontact AdresseContact,
     uti_compadrcontact ComplementAdresseContact, uti_com_cp_contact CodePostalContact, uti_com_codeinseecontact CodeInseeContact, com_art ArtCommune, com_libelle LibelleCommune, dep_num Departement
-
     from utilisateur  uti
     join profil rol on rol.rol_id = uti.rol_id 
     left join commune com on cpi_codeinsee = uti.uti_com_codeinseecontact
@@ -40,6 +39,7 @@ router.get('/', async function (req, res) {
         }
         else {
             const csv = result.rows;
+            log.d(csv)
             if (!csv || !csv.length) {
                 log.w('::csvopendatasoft - Résultat vide.')
                 //logTrace('aaq-csvods',2,startTime);
@@ -47,14 +47,16 @@ router.get('/', async function (req, res) {
             }
             stringify(csv, {
                 quoted: '"',
-                header: true
+                header: true,
+                escape: '\n'
             }, (err, csvContent) => {
                 if(err){
                     log.w('::csv - erreur',err)
                     //logTrace('aaq-csvods',3,startTime);
                     return res.status(500)
                 } else {
-                    return res.status(200).json({ csvContent });
+                    log.d(csvContent)
+                    return res.send(csvContent);
 
                 }
             })            
@@ -62,7 +64,7 @@ router.get('/', async function (req, res) {
     })
 
     log.i('::export - Done')
-    return res.status(200).csv({ csvContent });
+
 
 });
 
