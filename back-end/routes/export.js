@@ -57,9 +57,10 @@ router.get('/', async function (req, res) {
                     return res.status(500)
                 } else {
                     log.d(csvContent)
-                    return res.send(csvContent);
-
-                }
+                    //return res.send(csvContent);
+                    res.header('Content-Type','text/csv')
+                    //res.attachment(csvContent)
+                    return res.send(csvContent)               }
             })            
         }
     })
