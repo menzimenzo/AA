@@ -57,6 +57,12 @@ router.get('/', async function (req, res) {
                     return res.status(500)
                 } else {
                     log.d(csvContent)
+                    if (req.query.csv) 
+                    {
+                        res.setHeader('Content-disposition', 'attachment; filename=shifts-report.csv');
+                        res.set('Content-Type', 'text/csv');
+                        res.attachment(csvContent)
+                    }
                     return res.send(csvContent);
 
                 }

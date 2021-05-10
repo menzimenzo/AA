@@ -106,9 +106,20 @@ router.get('/csv', async function (req, res) {
         left join commune com on cpi_codeinsee = uti.uti_com_codeinseecontact
         order by 3,4 asc`;
     } 
-    // Je suis utilisateur "Partenaire" ==> Export de la liste des interventants
+    // Je suis utilisateur "Formateur" ==> Export de la liste des maitres nageurs qui m'ont fait la demande
+    if ( utilisateurCourant.rol_id == 3 ) {
+        requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, lower(uti_mail) as Courriel,  
+        to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
+
+        from utilisateur  uti
+        inner join profil rol on rol.rol_id = uti.rol_id 
+        inner join demande_aaq dem on dem.dem_uti_formateur_id = ${utilisateurCourant.uti_id} and dem.dem_uti_demandeur_id = uti.uti_id
+        left join commune com on cpi_codeinsee = uti.uti_com_codeinseecontact
+        order by 3,4 asc`;
+    } 
+    else
     // TODO : Refaire l'export pour les autre profils
-    else {
+    {
         requete =`SELECT uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, lower(uti_mail) as Courriel, 
         replace(replace(uti_validated::text,'true','Validée'),'false','Non validée') as inscription , stu.stu_libelle Statut_Utilisateur,
         str.str_libellecourt As Structure, uti.uti_structurelocale As Struture_Locale
