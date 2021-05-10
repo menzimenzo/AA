@@ -76,6 +76,7 @@
           id="eapsInputGroup"
           label-for="eapsInput"
           required
+          v-if="user.profilId!=1"
           >
           <b-form-input
             id="eapsInput"
