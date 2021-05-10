@@ -85,16 +85,21 @@ router.post('/verify', async (req,res) => {
     } 
 
     // Pour un maitre nageur, vérifier si le numéro EAPS est présent dans la table ref_eaps
-    if (user.eaps != '') {
-        log.d('::verify - Recherche numéro EAPS') 
-        const eapslExistenceQuery = await pgPool.query(`SELECT eap_numero FROM ref_eaps WHERE eap_numero='${user.uti_eaps}'`).catch(err => {
-            log.w(err)
-            throw err
+    // Exception pour l'admin
+    if (user.rol_id != 1)
+    {
+        if (user.eaps != '') {
+            log.d('::verify - Recherche numéro EAPS') 
+            const eapslExistenceQuery = await pgPool.query(`SELECT eap_numero FROM ref_eaps WHERE eap_numero='${user.uti_eaps}'`).catch(err => {
+                log.w(err)
+                throw err
 
-        })
-        if (eapslExistenceQuery.rowCount == 0) {
-            return res.status(200).json({nonAuthorizedUser: 'Vous n\'êtes pas autorisé(e) à vous créer un compte (carte professionnelle invalide)'})
+            })
+            if (eapslExistenceQuery.rowCount == 0) {
+                return res.status(200).json({nonAuthorizedUser: 'Vous n\'êtes pas autorisé(e) à vous créer un compte (carte professionnelle invalide)'})
+            }
         }
+
     }
 
     log.d('::verify - Mise à jour de l\'utilisateur existant', { insee: user.uti_com_codeinseecontact, mailcontact: user.uti_mailcontact })   

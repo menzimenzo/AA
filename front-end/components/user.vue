@@ -44,6 +44,7 @@
             label="Numéro de carte professionnelle :"
             id="eapsInputGroup"
             label-for="eapsInput"
+            v-if="formUser.role!=1"
             >
             <b-form-input
               id="eapsInput"
