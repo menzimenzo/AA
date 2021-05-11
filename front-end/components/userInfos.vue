@@ -202,8 +202,8 @@
             name="publiCheck"
           >
             <b-form-checkbox >
-              Je souhaite que ces données soient publiées sur le site "prévention des noyades" et qu'elles apparaissent sur la cartographie             
-
+              Je souhaite que ces données soient publiées sur le site "prévention des noyades" et qu'elles apparaissent sur la cartographie.<br>
+              Si vous ne cochez pas cette case vous pourrez tout de même créer des interventions et générer des attestations lorsque vous aurez accès à l'espace "interventions".
             </b-form-checkbox> 
           </b-form-checkbox-group>
         </b-form-group>

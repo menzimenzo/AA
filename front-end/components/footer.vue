@@ -6,6 +6,8 @@
               SI Aisance Aquatique - Version 1.0.0
           </b-col>
           <b-col cols="12 text-center">
+              Support :<i class="material-icons ml-2 mr-1" >mail</i>Appli.Aisance.Aquatique@sports.gouv.fr
+              <br>
               Contact :<i class="material-icons ml-2 mr-1" >mail</i>AisanceAquatique@sports.gouv.fr
           </b-col>
 

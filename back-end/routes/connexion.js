@@ -115,7 +115,7 @@ router.post('/verify', async (req,res) => {
         log.d('::verify - Mail de confirmation envoyé.')
         sendEmail({
             to: user.uti_mail,
-            subject: 'création compte Aisance Aquatique',
+            subject: 'création compte, site prévention des noyades,  recensement des maitres nageurs',
             body: `<p>Bonjour,</p>
                 <p>Votre compte a bien été créé. <br/><br/>
                 Nous vous invitons à faire votre demande auprès de votre formateur Aisance Aquatique la demande d'activation de compte « Aisance Aquatique » .<br/>

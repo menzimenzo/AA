@@ -36,11 +36,11 @@ module.exports = {
             from: SENDER_EMAIL,
             replyTo: SENDER_EMAIL,
             to: email,
-            subject: `Validez votre email "${siteName}"`,
+            subject: `Validez votre email, site prévention des noyades,  recensement des maitres nageurs`,
             body: `
             <p>Bonjour,</p>
 
-            <p>Vous recevez ce mail car vous vous êtes inscrit sur le site ${siteName}</p>
+            <p>Vous recevez ce mail car vous vous êtes inscrit sur le site prévention des noyades maitres-nageurs</p>
 
             <p>Afin de bénéficier de toutes les fonctionnalités, veuillez valider votre email en cliquant sur le lien suivant:</p>
 
