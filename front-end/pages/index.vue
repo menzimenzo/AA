@@ -8,7 +8,7 @@
       </b-col>
       <b-col   class="col-8 col-md-4" >
         <b-row >
-          <p class="aa-bouton-connexion"  v-if="this.b_MN" @click="SeLoguer('MN')">▷ Je suis maître nageur/formateur<br>Je m’identifie et renseigne mes données<br><br></p>
+          <p class="aa-bouton-connexion"  v-if="this.b_MN" @click="SeLoguer('MN')">▷ Je suis maître nageur<sup>(1)</sup>/formateur<br>Je m’identifie et renseigne mes données<br><br></p>
         </b-row>
         <b-row >
           <p class="aa-bouton-connexion" v-if="this.b_AS" @click="SeLoguer('AS')">▷ J'appartiens à une structure actrice du dispositif AAQ<br><br></p>
@@ -38,6 +38,22 @@
         </b-col>
       </b-row>
     </div>
+    
+
+    <div>
+
+      <b-row class="text-center" >
+        <b-col cols="12">
+          <br>
+          <span class="renvoiBasDePage">
+            (1) un maitre-nageur est un éducateur sportif professionnel détenteur d’une carte professionnelle, qualifié pour encadrer contre rémunération l’apprentissage de la natation( ex : BPJEPS AAn, DEJEPS Triathlon, Licence staps entrainement sportif « natation » ...
+          </span>
+            
+        </b-col>
+      </b-row>
+    </div>
+
+
   </b-container>
 </template>
 
@@ -131,6 +147,10 @@ export default {
 
 
 <style>
+.renvoiBasDePage {
+  text-align: center;
+  color:gray
+}
 .subtitle {
   font-weight: 300;
   font-size: 42px;
