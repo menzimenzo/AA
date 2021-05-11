@@ -58,6 +58,7 @@ const pdf           = require('./routes/pdf');
 const user          = require('./routes/user');
 const documents     = require('./routes/documents');
 const batch         = require('./routes/batch');
+const parametres         = require('./routes/parametres');
 const exp         = require('./routes/export');
 const demandeaaq         = require('./routes/demandeaaq');
 
@@ -94,6 +95,8 @@ app.get(config.URL_PREFIX + '', function (req, res) {
 });
 
 app.use(config.URL_PREFIX + '/batch', batch);
+
+app.use(config.URL_PREFIX + '/parametres', parametres);
 
 app.use(config.URL_PREFIX + '/export', exp);
 
