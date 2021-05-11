@@ -10,7 +10,7 @@
                 <!-- IMAGE RAYEE BANNER INTERVENTION -->
                 <b-img
                   fluid
-                  :src="require('assets/banner_ray_red.png')"
+                  :src="require('assets/banner_ray_blue.png')"
                   blank-color="rgba(0,0,0,0.5)"
                 />
                 <b-btn
@@ -81,7 +81,7 @@
             <b-form-row>
               <b-col>
                 <!-- IMAGE RAYEE BANNER INTERVENTION -->
-                <b-img :src="require('assets/banner_ray_red.png')" blank-color="rgba(0,0,0,1)" />
+                <b-img fluid :src="require('assets/banner_ray_blue.png')" blank-color="rgba(0,0,0,1)" />
                 <b-btn
                   class="accordionBtn"
                   block
