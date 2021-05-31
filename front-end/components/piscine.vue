@@ -77,7 +77,7 @@ export default {
         return this.$axios
           .$get(url)
           .then((response) => {
-            this.listepiscine = response.piscines;
+            this.listepiscine = response.piscines;         
           })
           .catch((error) => {
             console.error(

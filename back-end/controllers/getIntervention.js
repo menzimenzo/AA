@@ -48,4 +48,5 @@ module.exports = async function (req, res) {
         intervention[0].enfant = values[2]
      }).catch(reason => {console.log(reason)})
     return intervention
+    
 }

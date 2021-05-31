@@ -61,7 +61,8 @@ module.exports = {
     proxyHeaders: true
   },
   css: ['~/node_modules/vue-js-modal/dist/styles.css',
-        '~/node_modules/glyphicons-only-bootstrap/css/bootstrap.min.css'
+        '~/node_modules/glyphicons-only-bootstrap/css/bootstrap.min.css',
+        '~/node_modules/vue-js-modal/dist/styles.css'
   ],
   env: {
     // Utilisé côté client, url publique

@@ -7,5 +7,7 @@ module.exports = {
     getEnfantsFromIntervention: require('./getEnfantsFromIntervention'),
     postUtilisateursForIntervention: require('./postUtilisateursForIntervention'),
     postEnfantsForIntervention: require('./postEnfantsForIntervention'),
-    putEnfant: require('./putEnfant')
+    putEnfant: require('./putEnfant'),
+    deleteEnfant: require('./deleteEnfant'),
+    getEnfant: require('./getEnfant')
 }

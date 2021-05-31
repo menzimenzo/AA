@@ -115,6 +115,7 @@ router.get('/encadrant', async function (req, res) {
         }
         else {
             const encadrants = result.rows;
+            log.i('::encadrant - Done')
             res.json({ encadrants });
         }
     })

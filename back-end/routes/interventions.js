@@ -35,6 +35,7 @@ const formatIntervention = intervention => {
         strNom: intervention.str_libellecourt,
         cai: intervention.int_cai,
         classe:intervention.int_age,
+        nbSession:intervention.int_nbsession,
         dateDebutIntervention: new Date(intervention.int_datedebutintervention),
         dateFinIntervention: new Date(intervention.int_datefinintervention),
         dateCreation: new Date(intervention.int_datecreation),
@@ -199,10 +200,9 @@ router.get('/', async function (req, res) {
             let interventions = result.rows.map(formatIntervention);
 
             for (const [key, intervention] of Object.entries(interventions)) {
-                await Promise.all([getUtilisateursFromIntervention(intervention.id)], getEnfantsFromIntervention(intervention.id)).then(values => {
+                await Promise.all([getUtilisateursFromIntervention(intervention.id), getEnfantsFromIntervention(intervention.id)]).then(values => {
                     interventions[key].utilisateur = values[0];
                     interventions[key].enfant = values[1];
-                    //log.d(interventions[key])
                 })
             }
             res.json({ interventions });
@@ -269,15 +269,9 @@ router.post('/', async function (req, res) {
     const intervention = req.body.intervention
     if ( ! intervention.classe) { intervention.classe = null}
 
-    //console.log(intervention)
-    //insert dans la table intervention
     const requete = `insert into intervention 
                     (pis_id,str_id,int_nombreenfant,int_datedebutintervention,int_datefinintervention,int_nbsession, int_cai, int_age,int_datecreation,int_datemaj) 
                     values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10 ) RETURNING int_id AS int_id`;
-
-    log.d('::post - requete', { requete });
-
-    
 
     await pgPool.query(requete, [intervention.piscine.id,
     intervention.strId,
@@ -296,7 +290,7 @@ router.post('/', async function (req, res) {
         else {
             log.d('::post - insert dans intervention Done');
             let int_id = result.rows[0].int_id;
-            await Promise.all([postUtilisateursForIntervention([intervention.utilisateur, int_id]),postEnfantsForIntervention([intervention.nbEnfants, int_id])]).then(async () => {
+            await Promise.all([postUtilisateursForIntervention([intervention.utilisateur, int_id]),postEnfantsForIntervention([intervention.enfant, int_id])]).then(async () => {
                 
                 const user = req.session.user
                 const params = {
@@ -304,6 +298,7 @@ router.post('/', async function (req, res) {
                     user: user
                 }
                 let inter = await getIntervention(params)
+                log.i('::post - Done')
                 return res.status(200).json({ intervention: inter[0] })
             })
             

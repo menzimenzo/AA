@@ -5,42 +5,28 @@ const logger = require('../utils/logger')
 const log = logger(module.filename)
 
 module.exports = async function (req, res) {
-    const nbEnfants= req[0]
+    const enfant= req[0]
     const id = req[1]
 
-    var insertEnfant =  async (x,i) => {
-        const insertenf = `insert into enfant(enf_prenom) values(null) RETURNING enf_id`
-        await pgPool.query(insertenf, [])
-        .then( async res => {
-            log.d('::post - insert Enfant - int N°' + id + ' création enfant n°' + res.rows[0].enf_id + ' Done');
-            enf[i]=res.rows[0].enf_id
-        }) 
-        .catch(err => console.error('Error executing query', err.stack))
-        
-    }
+    log.i('::post - In')
+    for (var i = 0; i < enfant.length ; i++) {
+        const requete =  `insert into enfant(enf_prenom) values($1) RETURNING enf_id`
+        const insertenf = await pgPool.query(requete,[enfant[i].prenom]).catch(err => {
+            log.w('::POST - Erreur survenue lors de la l\'insertion dans la table enfant.', { requete, err: err.stack })
+            return res.status(400).json('Erreur survenue lors de la l\'insertion dans la table enfant');
+        })
+        if (insertenf) {
+            log.d('::post - insert Enfant '+insertenf.rows[0].enf_id + '- Done');
+            const secondeRequete = `insert into int_enf(int_id,enf_id,niv_ini,niv_fin) values ($1,$2,$3,$4)`
+            const insertintenf = await pgPool.query(secondeRequete,[id, insertenf.rows[0].enf_id,enfant[i].niv_ini,enfant[i].niv_fin]).catch(err => {
+                log.w('::POST - Erreur survenue lors de la l\'insertion dans la table int_enf.', { secondeRequete, err: err.stack })
+                return res.status(400).json('Erreur survenue lors de la l\'insertion dans la table int_enf');
+            })
+            if (insertintenf) {
+                log.d('::post - insert Enfant - int N°' + id + ' enfant n°' + insertenf.rows[0].enf_id + ' Done');
+            }
 
-    var enf = new Array(nbEnfants)
-    for (var i = 1; i < nbEnfants; i++) {
-        enf.push(i)
-    }
-
-    var actions = enf.map(insertEnfant)
-    await Promise.all(actions)
-    .then( async () => {
-        console.log('fin création des enfants')
-
-        var insertIntEnf =  async (enfId) => {
-            const insertintenf = `insert into int_enf(int_id,enf_id,niv_ini) values ($1,$2,0)`
-            await pgPool.query(insertintenf, [id, enfId])
-            .then( async res => {
-                log.d('::post - insert int_enf - int N°' + id + ' ajout enfant n°' + enfId + ' Done');
-            }) 
-            .catch(err => console.error('Error executing query', err.stack))
         }
-        var secondeActions = enf.map(insertIntEnf)
-        await Promise.all(secondeActions)
-            .then(() => {console.log('fin insertion int_enf')})
-            .catch(err => console.error('Error executing query', err.stack))
-    })
-    .catch(err => console.error('Error executing query', err.stack))
+    }
+    log.i('::post - Done')
 }

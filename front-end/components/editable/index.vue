@@ -341,20 +341,20 @@ export default {
             }
         },
         confirmRemove(item) {
-            this.$modal.show('dialog', {
+            /*this.$modal.show('dialog', {
                 title: this.confirmRemoveTitle,
                 text: this.confirmRemoveText,
                 buttons: [
                     {
                         title: '<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp; Oui, supprimer cet élément',
-                        handler: () => {
+                        handler: () => {*/
                             this.$emit('remove', item)
-                            this.$modal.hide('dialog')
+                            /*this.$modal.hide('dialog')
                         }
                     },
                     { title: '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp; Annuler' }
                 ]
-            })
+            })*/
         },
         clean() {
             this.editingIndex = null

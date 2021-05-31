@@ -4,7 +4,7 @@ const pgPool = require('../pgpool').getPool()
 const logger = require('../utils/logger')
 const log = logger(module.filename)
 
-module.exports = function (req, res) {
+module.exports =  async function (req, res) {
     log.i('::put - In')
     const enfant = req[0]
     const id = req[1]
@@ -15,26 +15,25 @@ module.exports = function (req, res) {
         RETURNING *
         ;`;
 
-    pgPool.query(requete, [enfant.prenom, enfant.enf_id], (err, result) => {
-        if (err) {
+    const tutu = await pgPool.query(requete, [enfant.prenom, enfant.enf_id]).catch(err=> {
             log.w('::put - Erreur survenue lors de la mise à jour du prénom.', { requete, err: err.stack })
             return res.status(400).json('erreur lors de la mise à jour du prénom de l\'enfant' + enfant.enf_id);
-        }
-        else {
+    })
+
+        if (tutu) {
             log.i('::put - mise à jour table enfant - Done')
             const secondeRequete = `update int_enf set niv_ini=$1,niv_fin=$2 
             WHERE enf_id = $3 and int_id=$4
             RETURNING *
             ;`;
-            pgPool.query(secondeRequete, [enfant.niv_ini, enfant.niv_fin, enfant.enf_id, id], (err, result) => {
-                if (err) {
+            const toto = await pgPool.query(secondeRequete, [enfant.niv_ini, enfant.niv_fin, enfant.enf_id, id]).catch(err => {
                     log.w('::put - Erreur survenue lors de la mise à jour du niveau de l\'enfant.', { requete, err: err.stack })
                     return res.status(400).json('erreur lors de la mise à jour du niveau de l\'enfant' + enfant.enf_id);
-                }
-                else {
-                    log.i('::put - Done')
-                }
             })
+            if (toto) {
+                    log.i('::put - Done') 
+                    console.log(toto)
+                }
         }
-    })
+   
 }

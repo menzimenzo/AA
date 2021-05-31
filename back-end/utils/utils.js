@@ -89,6 +89,7 @@ module.exports = {
       strNom: intervention.str_libellecourt,
       cai: intervention.int_cai,
       classe:intervention.int_age,
+      nbSession:intervention.int_nbsession,
       dateDebutIntervention: new Date(intervention.int_datedebutintervention),
       dateFinIntervention: new Date(intervention.int_datefinintervention),
       dateCreation: new Date(intervention.int_datecreation),

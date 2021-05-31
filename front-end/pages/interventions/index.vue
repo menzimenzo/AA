@@ -31,11 +31,8 @@
               </b-col>
             </b-form-row>
           </b-card-header>
-          <b-collapse id="accordion1" accordion="my-accordion" role="tabpanel" v-if="interventionCourrante.id == null ">
-            <Intervention :intervention="interventionCourrante" :step="step" />
-          </b-collapse>
-          <b-collapse id="accordion1" accordion="my-accordion" role="tabpanel" v-else>
-            <TableauEnfant :intervention="interventionCourrante" :step="step"/>
+          <b-collapse id="accordion1" accordion="my-accordion" role="tabpanel" >
+            <Intervention :intervention="interventionCourrante" />
           </b-collapse>
         </b-card>
         <!--  ACCORDEON -- MES INTERVENTIONS -->
@@ -266,13 +263,7 @@
         </b-card>
       </b-col>
     </b-row>
-    <modal
-      name="editIntervention"
-      height="auto"
-      width="1100px"
-      @closed="clearIntervention()"
-      :scrollabe="true"
-    >
+    <modal name="editIntervention" :scrollabe="true" height="auto" width="1100px" @closed="clearIntervention()">
       <Intervention :intervention="interventionCourrante" />
     </modal>
     <modal name="editPiscine" height="auto" width="900px" :scrollabe="true">
@@ -283,7 +274,6 @@
 
 <script>
 import Intervention from "~/components/Intervention.vue";
-import TableauEnfant from "~/components/tableauEnfant.vue";
 import Piscine from "~/components/piscine.vue";
 import { mapState } from "vuex";
 import Editable from "~/components/editable/index.vue";
@@ -293,11 +283,9 @@ export default {
     Intervention,
     Editable,
     Piscine,
-    TableauEnfant
   },
   data() {
     return {
-      step: 1,
       loadingInt: false,
       interventionsToDisplay: null,
       headers: [
@@ -320,7 +308,7 @@ export default {
           sortable: true,
         },
         {
-          path: "dateIntervention",
+          path: "dateFinIntervention",
           title: "Date",
           type: "date",
           sortable: true,
@@ -404,7 +392,7 @@ export default {
       return this.$store
         .dispatch("get_intervention", idIntervention)
         .then(() => {
-          console.log(this.$store.state.interventionCourrante)
+          //console.log(this.$store.state.interventionCourrante)
           this.$modal.show("editIntervention");
         })
         .catch((error) => {
