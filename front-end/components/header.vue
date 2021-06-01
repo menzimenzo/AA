@@ -25,8 +25,8 @@
           <b-button variant="outline-primary" class="settingsBtn"><i class="material-icons" >settings</i> Espace partenaire</b-button>
         </nuxt-link>
         <nuxt-link to="/formateur" v-if="utilisateurCourant.profilId == 3">
-          <b-img fluid :src="require('assets/ico_diplome.png')" blank-color="rgba(0,0,0,0.5)" img-alt="Espace Formateur" />
-          Espace Formateur
+          <b-img fluid :src="require('assets/ico_diplome.png')" blank-color="rgba(0,0,0,0.5)" img-alt="Espace Instructeur" />
+          Espace Instructeur
         </nuxt-link>
       </div>
       <b-dropdown  id="accountBtn"  >
