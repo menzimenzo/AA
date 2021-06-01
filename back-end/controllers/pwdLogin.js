@@ -34,6 +34,9 @@ module.exports = async function(req, res) {
             }
 
             if(user.uti_pwd && user.uti_pwd === crypted) {
+                if(!user.uti_eaps) {
+                    return res.status(200).json({message:'Veuillez terminer votre inscription', redirect:'/connexion/inscription', user: formatUtilisateur(user)})
+                }
                 if(!user.pwd_validated) {
                     return res.status(400).json({ message: 'En attente de confirmation du mot de passe.' });
                 }    
