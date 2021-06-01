@@ -8,10 +8,12 @@
       </b-col>
       <b-col  class="col-12 col-md-8" v-if="!loading">
         <b-card class="mb-3" v-if="!maDemande">
-          <b-form>          
+          <b-form>
             Vous êtes connecté avec un rôle "Maître Nageur"<br><br>
-            Vous suivez ou avez suivi une formation Aisance Aquatique :<br><br>
-            Précisez le formateur ayant dispensé la formation :<br>
+            Vous suivez ou avez suivi une formation pour les encadrants de l’ Aisance Aquatique :<br><br>
+            Vous avez la possibilité de valoriser cette formation,<br>
+            en recevant le label « Maitre-nageur AAQ ».<br><br>
+            Pour ce faire, précisez l’instructeur AAQ qui vous forme ou vous a formé<br>
             <b-form-group 
                 label-for="lstformateur" 
                 require
@@ -22,7 +24,7 @@
                     name="lstformateur"
                     aria-describedby="lstformateurFeedback">
                   
-                    <option :value="null">-- Choix du formateur --</option>
+                    <option :value="null">-- Choix de l’instructeur --</option>
                     <option
                       v-for="formateur in listeformateur"
                       :key="formateur.id"
