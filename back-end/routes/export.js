@@ -22,7 +22,7 @@ router.get('/', async function (req, res) {
     var requete = "";
 
     log.d('::export - Recherche des données : ' + requete);
-    requete =`SELECT uti.uti_id As Identifiant, rol_libelle as Role, lower(uti_mail) as Courriel, replace(replace(uti_publicontact::text,'true','Oui'),'false','Non') AutorisePublicationContact, 
+    requete =`SELECT uti.uti_id As Identifiant, replace(rol_libelle,'Formateur','MaitreNageur') as Role, replace(rol_libelle,'Formateur','Instructeur') as RoleInitial, uti_prenom, uti_nom, substr(uti_nom,1,1) || '.' as uti_plnom, lower(uti_mail) as Courriel, replace(replace(uti_publicontact::text,'true','Oui'),'false','Non') AutorisePublicationContact, 
     lower(uti_mailcontact) MailContact, uti_sitewebcontact SiteInternetContact, uti_telephonecontact TelephoneContact, uti_adrcontact AdresseContact,
     uti_compadrcontact ComplementAdresseContact, uti_com_cp_contact CodePostalContact, uti_com_codeinseecontact CodeInseeContact, com_art ArtCommune, com_libelle LibelleCommune, dep_num Departement
     from utilisateur  uti
@@ -59,9 +59,9 @@ router.get('/', async function (req, res) {
                     log.d(csvContent)
                     if (req.query.csv) 
                     {
-                        res.setHeader('Content-disposition', 'attachment; filename=shifts-report.csv');
-                        res.set('Content-Type', 'text/csv');
                         res.attachment(csvContent)
+                        res.set('Content-Type', 'text/csv');
+                        res.setHeader('Content-disposition', 'attachment; filename=AAQ-Contact.csv');
                     }
                     return res.send(csvContent);
 
