@@ -202,7 +202,7 @@
       <div class="input-group-display">
         <editable
           :columns="headersEnfants"
-          :data="tableauEnfant"
+          :data="this.$store.state.enfants"
           :removable="true"
           :creable="false"
           :editable="true"
@@ -327,9 +327,6 @@ var loadFormIntervention = function (intervention) {
   formIntervention.dateFinIntervention = dateFinIntervention.format(
     "YYYY-MM-DD"
   );
-  console.log('yyyyy')
-      console.log(formIntervention)
-      console.log('yyyyyyyy')
   return formIntervention;
 };
 
@@ -431,7 +428,7 @@ export default {
       randomId: "popover-" + Math.floor(Math.random() * 100000),
     };
   },
-  computed: {
+  /* computed: {
     tableauEnfant() {
       if (
         this.formIntervention &&
@@ -452,19 +449,24 @@ export default {
         return [];
       }
     },
-  },
+  },*/
   methods: {
     removeEnfant: function () {
       console.log("aaaaaaaaaa");
     },
     updateEnfant: function (evenement) {
       //console.log(this.tableauEnfant)
-      this.tableauEnfant[evenement.index] = evenement.item;
-      Vue.set(this.tableauEnfant, evenement.index, evenement.item);
+      const param = {
+        enfant: evenement.item,
+        index: evenement.index
+      }
+      this.$store.commit("put_enfant",param)
+      //this.tableauEnfant[evenement.index] = evenement.item;
+      //Vue.set(this.tableauEnfant, evenement.index, evenement.item);
       //console.log(this.tableauEnfant)
     },
     searchEnfant: function (param) {
-      console.log(param)
+      console.log(param);
       this.$modal.show("saisieIndex");
     },
     addPiscine: function () {
@@ -541,11 +543,11 @@ export default {
         dateFinIntervention: this.formIntervention.dateFinIntervention,
         nbSession: this.formIntervention.nbSession,
         piscine: this.formIntervention.piscine,
-        nbEnfants: this.tableauEnfant.length,
+        nbEnfants: this.$store.state.enfants.length,
         cai: this.formIntervention.cai,
         classe: this.formIntervention.classe,
         utilisateur: this.formIntervention.utilisateur,
-        enfant: this.tableauEnfant,
+        enfant: this.$store.state.enfants,
       };
 
       const action = intervention.id ? "put_intervention" : "post_intervention";
@@ -586,8 +588,7 @@ export default {
   },
   watch: {
     intervention(intervention) {
-
-     /* let formIntervention = JSON.parse(
+      /* let formIntervention = JSON.parse(
         JSON.stringify(
           Object.assign(
             {
@@ -614,6 +615,46 @@ export default {
       );*/
       Vue.set(this, "formIntervention", loadFormIntervention(intervention));
       //console.log(this.formIntervention)
+    },
+    "formIntervention.nbEnfants"() {
+      console.log("watch")
+      let enfant = {
+        id: null,
+        prenom: null,
+        niv_ini: 0,
+        niv_fin: 0,
+      };
+      if (this.$store.state.enfants.length == 0 )
+        for (let i = 0; i < this.formIntervention.nbEnfants; i++) {
+          this.$store.commit("add_enfant", enfant);
+        }
+      else {
+        if ( this.formIntervention.nbEnfants < this.$store.state.enfants.length ) {
+          const nbLgnes = this.$store.state.enfants.length - this.formIntervention.nbEnfants
+          let msg = ""
+          if (nbLgnes == 1 ) {
+            msg ="Vous allez effacer la dernière ligne saisie. Êtes vous sûr ?"
+          }
+          else {
+            msg = "Vous allez effacer les "+nbLgnes+ " dernières lignes saisies. Êtes vous sûr ?"
+          }
+          if (confirm(msg))
+          {
+            for (let i = 0; i < nbLgnes; i++) {
+            this.$store.commit("splice_enfant");
+            }
+          }
+          else {
+            this.formIntervention.nbEnfants = this.$store.state.enfants.length
+          }
+        }
+        else{
+          for (let i = 0; i < this.formIntervention.nbEnfants - this.$store.state.enfants.length +1; i++) {
+          this.$store.commit("add_enfant", enfant);
+        }
+        }
+      }
+      
     },
   },
   async mounted() {

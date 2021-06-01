@@ -20,14 +20,13 @@
         >
        
         <b-button variant="success" v-on:click="searchEnfant()"
-          >Enregistrer</b-button
+          >Rechercher</b-button
         >
       </p>
     </b-row>
   </b-container>
 </template>
 <script>
-import Vue from "vue";
 
 export default {
   props: {
@@ -36,6 +35,7 @@ export default {
       default: () => {
         return {};
       },
+      tableauEnfant:[]
     },
   },
   data() {
@@ -54,8 +54,8 @@ export default {
         return this.$axios
           .$get(url)
           .then((response) => {
-            console.log(response)
-            Vue.set(this.tableauEnfant, 0, response);
+            console.log(response.enfant.prenom)
+            tableauEnfant[0].prenom = response.enfant.prenom;
             this.$modal.hide("saisieIndex")         
           })
           .catch((error) => {
@@ -65,6 +65,9 @@ export default {
             );
           });
   },
+  },
+  async mounted() {
+   //console.log('longueur : '+this.tableauEnfant.length)
   }
 };
 </script>

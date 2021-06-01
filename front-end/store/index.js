@@ -14,8 +14,8 @@ export const state = () => ({
   structures: [],
   structureSelectionnee: [],
   documents: [],
-  statStructure: []
-
+  statStructure: [],
+  enfants: []
 });
 
 export const mutations = {
@@ -113,6 +113,22 @@ export const mutations = {
   clean_mesPiscines(state) {
     log.i(`mutations::clean_mesPiscines`)
     state.mesPiscines = null;
+  },
+  add_enfant(state, enfant) {
+    log.i(`mutations::add_enfant`, { enfant })
+    state.enfants.push(enfant);
+  },
+  splice_enfant(state) {
+    log.i(`mutations::splice_enfant`)
+    state.enfants.splice(-1);
+  },
+  put_enfant(state, {enfant,index}) {
+    log.i(`mutations::put_enfant`, { enfant })
+    Vue.set(state.enfants, index, enfant);
+  },
+  clean_enfants(state) {
+    log.i(`mutations::clean_enfants`)
+    state.enfants = [];
   },
   put_user(state, {user, index}){
     log.i(`mutations::put_user`)
@@ -242,6 +258,10 @@ export const actions = {
       return maPiscine
     })
   },
+
+
+
+
   async set_utilisateur({ commit }, utilisateur) {
     commit("set_utilisateurCourant", utilisateur)
   },

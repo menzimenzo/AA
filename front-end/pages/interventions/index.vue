@@ -544,10 +544,9 @@ export default {
   //  CHARGEMENT ASYNCHRONE DES INTERVENTIONS
   //
   async mounted() {
-    await Promise.all([
-      this.$store.dispatch("get_mesPiscines"),
-    ]);
+    this.$store.dispatch("get_mesPiscines"),
     this.$store.dispatch("get_interventions")
+    this.$store.commit("clean_enfants");
   },
 };
 </script>
