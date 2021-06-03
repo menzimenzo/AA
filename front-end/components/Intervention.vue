@@ -347,7 +347,6 @@ export default {
   },
   data() {
     return {
-      newIntervention: true,
       erreurformulaire: [],
       headersEncadrants: [
         { path: "nom", title: "Nom", type: "text", sortable: true },
@@ -428,28 +427,6 @@ export default {
       randomId: "popover-" + Math.floor(Math.random() * 100000),
     };
   },
-  /* computed: {
-    tableauEnfant() {
-      if (
-        this.formIntervention &&
-        this.formIntervention.nbEnfants > 0 &&
-        !this.tab
-      ) {
-        let tab = [];
-        for (let i = 0; i < this.formIntervention.nbEnfants; i++) {
-          tab.push({
-            enf_id: null,
-            prenom: null,
-            niv_ini: 0,
-            niv_fin: 0,
-          });
-        }
-        return tab;
-      } else {
-        return [];
-      }
-    },
-  },*/
   methods: {
     removeEnfant: function () {
       console.log("aaaaaaaaaa");
@@ -458,12 +435,9 @@ export default {
       //console.log(this.tableauEnfant)
       const param = {
         enfant: evenement.item,
-        index: evenement.index
-      }
-      this.$store.commit("put_enfant",param)
-      //this.tableauEnfant[evenement.index] = evenement.item;
-      //Vue.set(this.tableauEnfant, evenement.index, evenement.item);
-      //console.log(this.tableauEnfant)
+        index: evenement.index,
+      };
+      this.$store.commit("put_enfant", param);
     },
     searchEnfant: function (param) {
       console.log(param);
@@ -484,15 +458,22 @@ export default {
         }
       }
     },
-    resetform: function () {
+    resetform: async function () {
       this.erreurformulaire = [];
       const action = "reset_interventions";
       console.info({ action });
-      this.$store.commit(action);
-
-      if (this.intervention.id) {
-        this.$modal.hide("editIntervention");
+      await Promise.all([this.$store.commit(action)]).then( () => {
+      this.formIntervention.nbEnfants = "";
+      if (
+        (this.$store.state.utilisateurCourant.profilId == 3 ||
+          this.$store.state.utilisateurCourant.profilId == 4) &&
+        !this.$store.state.interventionCourrante.id
+      ) {
+        this.formIntervention.utilisateur.push(
+          this.$store.state.utilisateurCourant
+        );
       }
+      })
     },
     checkform: function () {
       console.info("Validation du formulaire");
@@ -528,6 +509,10 @@ export default {
       }
       if (!this.formIntervention.nbEnfants) {
         this.erreurformulaire.push("Le nombre d'enfants");
+        formOK = false;
+      }
+      if (!this.formIntervention.cai) {
+        this.erreurformulaire.push("Le cadre d'intervention");
         formOK = false;
       }
       if (!formOK) {
@@ -572,8 +557,9 @@ export default {
           this.$toast.success(`Intervention ${interventionLabel} enregistrée`, {
             action,
           });
-          this.$store.dispatch("get_intervention", serverIntervention.id);
-          //this.$modal.hide("editIntervention");
+          //this.$store.dispatch("get_intervention", serverIntervention.id);
+          this.resetform()
+       
         })
         .catch((error) => {
           console.error(
@@ -588,86 +574,64 @@ export default {
   },
   watch: {
     intervention(intervention) {
-      /* let formIntervention = JSON.parse(
-        JSON.stringify(
-          Object.assign(
-            {
-              structureId: null,
-              piscine: null,
-              dateDebutIntervention: null,
-              dateFinIntervention: null,
-              nbSession: "",
-              cadreIntervention: "",
-              classe: "",
-              nbEnfants: "",
-              enfant: [],
-              utilisateur: [],
-            },
-            intervention
-          )
-        )
-      );
-      formIntervention.dateDebutIntervention = new Date(
-        formIntervention.dateDebutIntervention
-      );
-      formIntervention.dateFinIntervention = new Date(
-        formIntervention.dateFinIntervention
-      );*/
       Vue.set(this, "formIntervention", loadFormIntervention(intervention));
-      //console.log(this.formIntervention)
     },
     "formIntervention.nbEnfants"() {
-      console.log("watch")
       let enfant = {
         id: null,
         prenom: null,
         niv_ini: 0,
         niv_fin: 0,
       };
-      if (this.$store.state.enfants.length == 0 )
-        for (let i = 0; i < this.formIntervention.nbEnfants; i++) {
-          this.$store.commit("add_enfant", enfant);
-        }
-      else {
-        if ( this.formIntervention.nbEnfants < this.$store.state.enfants.length ) {
-          const nbLgnes = this.$store.state.enfants.length - this.formIntervention.nbEnfants
-          let msg = ""
-          if (nbLgnes == 1 ) {
-            msg ="Vous allez effacer la dernière ligne saisie. Êtes vous sûr ?"
+      if (this.formIntervention.nbEnfants == "") {
+        this.$store.commit("clean_enfants");
+      } else {
+        if (this.$store.state.enfants.length == 0)
+          for (let i = 0; i < this.formIntervention.nbEnfants; i++) {
+            this.$store.commit("add_enfant", enfant);
           }
-          else {
-            msg = "Vous allez effacer les "+nbLgnes+ " dernières lignes saisies. Êtes vous sûr ?"
-          }
-          if (confirm(msg))
-          {
-            for (let i = 0; i < nbLgnes; i++) {
-            this.$store.commit("splice_enfant");
+        else {
+          if (
+            this.formIntervention.nbEnfants < this.$store.state.enfants.length
+          ) {
+            const nbLgnes =
+              this.$store.state.enfants.length -
+              this.formIntervention.nbEnfants;
+            let msg = "";
+            if (nbLgnes == 1) {
+              msg =
+                "Vous allez effacer la dernière ligne saisie. Êtes vous sûr ?";
+            } else {
+              msg =
+                "Vous allez effacer les " +
+                nbLgnes +
+                " dernières lignes saisies. Êtes vous sûr ?";
+            }
+            if (confirm(msg)) {
+              for (let i = 0; i < nbLgnes; i++) {
+                this.$store.commit("splice_enfant");
+              }
+            } else {
+              this.formIntervention.nbEnfants = this.$store.state.enfants.length;
+            }
+          } else {
+            for (
+              let i = 0;
+              i <
+              this.formIntervention.nbEnfants -
+                this.$store.state.enfants.length +
+                1;
+              i++
+            ) {
+              this.$store.commit("add_enfant", enfant);
             }
           }
-          else {
-            this.formIntervention.nbEnfants = this.$store.state.enfants.length
-          }
-        }
-        else{
-          for (let i = 0; i < this.formIntervention.nbEnfants - this.$store.state.enfants.length +1; i++) {
-          this.$store.commit("add_enfant", enfant);
-        }
         }
       }
-      
     },
   },
   async mounted() {
-    // si le user courant est de profil 3 ou 4 et que l'intervention courrante est nulle on l'ajoute
-    if (
-      (this.$store.state.utilisateurCourant.profilId == 3 ||
-        this.$store.state.utilisateurCourant.profilId == 4) &&
-      !this.$store.state.interventionCourrante.id
-    ) {
-      this.formIntervention.utilisateur.push(
-        this.$store.state.utilisateurCourant
-      );
-    }
+    this.resetform()
   },
 };
 </script>
