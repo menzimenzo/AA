@@ -114,13 +114,23 @@ export const mutations = {
     log.i(`mutations::clean_mesPiscines`)
     state.mesPiscines = null;
   },
+  set_enfants(state,enfant) {
+    log.i(`mutations::set_enfants`, { enfant })
+    state.enfants = enfant
+  },
   add_enfant(state, enfant) {
     log.i(`mutations::add_enfant`, { enfant })
     state.enfants.push(enfant);
   },
-  splice_enfant(state) {
+  splice_enfant(state,index) {
     log.i(`mutations::splice_enfant`)
-    state.enfants.splice(-1);
+    if (index) {
+      console.log('index dans store: '+index)
+      state.enfants.splice(index,-1);
+    }
+    else {
+      state.enfants.splice(-1);
+    }
   },
   put_enfant(state, {enfant,index}) {
     log.i(`mutations::put_enfant`, { enfant })

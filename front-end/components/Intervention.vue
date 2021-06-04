@@ -428,11 +428,18 @@ export default {
     };
   },
   methods: {
-    removeEnfant: function () {
-      console.log("aaaaaaaaaa");
+    removeEnfant: function (evenement) {
+      const index = evenement.index
+      console.log(evenement )
+      console.log('taille :'+this.$store.state.enfants.length )
+      this.$store.commit("splice_enfant",index-1);
+      this.formIntervention.nbEnfants = this.formIntervention.nbEnfants -1
+      console.log('taille :'+this.$store.state.enfants.length )
+
     },
     updateEnfant: function (evenement) {
       //console.log(this.tableauEnfant)
+      console.log(evenement )
       const param = {
         enfant: evenement.item,
         index: evenement.index,
@@ -574,6 +581,25 @@ export default {
   },
   watch: {
     intervention(intervention) {
+      let formIntervention = JSON.parse(
+        JSON.stringify(
+          Object.assign(
+            {
+              structureId: "",
+              piscine: {},
+              maitreNageur: {},
+              dateIntervention: null,
+              nbEnfants: "",
+              nbNouveauxEnfants: "",
+              listeEnfants: [],
+            },
+            intervention
+          )
+        )
+      );
+      formIntervention.dateIntervention = new Date(
+        formIntervention.dateIntervention
+      );
       Vue.set(this, "formIntervention", loadFormIntervention(intervention));
     },
     "formIntervention.nbEnfants"() {
@@ -631,7 +657,12 @@ export default {
     },
   },
   async mounted() {
-    this.resetform()
+    if (!this.intervention.id) {
+      this.resetform()
+    }
+    else {
+      this.$store.commit("set_enfants",this.intervention.enfant)
+    }
   },
 };
 </script>

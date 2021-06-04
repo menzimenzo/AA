@@ -340,7 +340,7 @@ export default {
                 return this.removableComputed 
             }
         },
-        confirmRemove(item) {
+        confirmRemove({ index, item }) {
             /*this.$modal.show('dialog', {
                 title: this.confirmRemoveTitle,
                 text: this.confirmRemoveText,
@@ -348,7 +348,10 @@ export default {
                     {
                         title: '<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp; Oui, supprimer cet élément',
                         handler: () => {*/
-                            this.$emit('remove', item)
+                            console.log(index)
+                            const globalIndex = (this.paginationEntries * (this.selectedPage - 1)) + index
+                            console.log(globalIndex)
+                            this.$emit('remove', {item,index: globalIndex})
                             /*this.$modal.hide('dialog')
                         }
                     },

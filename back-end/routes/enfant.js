@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { putEnfant } = require('../controllers');
-const { deleteEnfant } = require('../controllers');
+//const { deleteEnfant } = require('../controllers');
 const { getEnfant } = require('../controllers');
 
 
@@ -12,6 +12,7 @@ moment().format();
 const logger = require('../utils/logger');
 const log = logger(module.filename)
 
+/*
 router.post('/delete/', async function (req, res) {
     const enfId = req.body.enf.enf_id
     const id = req.body.id
@@ -21,7 +22,7 @@ router.post('/delete/', async function (req, res) {
         res.send('intervention mise à jour')
     }).catch(() => {console.log('erreur')})
 
-})
+})*/
 
 router.put('/:id', async function (req, res) {
     const enfant = req.body.enf

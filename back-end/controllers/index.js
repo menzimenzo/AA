@@ -3,11 +3,15 @@ module.exports = {
     pwdLogin: require('./pwdLogin'),
     generateForgotPasswordEncryption: require('./generateForgotPasswordEncryption'),
     getIntervention: require('./getIntervention'),
+    
     getUtilisateursFromIntervention: require('./getUtilisateursFromIntervention'),
-    getEnfantsFromIntervention: require('./getEnfantsFromIntervention'),
     postUtilisateursForIntervention: require('./postUtilisateursForIntervention'),
+    deleteUtilisateursFromIntervention: require('./deleteUtilisateursFromIntervention'),
+
+    getEnfantsFromIntervention: require('./getEnfantsFromIntervention'),
     postEnfantsForIntervention: require('./postEnfantsForIntervention'),
     putEnfant: require('./putEnfant'),
     deleteEnfant: require('./deleteEnfant'),
+    deleteEnfantsFromIntervention: require('./deleteEnfantsFromIntervention'),
     getEnfant: require('./getEnfant')
 }

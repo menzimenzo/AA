@@ -10,8 +10,18 @@ module.exports = async function (req, res) {
 
     log.i('::post - In')
     for (var i = 0; i < enfant.length ; i++) {
-        const requete =  `insert into enfant(enf_prenom) values($1) RETURNING enf_id`
-        const insertenf = await pgPool.query(requete,[enfant[i].prenom]).catch(err => {
+        let requete
+        let params = []
+        if (enfant[i].enf_id > 0) {
+            requete =  `update enfant set enf_prenom = $1 where enf_id=$2 RETURNING enf_id`    
+            params = [enfant[i].prenom,enfant[i].enf_id]
+        }
+        else {
+            requete =  `insert into enfant(enf_prenom) values($1) RETURNING enf_id`    
+            params = [enfant[i].prenom]
+        }
+
+        const insertenf = await pgPool.query(requete,params).catch(err => {
             log.w('::POST - Erreur survenue lors de la l\'insertion dans la table enfant.', { requete, err: err.stack })
             return res.status(400).json('Erreur survenue lors de la l\'insertion dans la table enfant');
         })

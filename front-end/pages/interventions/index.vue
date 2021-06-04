@@ -263,7 +263,7 @@
         </b-card>
       </b-col>
     </b-row>
-    <modal name="editIntervention" :scrollabe="true" height="auto" width="1100px" @closed="clearIntervention()">
+    <modal name="editIntervention" :scrollabe="true" height="1600px" width="1100px" @closed="clearIntervention()">
       <Intervention :intervention="interventionCourrante" />
     </modal>
     <modal name="editPiscine" height="auto" width="900px" :scrollabe="true">

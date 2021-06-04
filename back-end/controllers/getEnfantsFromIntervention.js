@@ -22,6 +22,5 @@ module.exports = async function (req, res) {
     log.d('::select from int_enf - récuperation via la requête.', { requete });
     let result = await pgPool.query(requete)
     log.i('::select from int_enf - Done')
-    log.i (result.rows)
     return result.rows
 }

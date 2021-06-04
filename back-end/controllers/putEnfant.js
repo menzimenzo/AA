@@ -15,24 +15,24 @@ module.exports =  async function (req, res) {
         RETURNING *
         ;`;
 
-    const tutu = await pgPool.query(requete, [enfant.prenom, enfant.enf_id]).catch(err=> {
+    const updateEnf = await pgPool.query(requete, [enfant.prenom, enfant.enf_id]).catch(err=> {
             log.w('::put - Erreur survenue lors de la mise à jour du prénom.', { requete, err: err.stack })
             return res.status(400).json('erreur lors de la mise à jour du prénom de l\'enfant' + enfant.enf_id);
     })
 
-        if (tutu) {
+        if (updateEnf) {
             log.i('::put - mise à jour table enfant - Done')
             const secondeRequete = `update int_enf set niv_ini=$1,niv_fin=$2 
             WHERE enf_id = $3 and int_id=$4
             RETURNING *
             ;`;
-            const toto = await pgPool.query(secondeRequete, [enfant.niv_ini, enfant.niv_fin, enfant.enf_id, id]).catch(err => {
+            const updateIntEnf = await pgPool.query(secondeRequete, [enfant.niv_ini, enfant.niv_fin, enfant.enf_id, id]).catch(err => {
                     log.w('::put - Erreur survenue lors de la mise à jour du niveau de l\'enfant.', { requete, err: err.stack })
                     return res.status(400).json('erreur lors de la mise à jour du niveau de l\'enfant' + enfant.enf_id);
             })
-            if (toto) {
+            if (updateIntEnf) {
                     log.i('::put - Done') 
-                    console.log(toto)
+                    console.log(updateIntEnf)
                 }
         }
    

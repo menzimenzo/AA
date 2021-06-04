@@ -8,6 +8,8 @@ const { getUtilisateursFromIntervention } = require('../controllers');
 const { getEnfantsFromIntervention } = require('../controllers/');
 const { postUtilisateursForIntervention } = require('../controllers/');
 const { postEnfantsForIntervention } = require('../controllers/');
+const { deleteEnfantsFromIntervention } = require('../controllers/');
+const { deleteUtilisateursFromIntervention } = require('../controllers/');
 
 //const formatIntervention = require('../utils/utils')
 var moment = require('moment');
@@ -224,15 +226,18 @@ router.put('/:id', async function (req, res) {
     const user = req.session.user
     const id = req.params.id
     log.i('::update - In', { id })
-    let { strId, nbEnfants, piscine, dateIntervention,
-        utilisateur } = intervention
+    let { strId, nbEnfants, piscine, dateDebutIntervention,dateFinIntervention,utilisateur,enfant,nbSession,cai,classe } = intervention
 
     //insert dans la table intervention
     const requete = `UPDATE intervention 
         SET str_id= $1,
         int_nombreenfant= $2,
         pis_id = $3,
-        int_dateintervention = $4,
+        int_datedebutintervention = $4,
+        int_datefinintervention = $5,
+        int_nbsession = $6,
+        int_cai =$7,
+        int_age = $8,
         int_datemaj = now()
         WHERE int_id = ${id}
         RETURNING *
@@ -242,8 +247,12 @@ router.put('/:id', async function (req, res) {
     pgPool.query(requete, [strId,
         nbEnfants,
         piscine.id,
-        dateIntervention
-    ], (err, result) => {
+        dateDebutIntervention,
+        dateFinIntervention,
+        nbSession,
+        cai,
+        classe
+    ], async (err, result) => {
         if (err) {
             log.w('::update - erreur lors de la sauvegarde', { requete, erreur: err.stack })
             return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
@@ -252,14 +261,23 @@ router.put('/:id', async function (req, res) {
             log.i('::update - Done')
             // generation du pdf (synchrone)
 
-            //return res.status(200).json({ intervention: result.rows.map(formatIntervention)[0] });
-            const params = {
-                id: id,
-                user: user
-            }
-            let inter = getIntervention(params)
-            return res.status(200).json({ intervention: inter });
+            // suppression des données utilisateurs et enfants
+            await Promise.all([deleteUtilisateursFromIntervention([id]),deleteEnfantsFromIntervention([id])]).then(async () => {
+                
+                // Ajout des données utilsiateurs et enfants
+                await Promise.all([postUtilisateursForIntervention([utilisateur,id]),postEnfantsForIntervention([enfant,id])]).then(async () => {
+                
+                    const user = req.session.user
+                    const params = {
+                        id: result.rows[0].int_id,
+                        user: user
+                    }
+                    let inter = await getIntervention(params)
+                    log.i('::post - Done')
+                    return res.status(200).json({ intervention: inter[0] })
+                })
 
+            })
         }
     })
 })
