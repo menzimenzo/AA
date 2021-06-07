@@ -49,7 +49,7 @@
                             @remove="confirmRemove">
                             <template v-for="column in columns">
                                 <template v-if="fieldType(column.path) === '__slot'" :slot="fieldPath(column.path)">
-                                    <slot :name="fieldPath(column.path)" :data="item" :onEdit="false" />
+                                    <slot :name="fieldPath(column.path)" :data="{item,index: i}" :onEdit="false" />
                                 </template>
                             </template>
                         </reading-row>
@@ -340,7 +340,7 @@ export default {
                 return this.removableComputed 
             }
         },
-        confirmRemove({ index, item }) {
+        confirmRemove( {item, index} ) {
             /*this.$modal.show('dialog', {
                 title: this.confirmRemoveTitle,
                 text: this.confirmRemoveText,
@@ -348,10 +348,11 @@ export default {
                     {
                         title: '<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp; Oui, supprimer cet élément',
                         handler: () => {*/
-                            console.log(index)
+                            //console.log(index)
+                            //console.log(index)
                             const globalIndex = (this.paginationEntries * (this.selectedPage - 1)) + index
-                            console.log(globalIndex)
                             this.$emit('remove', {item,index: globalIndex})
+                            //this.$emit('remove', {item})
                             /*this.$modal.hide('dialog')
                         }
                     },

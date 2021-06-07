@@ -12,6 +12,7 @@ module.exports = async function (req, res) {
     for (var i = 0; i < enfant.length ; i++) {
         let requete
         let params = []
+        console.log(enfant[i])
         if (enfant[i].enf_id > 0) {
             requete =  `update enfant set enf_prenom = $1 where enf_id=$2 RETURNING enf_id`    
             params = [enfant[i].prenom,enfant[i].enf_id]

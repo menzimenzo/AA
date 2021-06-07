@@ -98,7 +98,7 @@
                         <template slot-scope="props" slot="actions">
                           <div style="min-width: 147px">
                             <b-btn
-                              @click="editIntervention(props.data.id)"
+                              @click="editIntervention(props.data.item.id)"
                               size="sm"
                               class="ml-1"
                               variant="primary"
@@ -107,7 +107,7 @@
                               <i class="material-icons">edit</i>
                             </b-btn>
                             <b-btn
-                              @click="downloadPdf(props.data.id)"
+                              @click="downloadPdf(props.data.item.id)"
                               v-if="props.data.blocId == '3'"
                               size="sm"
                               class="ml-1"
@@ -117,7 +117,7 @@
                               <i class="material-icons">cloud_download</i>
                             </b-btn>
                             <b-btn
-                              @click="deleteIntervention(props.data.id)"
+                              @click="deleteIntervention(props.data.item.id)"
                               size="sm"
                               class="ml-1"
                               variant="danger"
@@ -186,7 +186,7 @@
                         <template slot-scope="props" slot="actions">
                           <div style="min-width: 147px">
                             <b-btn
-                              @click="deletePiscine(props.data)"
+                              @click="deletePiscine(props.data.item)"
                               size="sm"
                               class="ml-1"
                               variant="danger"
@@ -263,7 +263,7 @@
         </b-card>
       </b-col>
     </b-row>
-    <modal name="editIntervention" :scrollabe="true" height="1600px" width="1100px" @closed="clearIntervention()">
+    <modal name="editIntervention" :scrollabe="true" height="1100px" width="1100px" @closed="clearIntervention()">
       <Intervention :intervention="interventionCourrante" />
     </modal>
     <modal name="editPiscine" height="auto" width="900px" :scrollabe="true">
@@ -436,6 +436,7 @@ export default {
     },
     deletePiscine: function (piscine) {
       this.loading = true;
+      console.log(piscine)
       const url = process.env.API_URL + "/piscine/delete/";
       piscine.uti_id = this.$store.state.utilisateurCourant.id;
       return this.$axios

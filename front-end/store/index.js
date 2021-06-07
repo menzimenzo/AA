@@ -124,9 +124,8 @@ export const mutations = {
   },
   splice_enfant(state,index) {
     log.i(`mutations::splice_enfant`)
-    if (index) {
-      console.log('index dans store: '+index)
-      state.enfants.splice(index,-1);
+    if ( index > -1) {
+      state.enfants.splice(index,1);
     }
     else {
       state.enfants.splice(-1);

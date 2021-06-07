@@ -31,7 +31,7 @@
         >
           <template slot-scope="props" slot="actions">
             <b-btn
-              @click="deleteMN(props.data)"
+              @click="deleteMN(props.data.item)"
               size="sm"
               class="mr-1"
               variant="primary"
@@ -212,9 +212,9 @@
           @update="updateEnfant"
           @remove="removeEnfant"
         >
-          <template slot-scope="" slot="actions">
+          <template slot-scope="props" slot="actions">
             <b-btn
-              @click="searchEnfant(1)"
+              @click="searchEnfant(props.data)"
               size="sm"
               class="mr-1"
               variant="primary"
@@ -280,7 +280,7 @@
     </modal>
 
     <modal name="saisieIndex" height="auto" width="400px" :scrollabe="true">
-      <Saisieindex :intervention="this.formIntervention" />
+      <Saisieindex :intervention="this.formIntervention" :index="this.index" />
     </modal>
   </b-container>
 </template>
@@ -320,13 +320,11 @@ var loadFormIntervention = function (intervention) {
     )
   );
   let dateDebutIntervention = moment(intervention.dateDebutIntervention);
-  formIntervention.dateDebutIntervention = dateDebutIntervention.format(
-    "YYYY-MM-DD"
-  );
+  formIntervention.dateDebutIntervention =
+    dateDebutIntervention.format("YYYY-MM-DD");
   let dateFinIntervention = moment(intervention.dateFinIntervention);
-  formIntervention.dateFinIntervention = dateFinIntervention.format(
-    "YYYY-MM-DD"
-  );
+  formIntervention.dateFinIntervention =
+    dateFinIntervention.format("YYYY-MM-DD");
   return formIntervention;
 };
 
@@ -348,6 +346,7 @@ export default {
   data() {
     return {
       erreurformulaire: [],
+      index: null,
       headersEncadrants: [
         { path: "nom", title: "Nom", type: "text", sortable: true },
         { path: "prenom", title: "Prénom", type: "text", sortable: true },
@@ -429,25 +428,19 @@ export default {
   },
   methods: {
     removeEnfant: function (evenement) {
-      const index = evenement.index
-      console.log(evenement )
-      console.log('taille :'+this.$store.state.enfants.length )
-      this.$store.commit("splice_enfant",index-1);
-      this.formIntervention.nbEnfants = this.formIntervention.nbEnfants -1
-      console.log('taille :'+this.$store.state.enfants.length )
-
+      const indexT = evenement.index;
+      this.$store.commit("splice_enfant", indexT);
+      this.formIntervention.nbEnfants = this.$store.state.enfants.length
     },
     updateEnfant: function (evenement) {
-      //console.log(this.tableauEnfant)
-      console.log(evenement )
       const param = {
         enfant: evenement.item,
         index: evenement.index,
       };
       this.$store.commit("put_enfant", param);
     },
-    searchEnfant: function (param) {
-      console.log(param);
+    searchEnfant: function (param) {  
+      this.index = param.index
       this.$modal.show("saisieIndex");
     },
     addPiscine: function () {
@@ -469,18 +462,18 @@ export default {
       this.erreurformulaire = [];
       const action = "reset_interventions";
       console.info({ action });
-      await Promise.all([this.$store.commit(action)]).then( () => {
-      this.formIntervention.nbEnfants = "";
-      if (
-        (this.$store.state.utilisateurCourant.profilId == 3 ||
-          this.$store.state.utilisateurCourant.profilId == 4) &&
-        !this.$store.state.interventionCourrante.id
-      ) {
-        this.formIntervention.utilisateur.push(
-          this.$store.state.utilisateurCourant
-        );
-      }
-      })
+      await Promise.all([this.$store.commit(action)]).then(() => {
+        this.formIntervention.nbEnfants = "";
+        if (
+          (this.$store.state.utilisateurCourant.profilId == 3 ||
+            this.$store.state.utilisateurCourant.profilId == 4) &&
+          !this.$store.state.interventionCourrante.id
+        ) {
+          this.formIntervention.utilisateur.push(
+            this.$store.state.utilisateurCourant
+          );
+        }
+      });
     },
     checkform: function () {
       console.info("Validation du formulaire");
@@ -565,8 +558,7 @@ export default {
             action,
           });
           //this.$store.dispatch("get_intervention", serverIntervention.id);
-          this.resetform()
-       
+          this.resetform();
         })
         .catch((error) => {
           console.error(
@@ -638,18 +630,24 @@ export default {
                 this.$store.commit("splice_enfant");
               }
             } else {
-              this.formIntervention.nbEnfants = this.$store.state.enfants.length;
+              this.formIntervention.nbEnfants =
+                this.$store.state.enfants.length;
             }
           } else {
-            for (
-              let i = 0;
-              i <
-              this.formIntervention.nbEnfants -
-                this.$store.state.enfants.length +
-                1;
-              i++
+            if (
+              this.formIntervention.nbEnfants !=
+              this.$store.state.enfants.length
             ) {
-              this.$store.commit("add_enfant", enfant);
+              for (
+                let i = 0;
+                i <
+                this.formIntervention.nbEnfants -
+                  this.$store.state.enfants.length +
+                  1;
+                i++
+              ) {
+                this.$store.commit("add_enfant", enfant);
+              }
             }
           }
         }
@@ -658,10 +656,9 @@ export default {
   },
   async mounted() {
     if (!this.intervention.id) {
-      this.resetform()
-    }
-    else {
-      this.$store.commit("set_enfants",this.intervention.enfant)
+      this.resetform();
+    } else {
+      this.$store.commit("set_enfants", this.intervention.enfant);
     }
   },
 };
@@ -670,6 +667,7 @@ export default {
 <style>
 .interventionModal {
   padding: 30px;
+  overflow-y: scroll;
 }
 .modal-btns {
   position: absolute;

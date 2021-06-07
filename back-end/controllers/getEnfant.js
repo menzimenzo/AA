@@ -26,7 +26,7 @@ module.exports = async function (req, res) {
                 if (enf_niv) {
                         log.i('::put - Done')
                         const enfant = {
-                                id: id,
+                                enf_id: id,
                                 prenom: enf.rows[0].enf_prenom,
                                 niv_ini: enf_niv.rows[0].niv_fin,
                                 niv_fin: enf_niv.rows[0].niv_fin

@@ -31,7 +31,7 @@
         >
           <template slot-scope="props" slot="actions">
             <b-btn
-              @click="addMN(props.data)"
+              @click="addMN(props.data.item)"
               size="sm"
               class="mr-1"
               variant="primary"

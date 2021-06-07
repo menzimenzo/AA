@@ -93,14 +93,7 @@ export default {
     },
     addPiscine: function () {
       if (this.selectedPiscine) {
-        if (this.intervention) {
-          console.log('dedans')
-          console.log(this.selectedPiscine)
-          
-          Vue.set(this,intervention.piscine, this.selectedPiscine)
-          console.log(this.intervention.piscine)
-
-        }
+       
         return this.$store
           .dispatch("post_maPiscine", this.selectedPiscine)
           .then((message) => {
