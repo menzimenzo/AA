@@ -10,7 +10,7 @@
                 <!-- IMAGE RAYEE BANNER INTERVENTION -->
                 <b-img
                   fluid
-                  :src="require('assets/banner_ray_yellow.png')"
+                  :src="require('assets/banner_ray_blue.png')"
                   blank-color="rgba(0,0,0,0.5)"
                 />
                 <b-btn
@@ -41,9 +41,10 @@
             <b-form-row>
               <b-col>
                 <!-- IMAGE RAYEE BANNER INTERVENTION -->
-                <b-img
-                  :src="require('assets/banner_ray_yellow.png')"
-                  blank-color="rgba(0,0,0,1)"
+               <b-img
+                  fluid
+                  :src="require('assets/banner_ray_blue.png')"
+                  blank-color="rgba(0,0,0,0.5)"
                 />
                 <b-btn
                   class="accordionBtn"
@@ -148,8 +149,9 @@
               <b-col>
                 <!-- IMAGE RAYEE BANNER INTERVENTION -->
                 <b-img
-                  :src="require('assets/banner_ray_yellow.png')"
-                  blank-color="rgba(0,0,0,1)"
+                  fluid
+                  :src="require('assets/banner_ray_blue.png')"
+                  blank-color="rgba(0,0,0,0.5)"
                 />
                 <b-btn
                   class="accordionBtn"
@@ -217,14 +219,15 @@
               <b-col>
                 <!-- IMAGE RAYEE BANNER INTERVENTION -->
                 <b-img
-                  :src="require('assets/banner_ray_yellow.png')"
-                  blank-color="rgba(0,0,0,1)"
+                  fluid
+                  :src="require('assets/banner_ray_blue.png')"
+                  blank-color="rgba(0,0,0,0.5)"
                 />
                 <b-btn
                   class="accordionBtn"
                   block
                   href="#"
-                  v-b-toggle.accordion3
+                  v-b-toggle.accordion4
                   variant="Dark link"
                 >
                   <h4>
@@ -237,7 +240,57 @@
               </b-col>
             </b-form-row>
           </b-card-header>
-          <b-collapse id="accordion3" accordion="my-accordion" role="tabpanel">
+          <b-collapse id="accordion4" accordion="my-accordion" role="tabpanel">
+            <b-card-body>
+              <b-container>
+                <b-row>
+                  <b-col cols="12">
+                                        <ul>
+                      <li v-for="doc in documents" :key="doc.doc_id">
+                        {{ doc.doc_libelle }}
+                        <b-img
+                          class="img-icon"
+                          fluid
+                          @click="downloadDoc(doc)"
+                          :src="require('assets/pdf-240x240.png')"
+                          blank-color="rgba(0,0,0,0.5)"
+                        />
+                      </li>
+                    </ul>
+                  </b-col>
+                </b-row>
+              </b-container>
+            </b-card-body>
+          </b-collapse>
+        </b-card>
+        <b-card no-body class="mb-3">
+          <b-card-header header-tag="header" class="p-1" role="tab">
+            <b-form-row>
+              <b-col>
+                <!-- IMAGE RAYEE BANNER INTERVENTION -->
+                <b-img
+                  fluid
+                  :src="require('assets/banner_ray_blue.png')"
+                  blank-color="rgba(0,0,0,0.5)"
+                />
+                <b-btn
+                  class="accordionBtn"
+                  block
+                  href="#"
+                  v-b-toggle.accordion4
+                  variant="Dark link"
+                >
+                  <h4>
+                    <i class="material-icons accordion-chevron"
+                      >chevron_right</i
+                    >
+                    <i class="material-icons ml-2 mr-2">list</i>Documents utiles
+                  </h4>
+                </b-btn>
+              </b-col>
+            </b-form-row>
+          </b-card-header>
+          <b-collapse id="accordion4" accordion="my-accordion" role="tabpanel">
             <b-card-body>
               <b-container>
                 <b-row>
