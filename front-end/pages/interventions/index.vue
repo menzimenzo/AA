@@ -349,7 +349,7 @@ export default {
         },
         {
           path: "cp",
-          title: "code postal",
+          title: "Commune",
           type: "text",
           sortable: true,
         },

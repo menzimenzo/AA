@@ -461,7 +461,7 @@ export default {
         link.setAttribute("download", `${idformate}.pdf`); //or any other extension
         document.body.appendChild(link);
         link.click();
-      });
+      }
     },
     resetform: async function () {
       this.erreurformulaire = [];

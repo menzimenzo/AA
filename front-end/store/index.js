@@ -222,6 +222,7 @@ export const actions = {
   },
   async post_intervention({ commit, state }, intervention) {
     const url = process.env.API_URL + "/interventions";
+    console.log('dans store :'+url)
     intervention.utilisateurId = state.utilisateurCourant.id
     return await this.$axios.$post(url, { intervention }).then(({ intervention }) => {
       log.i("actions::post_intervention - In", { intervention });  

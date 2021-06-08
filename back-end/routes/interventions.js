@@ -291,6 +291,7 @@ router.post('/', async function (req, res) {
                     (pis_id,str_id,int_nombreenfant,int_datedebutintervention,int_datefinintervention,int_nbsession, int_cai, int_age,int_datecreation,int_datemaj) 
                     values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10 ) RETURNING int_id AS int_id`;
 
+    console.log(requete)
     await pgPool.query(requete, [intervention.piscine.id,
     intervention.strId,
     intervention.nbEnfants,

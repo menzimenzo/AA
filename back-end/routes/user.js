@@ -209,7 +209,8 @@ router.get('/:id', async function (req, res) {
             res.json({ user: formatUser(user) });
         }
     })
-});
+
+}});
 
 router.get('/', async function (req, res) {
     log.i('::list - In')
