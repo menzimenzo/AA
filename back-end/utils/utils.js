@@ -27,25 +27,24 @@ module.exports = {
   , formatUtilisateur: (utilisateur, toClient = true) => {
     if (toClient) {
       return {
-        id: utilisateur.uti_id,
-        authId: utilisateur.uti_authid,
-        profilId: utilisateur.rol_id,
-        statutId: utilisateur.stu_id,
-        mail: utilisateur.uti_mail,
-        nom: utilisateur.uti_nom,
-        prenom: utilisateur.uti_prenom,
-        tokenFc: utilisateur.uti_tockenfranceconnect,
-        validated: utilisateur.uti_validated,
-        eaps: utilisateur.uti_eaps,
-        publicontact: utilisateur.uti_publicontact,
-        mailcontact: utilisateur.uti_mailcontact,
-        sitewebcontact: utilisateur.uti_sitewebcontact,
-        adrcontact: utilisateur.uti_adrcontact,
-        compadrcontact: utilisateur.uti_compadrcontact,
-
-        cpi_codeinsee: utilisateur.uti_com_codeinseecontact,
-        cp: utilisateur.uti_com_cp_contact,
-        telephonecontact: utilisateur.uti_telephonecontact
+            id: utilisateur.uti_id,
+            authId: utilisateur.uti_authid,
+            profilId: utilisateur.rol_id,
+            statutId: utilisateur.stu_id,
+            mail: utilisateur.uti_mail,
+            nom: utilisateur.uti_nom,
+            prenom: utilisateur.uti_prenom,
+            tokenFc: utilisateur.uti_tockenfranceconnect,
+            validated: utilisateur.uti_validated,
+            eaps: utilisateur.uti_eaps,
+            publicontact: utilisateur.uti_publicontact,
+            mailcontact: utilisateur.uti_mailcontact,            
+            sitewebcontact: utilisateur.uti_sitewebcontact,
+            adrcontact: utilisateur.uti_adrcontact,
+            compadrcontact: utilisateur.uti_compadrcontact,
+            cpi_codeinsee: utilisateur.uti_com_codeinseecontact,
+            cp: utilisateur.uti_com_cp_contact,
+            telephonecontact: utilisateur.uti_telephonecontact
       }
     } else {
       return {
@@ -107,6 +106,7 @@ module.exports = {
     else {
       checkLog = 'Check log Backend AAQ';
     }
+    
     var contenu = formatDate() + '|' + codeerreur + '|' + checkLog + '|ExecTime=' + execTime;
 
     fs.writeFile(fichierSupervision + '/batch.' + batch + '.txt', contenu, function (err) {

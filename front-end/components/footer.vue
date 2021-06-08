@@ -3,10 +3,12 @@
     <b-container>
       <b-row>
           <b-col cols="12 text-center">
-              SI Aisance Aquatique - Version 1.0.0
+              SI Aisance Aquatique - Version 1.0.1
           </b-col>
           <b-col cols="12 text-center">
-              Contact :<i class="material-icons ml-2 mr-1" >mail</i>AisanceAquatique@sports.gouv.fr
+              Support :<i class="material-icons ml-2 mr-1" >mail</i>appli-aisance-aquatique@sports.gouv.fr
+              <br>
+              Contact :<i class="material-icons ml-2 mr-1" >mail</i>aisanceaquatique@sports.gouv.fr
           </b-col>
 
 

@@ -8,7 +8,7 @@
       </b-col>
       <b-col   class="col-8 col-md-4" >
         <b-row >
-          <p class="aa-bouton-connexion"  v-if="this.b_MN" @click="SeLoguer('MN')">▷ Je suis maître nageur/formateur<br>Je m’identifie et renseigne mes données<br><br></p>
+          <p class="aa-bouton-connexion"  v-if="this.b_MN" @click="SeLoguer('MN')">▷ Je suis maître nageur<sup>(1)</sup><br>Je m’identifie et renseigne mes données<br><br></p>
         </b-row>
         <b-row >
           <p class="aa-bouton-connexion" v-if="this.b_AS" @click="SeLoguer('AS')">▷ J'appartiens à une structure actrice du dispositif AAQ<br><br></p>
@@ -21,12 +21,12 @@
           <connectionForm @submit="login"/>
         </b-col>
       </b-row>
-      <b-row class="text-center">
+      <b-row class="text-center" v-if="this.fc">
         <b-col cols="12">
           <span class="otherConnexion">Ou</span>
         </b-col>
       </b-row>
-      <b-row class="text-center" >
+      <b-row class="text-center" v-if="this.fc">
         <b-col cols="12">
           <b-img class="fcBtn" @click="connexionutilisateur()"  fluid  :src="require('assets/FCboutons-10.png')" border="0" style="size: 100%;" />
           <br>
@@ -38,6 +38,22 @@
         </b-col>
       </b-row>
     </div>
+    
+
+    <div>
+
+      <b-row class="text-center" >
+        <b-col cols="12">
+          <br>
+          <span class="renvoiBasDePage">
+            (1) un maitre-nageur est un éducateur sportif professionnel détenteur d’une carte professionnelle, qualifié pour encadrer contre rémunération l’apprentissage de la natation (ex : BPJEPS AAn, DEJEPS Triathlon, Licence staps entrainement sportif « natation » ...)
+          </span>
+            
+        </b-col>
+      </b-row>
+    </div>
+
+
   </b-container>
 </template>
 
@@ -52,7 +68,9 @@ export default {
       // Booleen Maitre nageur
       b_MN: true,
       // Booleen agent de structure
-      b_AS: true
+      // V1 : On ne permet pas l'affichage du bouton Partenaire
+      b_AS: false,
+      fc: false
     };
   },
 //
@@ -105,8 +123,14 @@ export default {
     },
     // Fonction permettant d'afficher dynamiquement la partie Login
     SeLoguer: function(e) {
-      if (e === "AS")  {this.b_MN = false;}
-      if (e === "MN")  {this.b_AS = false;}
+      // V1 : On ne permet pas de basculer d'un bouton à l'autre
+      return
+      // Return à supprimer pour faire fonctionne le switch des boutons
+      if (e === "AS")  {
+        //this.b_MN = !this.b_MN
+        this.$toast.info("Ce profil n'est pas encore accessible.")
+        }
+      if (e === "MN")  {this.b_AS = !this.b_AS;}
     }
 
   },
@@ -116,13 +140,34 @@ export default {
 //
   async mounted() {
     console.info("mounted home");
-    
+    const url = process.env.API_URL + '/parametres/fcactif'
+      console.info(url);
+      this.$axios.$get(url)
+      .then(response => {
+        if (response) 
+        {
+          console.debug("France Connect Actif" + response)
+          this.fc = true
+        }
+        else
+        {
+          console.debug("France Connect Inactif")
+          this.fc = false
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+
   }
 };
 </script>
 
 
 <style>
+.renvoiBasDePage {
+  text-align: center;
+  color:gray
+}
 .subtitle {
   font-weight: 300;
   font-size: 42px;

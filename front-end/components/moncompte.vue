@@ -23,20 +23,58 @@
           />
         <b-form-invalid-feedback id="emailFeedback">Le courriel est obligatoire et doit être valide.</b-form-invalid-feedback>
       </b-form-group>
-
-
-        <b-form-group label="Prénom :" >
-          <b-form-input type="text" v-model="user.prenom" :disabled="isUserRegisteredViaPwd" />
+        <b-form-group 
+          label="Prénom :"
+          id="prenomInputGroup"
+          label-for="prenomInput"
+          required
+          :disabled="isUserRegisteredViaPwd"
+          >
+          <b-form-input
+            id="prenomInput"
+            type="text"
+            v-model="user.prenom"
+            name="prenom"
+            key="prenom-input"
+            v-validate="{ required: true }"
+            aria-describedby="prenomFeedback"
+            placeholder="Prénom"
+            :disabled="isUserRegisteredViaPwd"
+            :state="validateState('prenom')"
+          />
+           <b-form-invalid-feedback id="prenomFeedback"
+            >Le prénom est obligatoire.</b-form-invalid-feedback
+          >
         </b-form-group>
-        <b-form-group label="Nom :">
-          <b-form-input type="text" v-model="user.nom" :disabled="isUserRegisteredViaPwd" />
+        <b-form-group 
+          label="Nom :"
+          id="nomInputGroup"
+          label-for="nomInput"
+          required
+          :disabled="isUserRegisteredViaPwd"
+          >
+          <b-form-input
+            id="nomInput"
+            type="text"
+            v-model="user.nom"
+            name="nom"
+            key="nom-input"
+            v-validate="{ required: true}"
+            aria-describedby="nomFeedback"
+            placeholder="Nom"
+            :disabled="isUserRegisteredViaPwd"
+            :state="validateState('nom')"
+          />
+           <b-form-invalid-feedback id="nomFeedback"
+            >Le nom est obligatoire.</b-form-invalid-feedback
+          >
         </b-form-group>
-
         <b-form-group 
           label="Numéro de carte professionnelle :"
           id="eapsInputGroup"
           label-for="eapsInput"
           required
+          v-if="user.profilId!=1"
           >
           <b-form-input
             id="eapsInput"
@@ -125,20 +163,32 @@
           <b-form-group id="CodePostal" label="Code Postal :" label-for="cp">
             <b-form-input
               v-model="cp"
-              name="cp"
+              name="codepostal"
               key="cp"
-              :state="validateState('cp')"
+              :state="validateState('codepostal')"
+              v-validate="{ length:5,numeric:true}"
               aria-describedby="cpFeedback"
               id="cp"
               type="number"
               placeholder="CP de la commune"
             />
+            <b-form-invalid-feedback id="cpFeedback">Le code postal doit contenir 5 caractères.</b-form-invalid-feedback>
           </b-form-group>
           <b-form-group 
-            label="Commune">
+            v-if="cp"
+            label="Commune"
+            label-for="lstcommune" 
+            require
+            >
               <b-form-select 
                 class="liste-deroulante"
-                v-model="selectedCommune">
+                v-model="user.cpi_codeinsee"
+                name="lstcommune"
+                v-validate="{ required: true, min:5, max:5}"
+                :state="validateState('lstcommune')"
+                aria-describedby="lstcommuneFeedback"
+
+              >
                 <option :value="null">-- Choix de la commune --</option>
                 <option
                   v-for="commune in listecommune"
@@ -146,12 +196,13 @@
                   :value="commune.cpi_codeinsee"
                 >{{ commune.com_libellemaj}}</option>
               </b-form-select>
+              <b-form-invalid-feedback id="lstcommuneFeedback">Une commune doit être sélectionnée avec un code postal valide.</b-form-invalid-feedback>
           </b-form-group>
 
           
-       </b-form>
+        </b-form>
 
-             <b-form>
+      <b-form>
         <b-form-group id="publiCheckGroup" >
           <b-form-checkbox-group
             v-model="user.publicontact"
@@ -185,9 +236,14 @@
         </b-form-checkbox-group>
       </b-form-group>    
     </b-card> 
-     
+
     <div class="mb-3 text-right">
       <b-button
+        @click="cancel"
+        variant="secondary"
+
+        >{{ cancelTxt }}</b-button
+      >      <b-button
         @click="submit"
         variant="success"
 
@@ -213,8 +269,6 @@ export default {
       accordHonneur: false, 
       // Pour le champ code postal
       cp: null,
-      // Pour le champ Commune
-      selectedCommune: null,
       // Liste qui contient la liste des communes
       listecommune: [
         {
@@ -227,8 +281,11 @@ export default {
       ],
     };
   },
-  props: ["user", "submitTxt", "checkLegal"],
+  props: ["user", "submitTxt", "cancelTxt", "checkLegal"],
   methods: {
+    cancel: function () {
+      this.$emit("cancel");
+    },
     submit: function () {
       this.$validator.validateAll().then((isValid) => {
         if (this.accordHonneur) { 
@@ -285,6 +342,8 @@ export default {
             );
           });
       } else {
+        // On vide le CodeInsee si le CP n'est pas complet
+        this.user.cpi_codeinsee = null
         // On vide la liste car le code postal a changé
         this.listecommune = ["Veuillez saisir un code postal"];
         return Promise.resolve(null);
@@ -311,7 +370,7 @@ export default {
       // Recherche de la liste des commune
       this.recherchecommune()
       // Sélection de la commune correspondant à celle de l'utilisateur dans la liste
-      this.selectedCommune = this.user.cpi_codeinsee
+      //this.selectedCommune = this.user.cpi_codeinsee;
     }
   },
   computed: {

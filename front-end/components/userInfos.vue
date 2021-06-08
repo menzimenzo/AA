@@ -39,7 +39,7 @@
             v-model="user.prenom"
             name="prenom"
             key="prenom-input"
-            v-validate="{ required: true, alpha: true }"
+            v-validate="{ required: true }"
             aria-describedby="prenomFeedback"
             placeholder="Prénom"
             :disabled="isUserRegisteredViaPwd"
@@ -61,7 +61,7 @@
             v-model="user.nom"
             name="nom"
             key="nom-input"
-            v-validate="{ required: true, alpha: true  }"
+            v-validate="{ required: true}"
             aria-describedby="nomFeedback"
             placeholder="Nom"
             :disabled="isUserRegisteredViaPwd"
@@ -76,6 +76,7 @@
           id="eapsInputGroup"
           label-for="eapsInput"
           required
+          v-if="user.profilId!=1"
           >
           <b-form-input
             id="eapsInput"
@@ -156,20 +157,32 @@
           <b-form-group id="CodePostal" label="Code Postal :" label-for="cp">
             <b-form-input
               v-model="cp"
-              name="cp"
+              name="codepostal"
               key="cp"
-              :state="validateState('cp')"
+              :state="validateState('codepostal')"
+              v-validate="{ length:5,numeric:true}"
               aria-describedby="cpFeedback"
               id="cp"
               type="number"
               placeholder="CP de la commune"
             />
+            <b-form-invalid-feedback id="cpFeedback">Le code postal doit contenir 5 caractères.</b-form-invalid-feedback>
           </b-form-group>
           <b-form-group 
-            label="Commune">
+            v-if="cp"
+            label="Commune"
+            label-for="lstcommune" 
+            require
+            >
               <b-form-select 
                 class="liste-deroulante"
-                v-model="selectedCommune">
+                v-model="user.cpi_codeinsee"
+                name="lstcommune"
+                v-validate="{ required: true, min:5, max:5}"
+                :state="validateState('lstcommune')"
+                aria-describedby="lstcommuneFeedback"
+                >
+                
                 <option :value="null">-- Choix de la commune --</option>
                 <option
                   v-for="commune in listecommune"
@@ -177,6 +190,7 @@
                   :value="commune.cpi_codeinsee"
                 >{{ commune.com_libellemaj}}</option>
               </b-form-select>
+              <b-form-invalid-feedback id="lstcommuneFeedback">Une commune doit être sélectionnée avec un code postal valide.</b-form-invalid-feedback>
           </b-form-group>
        </b-form>
        <b-form>
@@ -188,8 +202,8 @@
             name="publiCheck"
           >
             <b-form-checkbox >
-              Je souhaite que ces données soient publiées sur le site "prévention des noyades" et qu'elles apparaissent sur la cartographie             
-
+              Je souhaite que ces données soient publiées sur le site "prévention des noyades" et qu'elles apparaissent sur la cartographie.<br>
+              Si vous ne cochez pas cette case vous pourrez tout de même créer des interventions et générer des attestations lorsque vous aurez accès à l'espace "interventions".
             </b-form-checkbox> 
           </b-form-checkbox-group>
         </b-form-group>
@@ -262,8 +276,6 @@ export default {
           codedep: null
         },
       ],
-      //communeselectionne: {},
-      selectedCommune: null
     };
   },
   props: ["submitTxt", "user", "checkLegal"],
@@ -288,7 +300,9 @@ export default {
         }
         else
         {
-          this.$toast.error('Veuillez certifier sur l honneur l exactitude des informations déclarées.');
+          // On vide le CodeInsee si le CP n'est pas complet
+          this.user.cpi_codeinsee = null          
+          this.$toast.error('Veuillez certifier sur l\'honneur l\'exactitude des informations déclarées.');
 
         }
       });
@@ -358,7 +372,7 @@ export default {
       // Recherche de la liste des commune
       this.recherchecommune()
       // Sélection de la commune correspondant à celle de l'utilisateur dans la liste
-      this.selectedCommune = this.user.cpi_codeinsee
+      //this.selectedCommune = this.user.cpi_codeinsee
     }
   },
   computed: {

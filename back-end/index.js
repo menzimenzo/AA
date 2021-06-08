@@ -59,11 +59,16 @@ const pdf           = require('./routes/pdf');
 const user          = require('./routes/user');
 const documents     = require('./routes/documents');
 const batch         = require('./routes/batch');
+const parametres         = require('./routes/parametres');
+const exp         = require('./routes/export');
+const demandeaaq         = require('./routes/demandeaaq');
 
 // Route vers la page de connexion
 app.use(config.URL_PREFIX + '/connexion', connexion);
 
-app.use(config.URL_PREFIX + '/interventions', interventions);
+//app.use(config.URL_PREFIX + '/interventions', interventions);
+app.use(config.URL_PREFIX + '/pageenconstruction', interventions);
+
 
 app.use(config.URL_PREFIX + '/listecommune', listecommune);
 
@@ -85,11 +90,18 @@ app.use(config.URL_PREFIX + '/pdf', pdf);
 
 app.use(config.URL_PREFIX + '/user', user);
 
+app.use(config.URL_PREFIX + '/demandeaaq', demandeaaq);
+
+
 app.get(config.URL_PREFIX + '', function (req, res) {
     res.send('Bienvenue sur le backend d Aisance Aquatique');
 });
 
 app.use(config.URL_PREFIX + '/batch', batch);
+
+app.use(config.URL_PREFIX + '/parametres', parametres);
+
+app.use(config.URL_PREFIX + '/export', exp);
 
 app.listen(3001, function () {
     console.log('Example app listening on port 3001!')

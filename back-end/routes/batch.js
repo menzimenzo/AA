@@ -3,6 +3,8 @@ const router = express.Router();
 const pgPool = require('../pgpool').getPool();
 var moment = require('moment');
 var fs = require('fs');
+const stringify = require('csv-stringify')
+const ftp = require("basic-ftp")
 const config = require('../config');
 const { sendEmail, formatAndSendMail } = require('../utils/mail-service');
 const { formatIntervention, formatDate, logTrace } = require('../utils/utils')
@@ -10,6 +12,99 @@ moment().format();
 
 const logger = require('../utils/logger')
 const log = logger(module.filename)
+
+
+/* route d'extraction de la liste d'utilisateurs pour le CSV */
+/* Pas d'argument, on utilise la structure de l'utilisateur en session */
+// Execution du batch csv localhost/backend/api/batch/csv
+router.get('/csvopendatasoft', async function (req, res) {
+    log.i('::csvopendatasoft - In')
+
+    //var startTime = new Date();
+    var requete = "";
+
+    log.d('::csvopendatasoft - Recherche des données : ' + requete);
+    requete =`SELECT uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, lower(uti_mail) as Courriel,  
+    replace(replace(uti_validated::text,'true','Validée'),'false','Non validée') as inscription, replace(replace(uti_publicontact::text,'true','Oui'),'false','Non') AutorisePublicationContact, 
+    lower(uti_mailcontact) MailContact, uti_sitewebcontact SiteInternetContact, uti_telephonecontact TelephoneContact, uti_adrcontact AdresseContact,
+    uti_compadrcontact ComplementAdresseContact, uti_com_cp_contact CodePostalContact, uti_com_codeinseecontact CodeInseeContact, com_art ArtCommune, com_libelle LibelleCommune, dep_num Departement
+
+    from utilisateur  uti
+    join profil rol on rol.rol_id = uti.rol_id 
+    left join commune com on cpi_codeinsee = uti.uti_com_codeinseecontact
+    order by 3,4 asc`;
+
+    pgPool.query(requete, (err, result) => {
+        if (err) {
+            log.w('::csvopendatasoft - Erreur lors de la requête.', { requete, erreur: err.stack});
+            //logTrace('aaq-csvods',1,startTime);
+            return res.status(400).json('erreur lors de la récupération des utilisateurs');
+        }
+        else {
+            const csv = result.rows;
+            if (!csv || !csv.length) {
+                log.w('::csvopendatasoft - Résultat vide.')
+                //logTrace('aaq-csvods',2,startTime);
+                return res.status(400).json({ message: 'Aucun résultat renvoyé par la requête' });
+            }
+            stringify(csv, {
+                quoted: '"',
+                header: true
+            }, (err, csvContent) => {
+                if(err){
+                    log.w('::csv - erreur',err)
+                    //logTrace('aaq-csvods',3,startTime);
+                    return res.status(500)
+                } else {
+                    
+                    try {
+                        // Ecriture des données dans un fichier temporaire à transmettre
+                        var stream = fs.createWriteStream(`${config.pathAttestation}csvopendatasoft.csv`);
+                        stream.once('open', function(fd) {
+                            stream.write( csvContent );
+                            stream.end();
+                            }
+                        );                    
+                    }
+                    catch(err) {
+                        log.w(err)
+                        log.w('::csvopendatasoft - Erreur lors de la création du fichier temporaire csvopendatasoft.csv.',  err);
+                        return res.status(500)
+                    }
+                }
+            })            
+        }
+    })
+
+
+    // Envoie du fichier vers OpenDataSoft
+    const client = new ftp.Client()
+    client.ftp.verbose = true
+    try {
+        // Connexion du client
+        await client.access({
+            host: `${config.FTP_ODS_HOTE}`,
+            user: `${config.FTP_ODS_USER}`,
+            password: `${config.FTP_ODS_PASS}`,
+            secure: true
+        })
+
+        // Positionnement du répertoire de destination (le créé s'il n'existe pas)
+        await client.ensureDir(`${config.FTP_ODS_DIR}`)
+        log.d(`Upload du fichier ${config.pathAttestation}csvopendatasoft.csv`)
+        await client.uploadFrom(`${config.pathAttestation}csvopendatasoft.csv`, `${config.FTP_ODS_FILE}`)
+        //await client.downloadTo("README_COPY.md", "README_FTP.md")
+    }
+    catch(err) {
+        log.w(err)
+        return res.status(500)
+    }
+    // Fermeture de la connexion distante
+    client.close()
+    //logTrace('aaq-csvods',0,startTime)
+    log.i('::csvopendatasoft - Done')
+    return res.status(200).json('OK')
+});
 
 // V1.0.1 : Création du socle technique pour l'envoie de mail de relance
 // A compléter en V1.0.2

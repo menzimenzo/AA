@@ -17,7 +17,7 @@ module.exports = async function(req, res) {
         return res.status(400).json({ message: 'Aucun mot de passe fournit pour identification.'});
     }
 
-    const requete = `SELECT * FROM utilisateur WHERE uti_mail='${mail}'`;
+    const requete = `SELECT * FROM utilisateur WHERE lower(uti_mail)=lower('${mail}')`;
     const crypted = await crypto.createHash('md5').update(password).digest('hex');
 
     pgPool.query(requete, (err, result) => {
@@ -34,6 +34,9 @@ module.exports = async function(req, res) {
             }
 
             if(user.uti_pwd && user.uti_pwd === crypted) {
+                if(!user.uti_eaps) {
+                    return res.status(200).json({message:'Veuillez terminer votre inscription', redirect:'/connexion/inscription', user: formatUtilisateur(user)})
+                }
                 if(!user.pwd_validated) {
                     return res.status(400).json({ message: 'En attente de confirmation du mot de passe.' });
                 }    

@@ -201,9 +201,9 @@ create table UTILISATEUR (
    UTI_EAPS             VARCHAR(15)   	      null,
    UTI_PUBLICONTACT     BOOLEAN              default false,
    UTI_MAILCONTACT      VARCHAR(50)          null,
-   UTI_SITEWEBCONTACT   VARCHAR(50)          null,
-   UTI_ADRCONTACT       VARCHAR(50)          null,
-   UTI_COMPADRCONTACT   VARCHAR(50)          null,
+   UTI_SITEWEBCONTACT   VARCHAR(500)          null,
+   UTI_ADRCONTACT       VARCHAR(100)          null,
+   UTI_COMPADRCONTACT   VARCHAR(100)          null,
    UTI_COM_CP_CONTACT       VARCHAR(5)       null,
    UTI_COM_CODEINSEECONTACT VARCHAR(5)       null,
    UTI_TELEPHONECONTACT VARCHAR(50)          null,
@@ -283,6 +283,36 @@ create table INT_ENF (
    constraint PK_INT_ENF primary key (enf_id,int_id)
 );
 
+/*==============================================================*/
+/* Table : DEMANDE_AAQ                                          */
+/* Table permettant à un MN de faire une demande auprès d'un    */
+/* Formateur pour devenir MN AAQ                                */
+/*==============================================================*/
+create table DEMANDE_AAQ (
+   DEM_ID                      SERIAL               not null,
+   DEM_UTI_DEMANDEUR_ID        BIGINT               not null,
+   DEM_UTI_FORMATEUR_ID        BIGINT               not null,
+   DEM_TOCKENDEMANDEACCORD     VARCHAR(100)          null,
+   DEM_TOCKENDEMANDEREFUS      VARCHAR(100)          null,
+   DEM_DATEDEMANDE             DATE               not null,
+   DEM_DATERELANCE             DATE               null,
+   DEM_NBRELANCE               INT                    default 0,
+   DEM_DATEACCORD              DATE               null,
+   DEM_DATEREFUS               DATE               null,
+   DEM_MOTIFREFUS              TEXT                  null,
+   DEM_DMS_ID                  BIGINT            not null,  -- Statut de la demande
+   constraint PK_DEMANDE_AAQ primary key (DEM_ID)
+);
+
+/*==============================================================*/
+/* Table : DEMANDE_STATUT                                       */
+/* Statut de la demande pour le formateur de la part du MN      */
+/* Pour devenir MN AAQ à la place du MN                         */
+/*==============================================================*/
+create table DEMANDE_STATUT (
+   DMS_ID                      BIGINT               not null,
+   DMS_LIBELLE                 VARCHAR(50)          not null
+);
 
 /*==============================================================*/
 /* Table : user_sessions                                        */

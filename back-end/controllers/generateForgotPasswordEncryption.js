@@ -13,7 +13,7 @@ module.exports = async ({ mail }) => {
     }
     mail = formatEmail(mail)
     
-    const userQuery = await pgPool.query(`SELECT uti_mail, uti_id, uti_pwd FROM utilisateur WHERE uti_mail='${mail}'`).catch(err => {
+    const userQuery = await pgPool.query(`SELECT lower(uti_mail) uti_mail, uti_id, uti_pwd FROM utilisateur WHERE lower(uti_mail)=lower('${mail}')`).catch(err => {
         log.w(err)
         throw err
     })

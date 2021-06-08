@@ -456,7 +456,12 @@ export default {
         if (user.id == mn.id) {
           this.formIntervention.utilisateur.splice(key, 1);
         }
-      }
+        idformate = "AAQ_Attestation-" + idformate;
+        console.log("intervention : " + idformate);
+        link.setAttribute("download", `${idformate}.pdf`); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+      });
     },
     resetform: async function () {
       this.erreurformulaire = [];
