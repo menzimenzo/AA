@@ -176,8 +176,9 @@ create table STATUT_UTILISATEUR (
 create table STRUCTURE (
    STR_ID               SERIAL               not null,
    STR_SIRET            BIGINT               null,
-   STR_LIBELLECOURT     VARCHAR(100)         null,
    STR_LIBELLE          VARCHAR(150)         not null,
+   STR_ADRESSE          VARCHAR(150)         not null,
+   STR_COMMUNE          VARCHAR(5)         not null,
    STR_ACTIF            BOOLEAN              not null,
    constraint PK_STRUCTURE primary key (STR_ID)
 );

@@ -29,6 +29,7 @@ router.get('/',
                 }
                 else {
                     const communes = result.rows;
+                    console.log(communes)
                     return res.status(200).json({ communes });
                 }
             });

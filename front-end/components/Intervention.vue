@@ -120,7 +120,7 @@
           type="date"
           class="text-date date-input-width"
         ></b-form-input>
-        <span>&nbsp;nombre de sessions :&nbsp;</span>
+        <span>&nbsp;Nombre de séances en piscine :&nbsp;</span>
         <b-form-input
           maxlength="2"
           v-model="formIntervention.nbSession"
@@ -183,6 +183,7 @@
     </b-row>
     <b-row>
       <div class="input-group-display">
+        <b-col>
         <span>Nombre d'enfants * :&nbsp;</span>
         <b-form-input
           v-model="formIntervention.nbEnfants"
@@ -190,6 +191,37 @@
           min="0"
           class="text-cinq-car"
         ></b-form-input>
+        </b-col>
+         <b-col>
+        <span>Niveau  initial :&nbsp;</span>
+        <b-form-select
+          v-model="niveauInitial"
+          class="liste-deroulante">
+          <option
+            v-for="classe in listeniveau"
+            :key="classe.value"
+            :value="classe.value"
+          >
+            {{ classe.lib }}
+          </option>
+          
+        ></b-form-select>
+        </b-col>
+            <b-col>
+        <span>Niveau  final :&nbsp;</span>
+        <b-form-select
+          v-model="niveauFinal"
+          class="liste-deroulante">
+          <option
+            v-for="classe in listeniveau"
+            :key="classe.value"
+            :value="classe.value"
+          >
+            {{ classe.lib }}
+          </option>
+          
+        ></b-form-select>
+        </b-col>
       </div>
     </b-row>
     <br />
@@ -293,7 +325,7 @@ import Piscine from "~/components/piscine.vue";
 import Saisieindex from "~/components/saisieindex.vue";
 
 const listeniveau = [
-  { lib: "Sans commpétence", value: 0 },
+  { lib: "Débutant", value: 0 },
   { lib: "Palier 1", value: "1" },
   { lib: "Palier 2", value: "2" },
   { lib: "Palier 3 ", value: "3" },
@@ -347,6 +379,8 @@ export default {
     return {
       erreurformulaire: [],
       index: null,
+      niveauInitial: null,
+      niveauFinal: null,
       headersEncadrants: [
         { path: "nom", title: "Nom", type: "text", sortable: true },
         { path: "prenom", title: "Prénom", type: "text", sortable: true },
@@ -417,7 +451,7 @@ export default {
         },
       ],
       listeniveau: [
-        { lib: "Sans commpétence", value: 0 },
+        { lib: "Débutant", value: 0 },
         { lib: "Palier 1", value: "1" },
         { lib: "Palier 2", value: "2" },
         { lib: "Palier 3 ", value: "3" },
@@ -603,8 +637,8 @@ export default {
       let enfant = {
         id: null,
         prenom: null,
-        niv_ini: 0,
-        niv_fin: 0,
+        niv_ini: this.niveauInitial,
+        niv_fin: this.niveauFinal,
       };
       if (this.formIntervention.nbEnfants == "") {
         this.$store.commit("clean_enfants");

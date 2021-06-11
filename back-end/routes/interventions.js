@@ -193,7 +193,7 @@ router.get('/', async function (req, res) {
          where uti.uti_id=${utilisateurId}`
     }
 
-    const requete = `SELECT int.*, pis.*, str.str_libellecourt from intervention int ${whereClause} order by int.int_datefinintervention desc`;
+    const requete = `SELECT int.*, pis.*, str.str_libelle from intervention int ${whereClause} order by int.int_datefinintervention desc`;
     log.d('::list - récuperation via la requête.', { requete });
 
     (async () => {

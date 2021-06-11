@@ -213,6 +213,17 @@
           </b-collapse>
         </b-card>
         <!--  ACCORDEON -- MES STRUCTURES -->
+        <!-- ECOLE : ?
+             CLUB  :SIREN
+             ASSOCIATION / LIGUE : SIREN
+             COLLECTIVITES : communes, EPCI, CD => code postal ou liste département
+             AUTRES : ?
+             Etablissement Public (CREPS) : ?
+
+             --> 
+             
+
+
         <b-card no-body class="mb-3">
           <b-card-header header-tag="header" class="p-1" role="tab">
             <b-form-row>
@@ -234,7 +245,7 @@
                     <i class="material-icons accordion-chevron"
                       >chevron_right</i
                     >
-                    <i class="material-icons ml-2 mr-2">list</i>Mes Structures
+                    <i class="material-icons ml-2 mr-2">list</i>Mes Structures organisatrices
                   </h4>
                 </b-btn>
               </b-col>
@@ -243,22 +254,37 @@
           <b-collapse id="accordion4" accordion="my-accordion" role="tabpanel">
             <b-card-body>
               <b-container>
-                <b-row>
-                  <b-col cols="12">
-                                        <ul>
-                      <li v-for="doc in documents" :key="doc.doc_id">
-                        {{ doc.doc_libelle }}
-                        <b-img
-                          class="img-icon"
-                          fluid
-                          @click="downloadDoc(doc)"
-                          :src="require('assets/pdf-240x240.png')"
-                          blank-color="rgba(0,0,0,0.5)"
-                        />
-                      </li>
-                    </ul>
-                  </b-col>
-                </b-row>
+                <div>
+                      <editable
+                        :columns="headersStructures"
+                        :data="mesStructures"
+                        :removable="false"
+                        :creable="false"
+                        :editable="false"
+                        :noDataLabel="''"
+                        tableMaxHeight="none"
+                      >
+                        <template slot-scope="props" slot="actions">
+                          <div style="min-width: 147px">
+                            <b-btn
+                              @click="deleteStructure(props.data.item)"
+                              size="sm"
+                              class="ml-1"
+                              variant="danger"
+                              v-b-popover.hover="`Supprimer l'intervention`"
+                            >
+                              <i class="material-icons">delete_forever</i>
+                            </b-btn>
+                          </div>
+                        </template>
+                      </editable>
+                      <b-btn
+                        @click="editStructure()"
+                        class="btn btn-primary btn-lg btn-block"
+                      >
+                        <i class="material-icons">add</i>
+                      </b-btn>
+                    </div>
               </b-container>
             </b-card-body>
           </b-collapse>
@@ -322,12 +348,16 @@
     <modal name="editPiscine" height="auto" width="900px" :scrollabe="true">
       <Piscine />
     </modal>
+    <modal name="editStructure" height="500px" width="800px" :scrollabe="true">
+      <Structure />
+    </modal>
   </b-container>
 </template>
 
 <script>
 import Intervention from "~/components/Intervention.vue";
 import Piscine from "~/components/piscine.vue";
+import Structure from "~/components/structure.vue";
 import { mapState } from "vuex";
 import Editable from "~/components/editable/index.vue";
 
@@ -336,6 +366,7 @@ export default {
     Intervention,
     Editable,
     Piscine,
+    Structure
   },
   data() {
     return {
@@ -413,6 +444,32 @@ export default {
           sortable: false,
         },
       ],
+      headersStructures: [
+        {
+          path: "nom",
+          title: "Nom",
+          type: "text",
+          sortable: true,
+        },
+        {
+          path: "adresse",
+          title: "Adresse",
+          type: "text",
+          sortable: true,
+        },
+        {
+          path: "siret",
+          title: "SIRET",
+          type: "text",
+          sortable: true,
+        },
+        {
+          path: "__slot:actions",
+          title: "Actions",
+          type: "__slot:actions",
+          sortable: false,
+        },
+      ],
     };
   },
   watch: {
@@ -436,6 +493,7 @@ export default {
   computed: mapState([
     "interventions",
     "mesPiscines",
+    "mesStructures",
     "interventionCourrante",
     "utilisateurCourant",
     "documents",
@@ -458,7 +516,9 @@ export default {
     editPiscine: function () {
       this.$modal.show("editPiscine");
     },
-
+    editStructure: function () {
+      this.$modal.show("editStructure");
+    },
     deleteIntervention: function (idIntervention) {
       console.info("Suppression d'une intervention : " + idIntervention);
       //this.$dialog.confirm({ text: 'Confirmez-vous la suppression définitive d\'intervention', title: 'Suppression'});
@@ -491,6 +551,28 @@ export default {
       this.loading = true;
       console.log(piscine)
       const url = process.env.API_URL + "/piscine/delete/";
+      piscine.uti_id = this.$store.state.utilisateurCourant.id;
+      return this.$axios
+        .$post(url, { piscine })
+        .then((response) => {
+          this.$store.dispatch("get_mesPiscines");
+          this.loading = false;
+          this.$toast.success(
+            `#${piscine.nom} a bien été supprimée de vos piscines favorites`,
+            {}
+          );
+        })
+        .catch((error) => {
+          console.error(
+            "Une erreur est survenue lors de la suppresion de la piscine favorite",
+            error
+          );
+          this.loading = false;
+        });
+    },
+    deleteStructure: function (stru) {
+      this.loading = true;
+      const url = process.env.API_URL + "/structure/delete/";
       piscine.uti_id = this.$store.state.utilisateurCourant.id;
       return this.$axios
         .$post(url, { piscine })
@@ -600,6 +682,7 @@ export default {
   async mounted() {
     this.$store.dispatch("get_mesPiscines"),
     this.$store.dispatch("get_interventions")
+    this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id)
     this.$store.commit("clean_enfants");
   },
 };

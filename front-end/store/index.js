@@ -147,10 +147,10 @@ export const mutations = {
     log.i(`mutations::set_structures`)
     state.structures = structures
   },
-  set_structureSelectionnee(state, structure) {
+  /*set_structureSelectionnee(state, structure) {
     log.i(`mutations::set_structureSelectionne`)
     state.structureSelectionnee = structure;
-  },
+  },*/
   put_structure(state, {structure, index}){
     log.i(`mutations::put_structure`)
     Vue.set(state.structures, index, structure)
@@ -159,10 +159,14 @@ export const mutations = {
     log.i(`mutations::add_structure`)
     state.structures.push(structure);
   },
-  clean_structureSelectionnee(state) {
+  splice_structure(state,index) {
+    log.i(`mutations::splice_structure`)
+    state.structures.splice(index,1);    
+  },
+  /*clean_structureSelectionnee(state) {
     log.i(`mutations::clean_structureSelectionnee`)
     state.structureSelectionnee = null;
-  },
+  },*/
   set_documents(state, documents){
     log.i(`mutations::set_documents`)    
     state.documents = documents
@@ -324,30 +328,43 @@ export const actions = {
   async logout({ commit }) {
     commit("set_utilisateurCourant", null)
   },
-  async get_structures({commit}) {
+  /*async get_structures({commit}) {
     log.i("actions::get_structures - In");  
     const url = process.env.API_URL + '/structures'
     return this.$axios.get(url).then(response => {
-      commit("set_structures", response.data);
+      //commit("set_structures", response.data);
       log.i("actions::get_structures - done");  
     }).catch(err => {
       log.w("actions::get_structures - error", { err });  
     })
-  },
-  async get_structure({ commit,state }, idStructure) {
+  },*/
+  /*async get_structure({ commit,state }, idStructure) {
     log.i("actions::get_structure - In", { idStructure });  
     const url = process.env.API_URL + "/structures/" + idStructure;
     return await this.$axios
       .$get(url)
       .then(response => {
-        commit("set_structureSelectionnee", response.structures);
+        //commit("set_structureSelectionnee", response.structures);
+        log.i("actions::get_structure - done");  
+      })
+      .catch(error => {
+        log.w("actions::get_structure - erreur", { error });  
+      });
+  },*/
+  async get_structureByUser({ commit,state }, userId) {
+    log.i("actions::get_structure - In", { userId });  
+    const url = process.env.API_URL + "/structures/user/" + userId;
+    return await this.$axios
+      .$get(url)
+      .then(response => {
+        commit("set_structures", response.structures);
         log.i("actions::get_structure - done");  
       })
       .catch(error => {
         log.w("actions::get_structure - erreur", { error });  
       });
   },
-  async put_structure({ commit, state }, structureSelectionnee) {
+  /*async put_structure({ commit, state }, structureSelectionnee) {
     log.i("actions::put_structure - In", { structureSelectionnee });  
     const url = process.env.API_URL + "/structures/" + structureSelectionnee.str_id;
     var structureIndex = state.structures.findIndex(structure=> {
@@ -367,16 +384,30 @@ export const actions = {
       .catch(error => {
         log.w("actions::put_structure - error", { error });  
       });
-  }, 
+  }, */
   async post_structure({ commit, state }, structure) {
     const url  = process.env.API_URL + "/structures";
     log.i("actions::post_structure - In", { url });  
+    console.log('URL store : '+url)
+    console.log(structure)
+    return await this.$axios.$post(url, { structure }).then(({ structure }) => {
+      //commit('add_structure', structure)
+      log.i("actions::post_structure - done");  
+      return structure
+    });
+  },
+
+  async add_structure({ commit, state }, structure, userId) {
+    const url  = process.env.API_URL + "/structures/"+ userId;
+    log.i("actions::post_structure - In", { url });  
+    console.log("actions::post_structure - In", { url });  
     return await this.$axios.$post(url, { structure }).then(({ structure }) => {
       commit('add_structure', structure)
       log.i("actions::post_structure - done");  
       return structure
     });
   },
+  
   async get_documents({ commit }) {
     const url = process.env.API_URL + '/documents'
     log.i("actions::get_documents - In", { url });  
