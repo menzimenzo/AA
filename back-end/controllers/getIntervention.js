@@ -38,7 +38,7 @@ module.exports = async function (req, res) {
          where uti.uti_id=${user.uti_id} and int.int_id=${id}`
     }
 
-    const requete = `SELECT int.*, pis.*, str.str_libelle from intervention int 
+    const requete = `SELECT int.*, pis.*,str.* from intervention int 
     join structure stru on stru.str_id = int.str_id
     ${whereClause}`;
     log.d('::select from intervention - récuperation via la requête.', { requete });

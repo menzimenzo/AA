@@ -11,6 +11,8 @@ const { postEnfantsForIntervention } = require('../controllers/');
 const { deleteEnfantsFromIntervention } = require('../controllers/');
 const { deleteUtilisateursFromIntervention } = require('../controllers/');
 
+const { formatIntervention } = require('../utils/utils')
+
 //const formatIntervention = require('../utils/utils')
 var moment = require('moment');
 moment().format();
@@ -19,33 +21,6 @@ const logger = require('../utils/logger');
 
 
 const log = logger(module.filename)
-
-const formatIntervention = intervention => {
-    var result = {
-        id: intervention.int_id,
-        nbEnfants: intervention.int_nombreenfant,
-        piscine: {
-          nom: intervention.pis_nom,
-          id: intervention.pis_id,
-          adresse: intervention.pis_adresse,
-          cp: intervention.cp,
-          type: intervention.typ_id,
-          x: intervention.pis_x,
-          y: intervention.pis_y
-        },
-        strId: intervention.str_id,
-        strNom: intervention.str_libellecourt,
-        cai: intervention.int_cai,
-        classe:intervention.int_age,
-        nbSession:intervention.int_nbsession,
-        dateDebutIntervention: new Date(intervention.int_datedebutintervention),
-        dateFinIntervention: new Date(intervention.int_datefinintervention),
-        dateCreation: new Date(intervention.int_datecreation),
-        dateMaj: intervention.int_datemaj
-    }
-    return result
-}
-
 
 router.get('/delete/:id', async function (req, res) {
     const intervention = req.body.intervention;
@@ -118,7 +93,6 @@ router.get('/csv/:utilisateurId', async function (req, res) {
                 newIntervention.codeinsee = intervention.int_com_codeinsee
                 newIntervention.dep_num = intervention.int_dep_num
                 newIntervention.reg_num = intervention.int_reg_num
-                newIntervention.dateIntervention = newIntervention.dateIntervention.toLocaleDateString(),
                     newIntervention.dateCreation = newIntervention.dateCreation.toISOString(),
                     newIntervention.dateMaj = newIntervention.dateMaj.toISOString()
                 delete newIntervention.structureCode;
@@ -161,6 +135,7 @@ router.get('/:id', async function (req, res) {
         user: user
     }
     inter = await getIntervention(params)
+    console.log(inter[0])
     return res.status('200').json({ intervention: inter[0] })
 });
 
@@ -193,7 +168,7 @@ router.get('/', async function (req, res) {
          where uti.uti_id=${utilisateurId}`
     }
 
-    const requete = `SELECT int.*, pis.*, str.str_libelle from intervention int ${whereClause} order by int.int_datefinintervention desc`;
+    const requete = `SELECT int.*, pis.*, str.* from intervention int ${whereClause} order by int.int_datefinintervention desc`;
     log.d('::list - récuperation via la requête.', { requete });
 
     (async () => {
@@ -291,7 +266,7 @@ router.post('/', async function (req, res) {
                     (pis_id,str_id,int_nombreenfant,int_datedebutintervention,int_datefinintervention,int_nbsession, int_cai, int_age,int_datecreation,int_datemaj) 
                     values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10 ) RETURNING int_id AS int_id`;
 
-    console.log(requete)
+    //console.log(requete)
     await pgPool.query(requete, [intervention.piscine.id,
     intervention.strId,
     intervention.nbEnfants,

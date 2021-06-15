@@ -46,9 +46,13 @@ router.get('/:id', async function (req, res) {
         log.w('::récuperation de l\'enfant - erreur', error)
         return res.status(400).json({message: error.message}); 
     })
-    if (enfant) {
+    if (enfant && enfant.length > 0) {
         log.i('::get - Done', { id })   
         return res.status(200).json({ enfant})
+    }
+    else {
+        log.i('::get - Done, rien trouvé', { id })   
+        return res.status(204).json('aucun enfant trouvé avec cet identifiant')
     }
 })
 

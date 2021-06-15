@@ -35,7 +35,7 @@ router.get('/',
     });
 
 
-router.get('/:id', async function (req, res) {
+router.get('/user/:id', async function (req, res) {
     const uti_id = req.params.id
     // Recherche des piscines appartenant au utilisateur
     pgPool.query(`select pis.pis_id AS id, pis.pis_nom AS nom, pis.pis_x AS x, pis.pis_y AS y,pis.pis_adr AS adresse, com.com_libelle AS cp
@@ -52,6 +52,26 @@ router.get('/:id', async function (req, res) {
             else {
                 const mesPiscines = result.rows;
                 return res.status(200).json({ mesPiscines });
+            }
+        });
+});
+
+router.get('/:id', async function (req, res) {
+    const id = req.params.id
+    // Recherche des piscines appartenant au utilisateur
+    pgPool.query(`select pis.pis_id AS id, pis.pis_nom AS nom, pis.pis_x AS x, pis.pis_y AS y,pis.pis_adr AS adresse, com.com_libelle AS cp
+                     from piscine pis  
+                        inner join commune com on com.cpi_codeinsee = pis.cpi_codeinsee
+                    where pis.pis_id = $1 `,
+        [$1 = id],
+        (err, result) => {
+            if (err) {
+                console.log(err);
+                return res.status(400).json({ message: 'erreur sur la requete de récupération de la piscine ' + id });
+            }
+            else {
+                const maPiscine = result.rows[0];
+                return res.status(200).json({ maPiscine });
             }
         });
 });
@@ -83,9 +103,9 @@ router.post('/', function (req, res) {
                     return res.status(400).json({ message: 'erreur sur la requete de récupération des piscines de l\'utilsateur' + uti_id });
                 }
             else {
-                    console.log(resu.rows.length)
-                    const mesPiscines = resu.rows[0];
-                    return res.status(200).json({ maPiscine: mesPiscines });
+                    console.log(resu.rows[0])
+                    const newPiscine = resu.rows[0];
+                    return res.status(200).json({ maPiscine: newPiscine });
                 }
             });
             //return res.status(200).json({ maPiscine: result.rows[0] });

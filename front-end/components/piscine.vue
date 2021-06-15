@@ -53,6 +53,10 @@ export default {
         return {};
       },
     },
+    dansInt: {
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {
@@ -77,7 +81,7 @@ export default {
         return this.$axios
           .$get(url)
           .then((response) => {
-            this.listepiscine = response.piscines;         
+            this.listepiscine = response.piscines;
           })
           .catch((error) => {
             console.error(
@@ -93,22 +97,26 @@ export default {
     },
     addPiscine: function () {
       if (this.selectedPiscine) {
-       
+        
         return this.$store
           .dispatch("post_maPiscine", this.selectedPiscine)
-          .then((message) => {
+          .then((piscine) => {
+            this.$store.dispatch("get_mesPiscines");
+            this.$store.dispatch("get_maPiscine",this.selectedPiscine.id);
             this.$toast.success(
               `${this.selectedPiscine.nom} ajoutée aux piscines favorites`,
               []
             );
-            
-            if (this.intervention.utilisateur) {
-              this.intervention.piscine = this.selectedPiscine;
-              this.$modal.hide("newPiscine");
-            } else {
+
+            if (this.dansInt) {
+              console.log('juste avant')
+              console.log(this.$store.state.maPiscine)
+              this.intervention.piscine = this.$store.state.maPiscine
               this.$modal.hide("editPiscine");
+            } else {
+              console.log('dans else')
+              this.$modal.hide("newPiscine");
             }
-            this.$store.dispatch("get_mesPiscines");
           })
           .catch((error) => {
             console.error(
@@ -120,20 +128,23 @@ export default {
               []
             );
             this.$store.dispatch("get_mesPiscines");
-            this.$modal.hide("editPiscine");
+            if (this.dansInt) {
+              this.$modal.hide("newPiscine");
+            } else {
+              this.$modal.hide("editPiscine");
+            }
           });
       } else {
         this.$toast.error(`veuillez sélectionner une piscine`, []);
       }
     },
     cancel: function () {
-      if (this.intervention.utilisateur) {
+      if (this.dansInt) {
+        this.$modal.hide("editPiscine");
+      } else {
         this.$modal.hide("newPiscine");
       }
-      else  {
-        this.$modal.hide("editPiscine");
-      }
-    }
+    },
   },
 };
 </script>

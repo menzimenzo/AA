@@ -16,7 +16,7 @@ module.exports = async function (req, res) {
                 return res.status(400).json('erreur lors de la récupération de l\'enfant' + enfant.enf_id);
         })
 
-        if (enf) {
+        if (enf && enf.length > 0) {
                 log.i('::get - récupération niveau - Done')
                 const secondeRequete = `select niv_fin from int_enf WHERE enf_id = $1 ORDER BY int_id desc limit 1`;
                 const enf_niv = await pgPool.query(secondeRequete, [id]).catch(err => {
@@ -34,6 +34,9 @@ module.exports = async function (req, res) {
                         return enfant
                 }
 
+        }
+        else {
+                return []
         }
 
 }

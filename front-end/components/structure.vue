@@ -234,6 +234,10 @@ export default {
         return {};
       },
     },
+    dansInt: {
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {
@@ -461,23 +465,23 @@ export default {
         soustype: null,
         commune: null,
         adresse: null,
-        actif: true
+        actif: true,
       };
       switch (this.selectedStructure) {
         case 1:
           structure.soustype = this.typeCollectivite;
           switch (structure.soustype) {
             case 1:
-              structure.nom = this.collectivite.com_libelle;
+              structure.nom = 'Commune - ' +this.collectivite.com_libelle;
               structure.code = this.collectivite.cpi_codeinsee;
               structure.commune = this.collectivite.cpi_codeinsee;
               break;
             case 2:
-              structure.nom = this.collectivite.dep_libelle;
+              structure.nom = 'Conseil Général - '+this.collectivite.dep_libelle;
               structure.code = this.collectivite.dep_num;
               break;
             case 3:
-              structure.nom = this.collectivite.epci_libelle;
+              structure.nom = 'EPCI - ' +this.collectivite.epci_libelle;
               structure.code = this.collectivite.epci_code;
               break;
           }
@@ -502,54 +506,52 @@ export default {
           structure.soustype = this.etab.type_libe;
           break;
       }
-      this.$store.dispatch(
-        "post_structure",
-        structure
-      );
-     
-        return this.$store
-          .dispatch("add_structure", structure,this.$store.state.utilisateurCourant.id)
-          .then(() => {
-            this.$toast.success(
-              `${this.structure.nom} ajoutée aux structures favorites`,
-              []
-            );
-
-            if (this.intervention.utilisateur) {
-              //this.intervention.piscine = this.selectedPiscine;
-              //this.$modal.hide("newPiscine");
-            } else {
-              this.$modal.hide("editStructure");
-            }
-            
-          })
-          .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de l'ajout de la piscine",
-              error
-            );
-            this.$toast.error(
-              `${this.selectedStructure.nom} n'a pas pu être ajoutée aux piscines favorites`,
-              []
-            );
-            //this.$store.dispatch("get_mesPiscines");
-            this.$modal.hide("editStructure");
-          });
-      /*
-      else {
-        this.$toast.error(`erreur survenue lors de la sauvegarde de la structure`, []);
-      }*/
+      
+      return this.$store
+        .dispatch("post_structure", [
+          structure,
+          this.$store.state.utilisateurCourant.id,
+        ])
+        .then((structure) => {
+          this.$store.dispatch(
+            "get_structureByUser",
+            this.$store.state.utilisateurCourant.id
+          );
+          this.$toast.success(
+            `${structure.nom} ajoutée aux structures favorites`,
+            []
+          );
+          if (this.dansInt) {
+           this.intervention.structure = structure;
+           this.$modal.hide("editStructure");
+          }
+          else {
+            this.$modal.hide("newStructure");
+          }
+          
+        })
+        .catch((error) => {
+          console.error(
+            "Une erreur est survenue lors de l'ajout de la structure",
+            error
+          );
+          this.$toast.error(
+            `${this.selectedStructure.nom} n'a pas pu être ajoutée aux piscines favorites`,
+            []
+          );
+          this.$modal.hide("editStructure");
+        });
     },
     cancel: function () {
-      if (this.intervention.utilisateur) {
-        this.$modal.hide("newPiscine");
+      if (this.dansInt) {
+        this.$modal.hide("editStructure");
       } else {
-        this.$modal.hide("editPiscine");
+        this.$modal.hide("newStructure");
       }
     },
   },
   async mounted() {
-    this.getDepartements().then((res) => {});
+    this.getDepartements();
   },
 };
 </script>

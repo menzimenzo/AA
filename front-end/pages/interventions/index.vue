@@ -92,7 +92,7 @@
                         tableMaxHeight="none"
                         :loading="loadingInt"
                         :defaultSortField="{
-                          key: 'dateIntervention',
+                          key: 'dateFinIntervention',
                           order: 'desc',
                         }"
                       >
@@ -257,7 +257,7 @@
                 <div>
                       <editable
                         :columns="headersStructures"
-                        :data="mesStructures"
+                        :data=structures
                         :removable="false"
                         :creable="false"
                         :editable="false"
@@ -271,7 +271,7 @@
                               size="sm"
                               class="ml-1"
                               variant="danger"
-                              v-b-popover.hover="`Supprimer l'intervention`"
+                              v-b-popover.hover="`Supprimer la structure de vos structures favorites`"
                             >
                               <i class="material-icons">delete_forever</i>
                             </b-btn>
@@ -345,11 +345,11 @@
     <modal name="editIntervention" :scrollabe="true" height="1100px" width="1100px" @closed="clearIntervention()">
       <Intervention :intervention="interventionCourrante" />
     </modal>
-    <modal name="editPiscine" height="auto" width="900px" :scrollabe="true">
-      <Piscine />
+    <modal name="newPiscine" height="auto" width="900px" :scrollabe="true">
+      <Piscine :dansInt="false"/>
     </modal>
-    <modal name="editStructure" height="500px" width="800px" :scrollabe="true">
-      <Structure />
+    <modal name="newStructure" height="500px" width="800px" :scrollabe="true">
+       <Structure :dansInt="false"/>
     </modal>
   </b-container>
 </template>
@@ -380,7 +380,7 @@ export default {
           sortable: true,
         },
         {
-          path: "strNom",
+          path: "structure.nom",
           title: "Structure",
           type: "text",
           sortable: true,
@@ -458,8 +458,8 @@ export default {
           sortable: true,
         },
         {
-          path: "siret",
-          title: "SIRET",
+          path: "code",
+          title: "Code",
           type: "text",
           sortable: true,
         },
@@ -489,6 +489,7 @@ export default {
       }
       this.loadingInt = false;
     },
+
   },
   computed: mapState([
     "interventions",
@@ -497,6 +498,7 @@ export default {
     "interventionCourrante",
     "utilisateurCourant",
     "documents",
+    "structures"
   ]),
   methods: {
     editIntervention: function (idIntervention) {
@@ -514,10 +516,10 @@ export default {
         });
     },
     editPiscine: function () {
-      this.$modal.show("editPiscine");
+      this.$modal.show("newPiscine");
     },
     editStructure: function () {
-      this.$modal.show("editStructure");
+      this.$modal.show("newStructure");
     },
     deleteIntervention: function (idIntervention) {
       console.info("Suppression d'une intervention : " + idIntervention);
@@ -570,23 +572,24 @@ export default {
           this.loading = false;
         });
     },
-    deleteStructure: function (stru) {
+    deleteStructure: function (structure) {
       this.loading = true;
-      const url = process.env.API_URL + "/structure/delete/";
-      piscine.uti_id = this.$store.state.utilisateurCourant.id;
+      console.log(structure)
+      const url = process.env.API_URL + "/structures/delete";
+      console.log(url)
       return this.$axios
-        .$post(url, { piscine })
+        .$post(url, { structure })
         .then((response) => {
-          this.$store.dispatch("get_mesPiscines");
+          this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id)
           this.loading = false;
           this.$toast.success(
-            `#${piscine.nom} a bien été supprimée de vos piscines favorites`,
+            response,
             {}
           );
         })
         .catch((error) => {
           console.error(
-            "Une erreur est survenue lors de la suppresion de la piscine favorite",
+            "Une erreur est survenue lors de la suppresion de la structure favorite",
             error
           );
           this.loading = false;
@@ -684,6 +687,7 @@ export default {
     this.$store.dispatch("get_interventions")
     this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id)
     this.$store.commit("clean_enfants");
+    
   },
 };
 </script>

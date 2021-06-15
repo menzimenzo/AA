@@ -10,7 +10,7 @@ create table STRUCTURE (
    STR_ADRESSE          VARCHAR(150)         null,
    STR_COMMUNE          VARCHAR(5)           null,
    STR_TYPE             BIGINT               null,
-   STR_SOUSTYPE         VARCHAR(20)          null,
+   STR_SOUSTYPE         VARCHAR(50)          null,
    STR_ACTIF            BOOLEAN              not null,
    constraint PK_STRUCTURE primary key (STR_ID)
 );

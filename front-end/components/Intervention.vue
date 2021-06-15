@@ -54,12 +54,30 @@
     </b-row>
     <b-row>
       <div class="input-group-display">
-        <span>structure pour laquelle j'interviens * :</span>
-        <b-form-select
-          class="liste-deroulante"
-          v-model="formIntervention.strId"
-          :options="listebloc"
-        />
+        <b-col cols="10">
+          <span>structure pour laquelle j'interviens * :</span>
+          <b-form-select
+            class="liste-deroulante"
+            v-model="formIntervention.structure"
+          >
+            <option :value="null">-- Choix de la structure --</option>
+            <option
+              v-for="structure in this.$store.state.structures"
+              :key="structure.id"
+              :value="structure"
+            >
+              {{ structure.nom }}
+            </option>
+          </b-form-select>
+        </b-col>
+        <b-col cols="2">
+          <b-btn
+            @click="addStructure()"
+            class="btn btn-primary btn-lg btn-block"
+          >
+            <i class="material-icons">add</i>
+          </b-btn>
+        </b-col>
       </div>
     </b-row>
     <b-row>
@@ -92,10 +110,8 @@
       </div>
     </b-row>
     <div v-if="formIntervention.piscine">
-      Nom : {{ formIntervention.piscine.nom }} <br />
-      Type : {{ formIntervention.piscine.type }} <br />
-      Adresse : {{ formIntervention.piscine.adresse }}
-      {{ formIntervention.piscine.cp }}
+      Adresse : {{ formIntervention.piscine.adresse }} <br />
+      Commune : {{ formIntervention.piscine.cp }}
     </div>
     <b-row>
       <br />
@@ -184,43 +200,41 @@
     <b-row>
       <div class="input-group-display">
         <b-col>
-        <span>Nombre d'enfants * :&nbsp;</span>
-        <b-form-input
-          v-model="formIntervention.nbEnfants"
-          type="number"
-          min="0"
-          class="text-cinq-car"
-        ></b-form-input>
+          <span>Nombre d'enfants * :&nbsp;</span>
+          <b-form-input
+            v-model="formIntervention.nbEnfants"
+            type="number"
+            min="0"
+            class="text-cinq-car"
+          ></b-form-input>
         </b-col>
-         <b-col>
-        <span>Niveau  initial :&nbsp;</span>
-        <b-form-select
-          v-model="niveauInitial"
-          class="liste-deroulante">
-          <option
-            v-for="classe in listeniveau"
-            :key="classe.value"
-            :value="classe.value"
+        <b-col>
+          <span>Niveau initial :&nbsp;</span>
+          <b-form-select v-model="niveauInitial" class="liste-deroulante">
+            <option
+              v-for="classe in listeniveau"
+              :key="classe.value"
+              :value="classe.value"
+            >
+              {{ classe.lib }}
+            </option>
+
+            ></b-form-select
           >
-            {{ classe.lib }}
-          </option>
-          
-        ></b-form-select>
         </b-col>
-            <b-col>
-        <span>Niveau  final :&nbsp;</span>
-        <b-form-select
-          v-model="niveauFinal"
-          class="liste-deroulante">
-          <option
-            v-for="classe in listeniveau"
-            :key="classe.value"
-            :value="classe.value"
+        <b-col>
+          <span>Niveau final :&nbsp;</span>
+          <b-form-select v-model="niveauFinal" class="liste-deroulante">
+            <option
+              v-for="classe in listeniveau"
+              :key="classe.value"
+              :value="classe.value"
+            >
+              {{ classe.lib }}
+            </option>
+
+            ></b-form-select
           >
-            {{ classe.lib }}
-          </option>
-          
-        ></b-form-select>
         </b-col>
       </div>
     </b-row>
@@ -307,10 +321,12 @@
     >
       <Intervenant :intervention="this.formIntervention" />
     </modal>
-    <modal name="newPiscine" height="auto" width="1100px" :scrollabe="true">
-      <Piscine :intervention="this.formIntervention" />
+    <modal name="editPiscine" height="auto" width="1100px" :scrollabe="true">
+      <Piscine :intervention="this.formIntervention" :dansInt="true" />
     </modal>
-
+    <modal name="editStructure" height="auto" width="400px" :scrollabe="true">
+      <Structure :intervention="this.formIntervention" :dansInt="true" />
+    </modal>
     <modal name="saisieIndex" height="auto" width="400px" :scrollabe="true">
       <Saisieindex :intervention="this.formIntervention" :index="this.index" />
     </modal>
@@ -322,6 +338,7 @@ import moment from "moment";
 import Editable from "~/components/editable/index.vue";
 import Intervenant from "~/components/Intervenant.vue";
 import Piscine from "~/components/piscine.vue";
+import Structure from "~/components/structure.vue";
 import Saisieindex from "~/components/saisieindex.vue";
 
 const listeniveau = [
@@ -332,11 +349,12 @@ const listeniveau = [
 ];
 
 var loadFormIntervention = function (intervention) {
+  console.info("loadFormIntervention");
   let formIntervention = JSON.parse(
     JSON.stringify(
       Object.assign(
         {
-          structureId: null,
+          strId: null,
           piscine: null,
           dateDebutIntervention: null,
           dateFinIntervention: null,
@@ -357,6 +375,8 @@ var loadFormIntervention = function (intervention) {
   let dateFinIntervention = moment(intervention.dateFinIntervention);
   formIntervention.dateFinIntervention =
     dateFinIntervention.format("YYYY-MM-DD");
+  console.info("apres loadFrom");
+  console.info(formIntervention);
   return formIntervention;
 };
 
@@ -374,6 +394,7 @@ export default {
     Intervenant,
     Piscine,
     Saisieindex,
+    Structure,
   },
   data() {
     return {
@@ -393,12 +414,6 @@ export default {
         },
       ],
       formIntervention: loadFormIntervention(this.intervention),
-      listebloc: [
-        { text: "-- Choix du type de bloc --", value: null },
-        { text: "Bloc 1 : Savoir pédaler", value: "1" },
-        { text: "Bloc 2 : Savoir circuler", value: "2" },
-        { text: "Bloc 3 : Savoir rouler", value: "3" },
-      ],
       listecadreintervention: [
         { text: `Scolaire`, value: "1" },
         { text: `Péri-scolaire`, value: "2" },
@@ -462,9 +477,10 @@ export default {
   },
   methods: {
     removeEnfant: function (evenement) {
+      console.info("removeEnfant");
       const indexT = evenement.index;
       this.$store.commit("splice_enfant", indexT);
-      this.formIntervention.nbEnfants = this.$store.state.enfants.length
+      this.formIntervention.nbEnfants = this.$store.state.enfants.length;
     },
     updateEnfant: function (evenement) {
       const param = {
@@ -473,12 +489,15 @@ export default {
       };
       this.$store.commit("put_enfant", param);
     },
-    searchEnfant: function (param) {  
-      this.index = param.index
+    searchEnfant: function (param) {
+      this.index = param.index;
       this.$modal.show("saisieIndex");
     },
     addPiscine: function () {
-      this.$modal.show("newPiscine");
+      this.$modal.show("editPiscine");
+    },
+    addStructure: function () {
+      this.$modal.show("editStructure");
     },
     editIntervenant: function () {
       this.$modal.show("editIntervenant");
@@ -526,7 +545,7 @@ export default {
         this.erreurformulaire.push("Les intervenants");
         formOK = false;
       }
-      if (!this.formIntervention.strId) {
+      if (!this.formIntervention.structure) {
         this.erreurformulaire.push("La structure");
         formOK = false;
       }
@@ -562,7 +581,7 @@ export default {
       const url = process.env.API_URL + "/interventions";
       const intervention = {
         id: this.formIntervention.id,
-        strId: this.formIntervention.strId,
+        strId: this.formIntervention.structure.id,
         dateDebutIntervention: this.formIntervention.dateDebutIntervention,
         dateFinIntervention: this.formIntervention.dateFinIntervention,
         nbSession: this.formIntervention.nbSession,
@@ -612,14 +631,16 @@ export default {
   },
   watch: {
     intervention(intervention) {
+      console.info("watch.intervention");
       let formIntervention = JSON.parse(
         JSON.stringify(
           Object.assign(
             {
-              structureId: "",
+              strId: "",
               piscine: {},
               maitreNageur: {},
-              dateIntervention: null,
+              dateDebutIntervention: null,
+              dateFinIntervention: null,
               nbEnfants: "",
               nbNouveauxEnfants: "",
               listeEnfants: [],
@@ -627,65 +648,65 @@ export default {
             intervention
           )
         )
-      );
-      formIntervention.dateIntervention = new Date(
-        formIntervention.dateIntervention
-      );
+      );  
       Vue.set(this, "formIntervention", loadFormIntervention(intervention));
     },
     "formIntervention.nbEnfants"() {
-      let enfant = {
-        id: null,
-        prenom: null,
-        niv_ini: this.niveauInitial,
-        niv_fin: this.niveauFinal,
-      };
-      if (this.formIntervention.nbEnfants == "") {
-        this.$store.commit("clean_enfants");
-      } else {
-        if (this.$store.state.enfants.length == 0)
-          for (let i = 0; i < this.formIntervention.nbEnfants; i++) {
-            this.$store.commit("add_enfant", enfant);
-          }
-        else {
-          if (
-            this.formIntervention.nbEnfants < this.$store.state.enfants.length
-          ) {
-            const nbLgnes =
-              this.$store.state.enfants.length -
-              this.formIntervention.nbEnfants;
-            let msg = "";
-            if (nbLgnes == 1) {
-              msg =
-                "Vous allez effacer la dernière ligne saisie. Êtes vous sûr ?";
-            } else {
-              msg =
-                "Vous allez effacer les " +
-                nbLgnes +
-                " dernières lignes saisies. Êtes vous sûr ?";
+      if (!this.formIntervention.id) {
+        console.info("formIntervention.nbEnfants");
+        let enfant = {
+          id: null,
+          prenom: null,
+          niv_ini: this.niveauInitial,
+          niv_fin: this.niveauFinal,
+        };
+        if (this.formIntervention.nbEnfants == "") {
+          this.$store.commit("clean_enfants");
+        } else {
+          if (this.$store.state.enfants.length == 0)
+            for (let i = 0; i < this.formIntervention.nbEnfants; i++) {
+              this.$store.commit("add_enfant", enfant);
             }
-            if (confirm(msg)) {
-              for (let i = 0; i < nbLgnes; i++) {
-                this.$store.commit("splice_enfant");
+          else {
+            if (
+              this.formIntervention.nbEnfants < this.$store.state.enfants.length
+            ) {
+              const nbLgnes =
+                this.$store.state.enfants.length -
+                this.formIntervention.nbEnfants;
+              let msg = "";
+              if (nbLgnes == 1) {
+                msg =
+                  "Vous allez effacer la dernière ligne saisie. Êtes vous sûr ?";
+              } else {
+                msg =
+                  "Vous allez effacer les " +
+                  nbLgnes +
+                  " dernières lignes saisies. Êtes vous sûr ?";
+              }
+              if (confirm(msg)) {
+                for (let i = 0; i < nbLgnes; i++) {
+                  this.$store.commit("splice_enfant");
+                }
+              } else {
+                this.formIntervention.nbEnfants =
+                  this.$store.state.enfants.length;
               }
             } else {
-              this.formIntervention.nbEnfants =
-                this.$store.state.enfants.length;
-            }
-          } else {
-            if (
-              this.formIntervention.nbEnfants !=
-              this.$store.state.enfants.length
-            ) {
-              for (
-                let i = 0;
-                i <
-                this.formIntervention.nbEnfants -
-                  this.$store.state.enfants.length +
-                  1;
-                i++
+              if (
+                this.formIntervention.nbEnfants !=
+                this.$store.state.enfants.length
               ) {
-                this.$store.commit("add_enfant", enfant);
+                for (
+                  let i = 0;
+                  i <
+                  this.formIntervention.nbEnfants -
+                    this.$store.state.enfants.length +
+                    1;
+                  i++
+                ) {
+                  this.$store.commit("add_enfant", enfant);
+                }
               }
             }
           }

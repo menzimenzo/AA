@@ -9,10 +9,10 @@ export const state = () => ({
   interventionCourrante: {},
   utilisateurCourant: null,
   mesPiscines: null,
+  maPiscine: {},
   utilisateurSelectionne: [],
   users: [],
   structures: [],
-  structureSelectionnee: [],
   documents: [],
   statStructure: [],
   enfants: []
@@ -106,9 +106,13 @@ export const mutations = {
     log.i(`mutations::add_piscine`, { piscine })
     state.interventions.push(piscine);
   },
-  set_mesPiscines(state, utilisateur) {
+  set_mesPiscines(state, piscine) {
     log.i("::mutations::set_mesPiscines - In");
-    state.mesPiscines = utilisateur;
+    state.mesPiscines = piscine;
+  },
+  set_maPiscine(state, piscine) {
+    log.i("::mutations::set_maPiscine - In");
+    state.maPiscine = piscine;
   },
   clean_mesPiscines(state) {
     log.i(`mutations::clean_mesPiscines`)
@@ -147,26 +151,6 @@ export const mutations = {
     log.i(`mutations::set_structures`)
     state.structures = structures
   },
-  /*set_structureSelectionnee(state, structure) {
-    log.i(`mutations::set_structureSelectionne`)
-    state.structureSelectionnee = structure;
-  },*/
-  put_structure(state, {structure, index}){
-    log.i(`mutations::put_structure`)
-    Vue.set(state.structures, index, structure)
-  },
-  add_structure(state, structure) {
-    log.i(`mutations::add_structure`)
-    state.structures.push(structure);
-  },
-  splice_structure(state,index) {
-    log.i(`mutations::splice_structure`)
-    state.structures.splice(index,1);    
-  },
-  /*clean_structureSelectionnee(state) {
-    log.i(`mutations::clean_structureSelectionnee`)
-    state.structureSelectionnee = null;
-  },*/
   set_documents(state, documents){
     log.i(`mutations::set_documents`)    
     state.documents = documents
@@ -195,7 +179,6 @@ export const actions = {
       .then(response => {
         response.interventions.forEach(intervention => {
           intervention.dateCreation = new Date(intervention.dateCreation)
-          intervention.dateIntervention = new Date(intervention.dateIntervention)
         })
         commit("set_interventionCourrantes", response.interventions);
         log.i("actions::get_interventions - Done", {
@@ -215,7 +198,6 @@ export const actions = {
       .$get(url)
       .then(response => {
         response.intervention.dateCreation = new Date(response.intervention.dateCreation)
-        response.intervention.dateIntervention = new Date(response.intervention.dateIntervention)
         commit("set_interventionCourrante", response.intervention);
         log.i("actions::get_intervention - done", { intervention: response.intervention });
         // this.interventions = response.interventions
@@ -245,14 +227,14 @@ export const actions = {
     })
   },
   async get_mesPiscines({ commit, state }) {
-    const url = process.env.API_URL + "/piscine/" + state.utilisateurCourant.id;
+    const url = process.env.API_URL + "/piscine/user/" + state.utilisateurCourant.id;
     log.i("get_mesPiscines - In", { url });
     return await this.$axios
       .$get(url)
       .then(response => {
         commit("set_mesPiscines", response.mesPiscines);
         log.i("fetched mesPiscines - Done", {
-          mesPiscines: this.mesPiscines
+        //  mesPiscines: this.mesPiscines
         });
         // this.interventions = response.interventions
       })
@@ -264,18 +246,32 @@ export const actions = {
         commit("clean_mesPiscines");
       });
   },
+  async get_maPiscine({ commit, state },id) {
+    const url = process.env.API_URL + "/piscine/" + id;
+    log.i("get_maPiscine - In", { url });
+    return await this.$axios
+      .$get(url)
+      .then(response => {
+        commit("set_maPiscine", response.maPiscine);
+        log.i("fetched maPiscine - Done", {
+        });
+      })
+      .catch(error => {
+        log.w(
+          "Une erreur est survenue lors de la récupération d'une piscine de l'utilisateur " + state.utilisateurCourant.id,
+          error
+        );
+        commit("clean_mesPiscines");
+      });
+  },
   async post_maPiscine({ commit, state }, maPiscine) {
     maPiscine.utilisateurId = state.utilisateurCourant.id
     const url = process.env.API_URL + "/piscine/"
     return await this.$axios.$post(url, { maPiscine }).then(({ maPiscine }) => {
+      log.i('dans store',  maPiscine)
       commit('add_piscine', { maPiscine })
-      return maPiscine
     })
   },
-
-
-
-
   async set_utilisateur({ commit }, utilisateur) {
     commit("set_utilisateurCourant", utilisateur)
   },
@@ -328,86 +324,27 @@ export const actions = {
   async logout({ commit }) {
     commit("set_utilisateurCourant", null)
   },
-  /*async get_structures({commit}) {
-    log.i("actions::get_structures - In");  
-    const url = process.env.API_URL + '/structures'
-    return this.$axios.get(url).then(response => {
-      //commit("set_structures", response.data);
-      log.i("actions::get_structures - done");  
-    }).catch(err => {
-      log.w("actions::get_structures - error", { err });  
-    })
-  },*/
-  /*async get_structure({ commit,state }, idStructure) {
-    log.i("actions::get_structure - In", { idStructure });  
-    const url = process.env.API_URL + "/structures/" + idStructure;
-    return await this.$axios
-      .$get(url)
-      .then(response => {
-        //commit("set_structureSelectionnee", response.structures);
-        log.i("actions::get_structure - done");  
-      })
-      .catch(error => {
-        log.w("actions::get_structure - erreur", { error });  
-      });
-  },*/
-  async get_structureByUser({ commit,state }, userId) {
+    async get_structureByUser({ commit,state }, userId) {
     log.i("actions::get_structure - In", { userId });  
     const url = process.env.API_URL + "/structures/user/" + userId;
     return await this.$axios
       .$get(url)
       .then(response => {
         commit("set_structures", response.structures);
-        log.i("actions::get_structure - done");  
+        console.log("actions::get_structure - done");  
       })
       .catch(error => {
         log.w("actions::get_structure - erreur", { error });  
       });
   },
-  /*async put_structure({ commit, state }, structureSelectionnee) {
-    log.i("actions::put_structure - In", { structureSelectionnee });  
-    const url = process.env.API_URL + "/structures/" + structureSelectionnee.str_id;
-    var structureIndex = state.structures.findIndex(structure=> {
-      return structure.id == structureSelectionnee.id
-    })
-    return await this.$axios
-      .$put(url, { structureSelectionnee })
-      .then(async res => {
-        const url = process.env.API_URL + "/structures/" + res.structures.str_id;
-        return this.$axios
-          .$get(url)
-          .then(response => {
-            commit("put_user", {structure: response.structure, index: structureIndex});
-            log.i("actions::put_structure - done");  
-          })
-      })
-      .catch(error => {
-        log.w("actions::put_structure - error", { error });  
-      });
-  }, */
-  async post_structure({ commit, state }, structure) {
+  async post_structure({ commit, state }, [structure,userId]) {
     const url  = process.env.API_URL + "/structures";
     log.i("actions::post_structure - In", { url });  
-    console.log('URL store : '+url)
-    console.log(structure)
-    return await this.$axios.$post(url, { structure }).then(({ structure }) => {
-      //commit('add_structure', structure)
+    return await this.$axios.$post(url, { structure, userId }).then(({ structure }) => {
       log.i("actions::post_structure - done");  
       return structure
     });
   },
-
-  async add_structure({ commit, state }, structure, userId) {
-    const url  = process.env.API_URL + "/structures/"+ userId;
-    log.i("actions::post_structure - In", { url });  
-    console.log("actions::post_structure - In", { url });  
-    return await this.$axios.$post(url, { structure }).then(({ structure }) => {
-      commit('add_structure', structure)
-      log.i("actions::post_structure - done");  
-      return structure
-    });
-  },
-  
   async get_documents({ commit }) {
     const url = process.env.API_URL + '/documents'
     log.i("actions::get_documents - In", { url });  

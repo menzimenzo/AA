@@ -13,11 +13,5 @@ module.exports = {
     putEnfant: require('./putEnfant'),
     deleteEnfant: require('./deleteEnfant'),
     deleteEnfantsFromIntervention: require('./deleteEnfantsFromIntervention'),
-    getEnfant: require('./getEnfant'),
-    postStructure: require('./postStructure'),
-    postUtilisateurForStructure: require('./postUtilisateurForStructure'),
-    putStructure: require('./putStructure'),
-    getStructureByUser: require('./getStructureByUser'),
-    getStructure: require('./getStructure'),
-    getStructures: require('./getStructures')
+    getEnfant: require('./getEnfant')
 }

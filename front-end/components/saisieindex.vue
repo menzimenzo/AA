@@ -49,7 +49,6 @@ export default {
       let enfantDoublon = [];
       enfantDoublon = this.intervention.enfant.filter((el) => {
         if (el.enf_id == this.idEnfant) {
-          console.log("trouvé");
           return true;
         }
       });
@@ -63,7 +62,7 @@ export default {
         return this.$axios
           .$get(url)
           .then((response) => {
-            console.log(response);
+            if (response) {
             this.$store.commit("put_enfant", {
               enfant: response.enfant,
               index: this.index,
@@ -72,6 +71,10 @@ export default {
               `recupération des données de l\'enfant ${this.idEnfant} effectuée`
             );
             this.$modal.hide("saisieIndex");
+            }
+            else {
+              this.$toast.error(`L\'enfant ${this.idEnfant} n\'a pu être trouvé`);  
+            }
           })
           .catch((error) => {
             this.$toast.error(`L\'enfant ${this.idEnfant} n\'a pu être trouvé`);
