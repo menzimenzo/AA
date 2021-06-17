@@ -6,21 +6,84 @@
         <b-img :src="require('assets/MainAisAqua.png')" width="365%"/>
 
       </b-col>
-      <b-col   class="col-4 col-md-8" >
-        <b-row >
-          <p class="InfoMN" ><b>Vous êtes connecté avec un rôle "Maître Nageur"</b><br><br>
-          Vous pouvez modifier les informations de votre compte<br>
-          Des formations de qualification Maître Nageur Aisance Aquatique sont disponibles sur le site : <br><a href="https://www.sports.gouv.fr/accueil-du-site/actualites/Lancement-du-plan-aisance-aquatique">Formations aisance aquatique</a><br></p>
-        </b-row>
+      <b-col  class="col-12 col-md-8" v-if="!loading">
+        <b-card class="mb-3" v-if="!maDemande">
+          <b-form>
+            Vous êtes connecté avec un rôle "Maître Nageur"<br><br>
+            Vous suivez ou avez suivi une formation pour les encadrants de l’ Aisance Aquatique :<br><br>
+            Vous avez la possibilité de valoriser cette formation,<br>
+            en recevant le label « Maitre-nageur AAQ ».<br><br>
+            Pour ce faire, précisez la structure ou l’instructeur AAQ qui vous forme ou vous a formé<br>
+            <b-form-group 
+                label-for="lststructureref" 
+                require
+                >
+                  <b-form-select 
+                    class="liste-deroulante"
+                    v-model="structurerefid"
+                    name="lststructureref"
+                    aria-describedby="lststructurerefFeedback">
+                  
+                    <option :value="null">-- Choix de la structure de référence --</option>
+                    <option
+                      v-for="structureref in listestructureref"
+                      :key="structureref.id"
+                      :value="structureref.id"
+                    >{{ structureref.libellecourt }} | {{ structureref.courriel }}</option>
+                  </b-form-select>
+                <b-button variant="success" v-on:click="validerStrutureRef()">Valider</b-button>
+            </b-form-group>   
+            OU<br><br>
+
+            <b-form-group 
+                label-for="lstformateur" 
+                require
+                >
+                  <b-form-select 
+                    class="liste-deroulante"
+                    v-model="formateurid"
+                    name="lstformateur"
+                    aria-describedby="lstformateurFeedback">
+                  
+                    <option :value="null">-- Choix de l’instructeur --</option>
+                    <option
+                      v-for="formateur in listeformateur"
+                      :key="formateur.id"
+                      :value="formateur.id"
+                    >{{ formateur.nom }} {{ formateur.prenom }} | {{ formateur.mail }}</option>
+                  </b-form-select>
+                <b-button variant="success" v-on:click="validerFormateur()">Valider</b-button>
+            </b-form-group>    
+             
+                        
+          </b-form>
+        </b-card>            
+        <b-card class="mb-3" v-else>
+          <b-form> 
+            
+            Vous êtes connecté avec un rôle "Maître Nageur"<br><br>
+            Vous avez une demande en cours pour passer en "Maître Nageur Aisance Aquatique".
+            Demande effectuée le {{ this.maDemande.datedemandeaaq}} auprès de {{ this.maDemande.sre_libellecourt}} {{ this.maDemande.uti_prenom}} {{ this.maDemande.uti_nom}} ({{this.maDemande.sre_courriel}} {{ this.maDemande.uti_mail}})<br><br>
+          </b-form>
+          <!-- // TODO Implémentation du bouton Annuler la demande à faire
+               // Ajouter le statut "Annulé"
+            <b-button variant="danger" v-on:click="annulerDemande()">Annuler ma demande</b-button>
+          -->
+        </b-card>            
+      </b-col>
+      <b-col class="col-12 col-md-8" v-else>
+        Chargement en cours ... veuillez patienter
       </b-col>
     </b-row>
   </b-container>
 </template>
 
 <script>
-//import Intervention from "~/components/Intervention.vue";
+
 import { mapState } from "vuex";
 //import Editable from "~/components/editable/index.vue";
+
+import moment from "moment";
 
 export default {
   components: {
@@ -29,56 +92,30 @@ export default {
   },
   data() {
     return {
-      loading: true,
-      interventionsToDisplay: null,
-      headers: [
-        {
-          path: "id",
-          title: "N° d'intervention",
-          type: "text",
-          sortable: true
-        },
-        { path: "blocId", title: "Bloc", type: "text", sortable: true },
-        {
-          path: "commune.com_libellemaj",
-          title: "Commune",
-          type: "text",
-          sortable: true
-        },
-        {
-          path: "dateIntervention",
-          title: "Date d'intervention",
-          type: "date",
-          sortable: true,
-          filter: "date"
-        },
-        {
-          path: "dateCreation",
-          title: "Création",
-          type: "date",
-          sortable: true,
-          filter: "timestamp"
-        },
-        {
-          path: "dateMaj",
-          title: "Modification",
-          type: "date",
-          sortable: true,
-          filter: "timestamp"
-        },
-        {
-          path: "nbEnfants",
-          title: "Nombre d'enfants",
-          type: "text",
-          sortable: true
-        },
-        {
-          path: "__slot:actions",
-          title: "Actions",
-          type: "__slot:actions",
-          sortable: false
-        }
-      ]
+      loading: false,
+      formateurid: null,
+      structurerefid: null,
+      iddemande: null,
+      maDemande: null,        
+      listeformateur: [
+          {
+            text: "Veuillez sélectionner un formateur",
+            value: null,
+            id: null,
+            nom: null,
+            prenom: null,
+            mail: null
+          },
+        ],
+      listestructureref: [
+          {
+            text: "Veuillez sélectionner une structure de référence",
+            value: null,
+            id: null,
+            libellecourt: null,
+            courriel: null
+          },
+        ],
     };
   },
   watch: {
@@ -124,80 +161,42 @@ export default {
             error
           );
         });
-    },
-    deleteIntervention: function(idIntervention) {
-      console.info("Suppression d'une intervention : " + idIntervention);
-      //this.$dialog.confirm({ text: 'Confirmez-vous la suppression définitive d\'intervention', title: 'Suppression'});
-      if (confirm("Confirmez-vous la suppression définitive d'intervention")) {
-        this.loading = true;
-        const url =
-          process.env.API_URL + "/interventions/delete/" + idIntervention;
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then(response => {
-            this.$store.dispatch("get_interventions");
-            //this.resetform();
-            this.clearIntervention();
-            this.$toast.success(
-              `Intervention #${idIntervention} a bien été supprimée`,
-              {}
-            );
-          })
-          .catch(error => {
-            console.error(
-              "Une erreur est survenue lors de la suppresion de l'intervention",
-              error
-            );
-          });
-        this.loading = false;
-      }
-    },
-    downloadPdf: function(id) {
-      this.$axios({
-        url: process.env.API_URL + "/pdf/" + id,
-        method: "GET",
-        responseType: "blob" // important
-      }).then(response => {
-        // Crée un objet blob avec le contenue du CSV et un lien associé
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        // Crée un lien caché pour télécharger le fichier
-        const link = document.createElement("a");
-        link.href = url;
-        var idformate = "";
-        var nbzero;
-        idformate = id.toString();
-        for (nbzero = 0; nbzero < 7 - id.toString().length; nbzero++) {
-          idformate = "0" + idformate;
-        }
-        idformate = "AAQ_Attestation-" + idformate;
-        console.log(idformate);
-        link.setAttribute("download", `${idformate}.pdf`); //or any other extension
-        document.body.appendChild(link);
-        // Télécharge le fichier
-        link.click();
-        link.remove();
-      });
-    },
-    downloadDoc: function(doc) {
-      this.$axios({
-        url: process.env.API_URL + "/documents/" + doc.doc_id,
-        method: "GET",
-        responseType: "blob"
-      })
+      },
+  recherchestructureref: function() 
+    {
+      console.info("Recherche des structures de référence");
+      // Lance la recherche sur la liste des formateurs 
+      const url = process.env.API_URL + "/structureref/liste/"
+      console.info(url);
+      return this.$axios
+        .$get(url)
         .then(response => {
-          // https://gist.github.com/javilobo8/097c30a233786be52070986d8cdb1743
-          // Crée un objet blob avec le contenue du CSV et un lien associé
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          // Crée un lien caché pour télécharger le fichier
-          const link = document.createElement("a");
-          link.href = url;
-          const fileName = doc.doc_filename;
-          link.setAttribute("download", fileName);
-          // Télécharge le fichier
-          link.click();
-          link.remove();
-          console.log("Done - Download", { fileName });
+          this.listestructureref = response.structureref;
+          console.info("recherche structureref : this.listestructureref " + this.listestructureref );
+        })
+        .catch(error => {
+          console.error(
+            "Une erreur est survenue lors de la récupération des structures de référence",
+            error
+          );
+        });
+      },      
+  chargedemande: function() {
+      console.log("Charge demande AAQ");
+      // Lance la recherche sur la liste des formateurs 
+      const url = process.env.API_URL + "/demandeaaq?demandeurid=" + this.utilisateurCourant.id
+      console.info(url);
+      return this.$axios
+        .$get(url)
+        .then( response => {
+          if(response && response.demandeaaq) {
+            console.log("Une demande en cours: " + response.demandeaaq.dem_id)
+            this.maDemande = response.demandeaaq;
+          }
+          else
+          {
+            console.log("Aucune demande en cours")
+          }
         })
         .catch(err => {
           console.log(JSON.stringify(err));
@@ -235,6 +234,58 @@ export default {
           console.log(JSON.stringify(err));
           this.$toasted.error("Erreur lors du téléchargement: " + err.message);
         });
+      },
+  validerFormateur: function() {
+      console.log('Formateur choisi' + this.formateurid)
+      if (this.formateurid) {
+        const url = process.env.API_URL + '/demandeaaq/'
+        const body = {
+          formateurId: this.formateurid,
+          demandeurId: this.utilisateurCourant.id
+        }
+        return this.$axios.$post(url, body)
+          .then(async response => {
+              this.$toast.success('Votre demande a été envoyée.')
+              
+          if (response && response.maDemande) {
+            this.maDemande = response.maDemande;
+            //console.log("Une créée: " + this.maDemande.demandeurId)
+            // J'ai fait l'inverse de ce que Glenn a dit, je refais un appel serveur
+            // TODO : Récupérer les valeur du Post ... et non refaire un appel serveur
+            this.chargedemande()
+
+          }
+          }).catch(error => {
+            console.log(error)
+            this.$toast.error(error)
+          })      
+      }
+    },
+    validerStrutureRef: function() {
+      console.log('Structure de référence choisie' + this.structurerefid)
+      if (this.structurerefid) {
+        const url = process.env.API_URL + '/demandeaaq/'
+        const body = {
+          structurerefid: this.structurerefid,
+          demandeurId: this.utilisateurCourant.id
+        }
+        return this.$axios.$post(url, body)
+          .then(async response => {
+              this.$toast.success('Votre demande a été envoyée à la structure')
+              
+          if (response && response.maDemande) {
+            this.maDemande = response.maDemande;
+            //console.log("Une créée: " + this.maDemande.demandeurId)
+            // J'ai fait l'inverse de ce que Glenn a dit, je refais un appel serveur
+            // TODO : Récupérer les valeur du Post ... et non refaire un appel serveur
+            this.chargedemande()
+
+          }
+          }).catch(error => {
+            console.log(error)
+            this.$toast.error(error)
+          })      
+      }
     }
   },
   //
@@ -262,6 +313,16 @@ export default {
       this.interventionsToDisplay = this.interventions;
     }*/
     this.loading = false;
+  },
+  async created() {
+   this.loading = true;
+   // Chargement de la liste des formateurs
+   await this.rechercheformateur()   
+   // Chargement de la liste des structures de référence
+   await this.recherchestructureref()   
+   // Chargement de la demande
+   await  this.chargedemande() 
+   this.loading = false;
   }
 };
 </script>

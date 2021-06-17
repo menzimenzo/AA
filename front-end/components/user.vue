@@ -60,11 +60,35 @@
         <div class="mb-3 mt-3">
           Profil :
           <b-form-select
-            v-model="formUser.role"
+            v-model="role"
             :options="listeprofil"
           />
         </div>
 
+
+          <b-form-group 
+            v-if="renseignerinstructeur()"
+            label="* Instructeur ayant assuré la formation :"
+            label-for="lstinstructeur" 
+            require
+            >
+              <b-form-select 
+                class="liste-deroulante"
+                v-model="instructeurid"
+                name="lstinstructeur"
+                v-validate="{ required: true }"
+                aria-describedby="lstinstructeurFeedback"
+
+              >
+                <option :value="null">-- Choix de l'instructeur --</option>
+                <option
+                  v-for="instructeur in listeinstructeur"
+                  :key="instructeur.id"
+                  :value="instructeur.id"
+                >{{ instructeur.nom }} {{ instructeur.prenom }}</option>
+              </b-form-select>
+              <b-form-invalid-feedback id="lstinstructeurFeedback">Un instructeur doit être sélectionné.</b-form-invalid-feedback>
+          </b-form-group>
         <div v-if="isAdmin()">
           <div class="mb-3 mt-3">
             Statut utilisateur :
@@ -252,6 +276,7 @@ export default {
     return {
       cp: null,
       formUser: loadFormUser(this.$store.state.utilisateurSelectionne),
+      role: null,
       listeprofil: [
         { text: "Administrateur", value: "1" },
         //{ text: "Partenaire", value: "2" },
@@ -273,10 +298,23 @@ export default {
           codedep: null
         },
       ],
+      listeinstructeur: [
+          {
+            text: "Veuillez sélectionner un formateur",
+            value: null,
+            id: null,
+            nom: null,
+            prenom: null,
+            mail: null
+          },
+        ],
+        instructeurid: null,
 
     };
   },
   methods: {
+
+
     checkform: function () {
       console.info("Validation du formulaire");
       this.erreurformulaire = [];
@@ -294,12 +332,66 @@ export default {
         this.erreurformulaire.push("Le mail");
         formOK = false;
       }
+      // On vérifie si c'est une structure de réféence et qu'elle passe le rôle à MNAAQ 
+        // qu'il y avait bien une demande pour cet utiliteur.
+        // Si oui alors on vérifique que l'instructeur a bien été renseigné.
+
+      if(this.formUser.role =="4") {
+        if(this.$store.state.utilisateurCourant.profilId=="6" || this.$store.state.utilisateurCourant.profilId=="3") {
+          const url = process.env.API_URL + "/demandeaaq?demandeurid=" + this.formUser.id
+          console.info(url);
+          this.$axios
+            .$get(url)
+            .then( response => {
+              if(response && response.demandeaaq) {
+                console.log("Une demande en cours: " + response.demandeaaq.dem_id)
+                var demandeaaq = response.demandeaaq
+                const url = process.env.API_URL + '/demandeaaq/accord'
+
+                // Lorsque c'est une structure référente qui fait la modification, alors l'id du formateur est mis à jour
+                // Sinon le formateur avait été choisi par le 
+                if (this.$store.state.utilisateurCourant.profilId=="6") {
+                  demandeaaq['dem_uti_formateur_id'] = this.instructeurid
+                }
+                return this.$axios.$put(url, {demandeaaq})
+                  .then(async demandeaaq => {
+                    // Route pour les Maîtres nagueurs MN
+                    //this.$router.push('/interventions')
+                    console.log("Mise à jour de la demande AAQ")
+                  }).catch(error => {
+                    const err = error.response.data.message || error.message
+                    this.$toast.error(err)
+                    return
+                  })
+              }
+              else
+              {
+                console.log("Aucune demande en cours")
+              }
+            })
+            .catch(error => {
+              console.error(
+                "Une erreur est survenue lors de la vérification de la présence d'une demande AAQ",
+                error);
+              return;
+            });
+        }
+      }
+
+      if(this.$store.state.utilisateurCourant.profilId=="6" && this.formUser.role =="4") {
+        if (!this.instructeurid) {
+          formOK = false;
+        }
+      }
 
       if (!formOK) {
         console.info("Formulaire invalide", this.erreurformulaire);
         return;
       }
+      // Mise à jour de du formateur associé à la demande 
+      if (this.instructeurid) {
 
+      }
       return this.$store
         .dispatch("put_user", this.formUser)
         .then((message) => {
@@ -309,6 +401,7 @@ export default {
             []
           );
           this.$store.dispatch("get_users");
+
           this.$modal.hide("editUser");
         })
         .catch((error) => {
@@ -320,6 +413,14 @@ export default {
     },
     isAdmin: function(){
       if(this.$store.state.utilisateurCourant.profilId=="1") {
+        return true;
+      } else {
+        return false;
+      }
+   },
+    renseignerinstructeur: function(){
+      console.log(this.formUser.role)
+      if(this.$store.state.utilisateurCourant.profilId=="6" && this.formUser.role =="4") {
         return true;
       } else {
         return false;
@@ -352,6 +453,28 @@ export default {
         return Promise.resolve(null);
       }
     },   
+    rechercheinstructeurs: function() 
+    {
+      if(this.$store.state.utilisateurCourant.profilId=="6")
+      {
+        console.info("Recherche des instructeurs");
+        // Lance la recherche sur la liste des formateurs 
+        const url = process.env.API_URL + "/user/liste/3"
+        console.info(url);
+        return this.$axios
+          .$get(url)
+          .then(response => {
+            this.listeinstructeur = response.users;
+            console.info("rechercheinstructeurs : this.listeinstructeur " + this.listeinstructeur );
+          })
+          .catch(error => {
+            console.error(
+              "Une erreur est survenue lors de la récupération des instructeurs",
+              error
+            );
+          });
+      }
+    },
   },
  watch: {
     "cp"() {
@@ -359,6 +482,12 @@ export default {
       this.formUser.cp = this.cp;
       this.recherchecommune();
     },
+    "role"() {
+      console.debug("Renseigner instructeur ?");
+      this.formUser.role = this.role;
+      this.renseignerinstructeur();
+
+    }
  },
 
   computed: { ...mapState(["structures", "utilisateurCourant"]) 
@@ -366,6 +495,8 @@ export default {
   async mounted() {
     await this.$store.dispatch("get_structures");
     await this.$store.dispatch("get_users");
+    await this.rechercheinstructeurs();
+
     this.loading = false;
     // Si ce n'est pas l'admin alors il ne peut pas mettre
     // ce qu'il veut comme profil 
@@ -373,7 +504,7 @@ export default {
     {
       var elementsSupprimes = this.listeprofil.splice(0, 2);
     }
-
+    this.role = this.formUser.role;
     if(this.formUser.cp)
     {
       // Recopie du CP dans le champ code postal

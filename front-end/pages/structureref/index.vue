@@ -23,7 +23,7 @@
                   <h4>
                     <i class="material-icons accordion-chevron">chevron_right</i>
                     <i class="material-icons ml-2 mr-2">people</i>
-                    Gestion des comptes utilisateurs
+                    Liste des comptes "Aisance Aquatique" à valider ({{ this.nbdemandeaaq }})
                   </h4>
                 </b-btn>
               </b-col>
@@ -45,11 +45,11 @@
                     v-model="prenomFilter"
                     placeholder="Prénom"
                   />
-                  <label class="ml-3" for="inscriptionFilter">Validité Inscription :</label>
+                  <label class="ml-3" for="inscriptionFilter">Rôle :</label>
                   <b-form-select
                     class="ml-3"
-                    v-model="inscriptionFilter"
-                    :options="listeValidInscrip"
+                    v-model="roleFilter"
+                    :options="listeRole"
                   />
                 </b-form>
               </div>
@@ -66,41 +66,11 @@
                 :defaultSortField="{ key: 'nom', order: 'asc' }"
               >
                 <template slot-scope="props" slot="actions">
-                  <b-btn @click="editUser(props.data.item.id)" size="sm" class="mr-1" variant="primary">
+                  <b-btn @click="editUser(props.data.id)" size="sm" class="mr-1" variant="primary">
                     <i class="material-icons">edit</i>
-
                   </b-btn>
                 </template>
               </editable>
-            </b-card-body>
-          </b-collapse>
-        </b-card>
-        <!-- ACCORDEON -- DOCUMENTS PUBLIES -->
-        <b-card no-body class="mb-3">
-          <b-card-header header-tag="header" class="p-1" role="tab">
-            <b-form-row>
-              <b-col>
-                <!-- IMAGE RAYEE BANNER INTERVENTION -->
-                <b-img fluid :src="require('assets/banner_ray_blue.png')" blank-color="rgba(0,0,0,1)" />
-                <b-btn
-                  class="accordionBtn"
-                  block
-                  href="#"
-                  v-b-toggle.accordion4
-                  variant="Dark link"
-                >
-                  <h4>
-                    <i class="material-icons accordion-chevron">chevron_right</i>
-                    <i class="material-icons ml-2 mr-2">cloud_upload</i>
-                    Publication des documents
-                  </h4>
-                </b-btn>
-              </b-col>
-            </b-form-row>
-          </b-card-header>
-          <b-collapse id="accordion4" accordion="my-accordion" role="tabpanel">
-            <b-card-body>
-              <file-upload />
             </b-card-body>
           </b-collapse>
         </b-card>
@@ -116,13 +86,12 @@
 import { mapState } from "vuex";
 import Editable from "~/components/editable/index.vue";
 import user from "~/components/user.vue";
-import fileUpload from "~/components/fileUpload.vue";
 
 export default {
   components: {
     Editable,
-    user,
-    fileUpload
+    user/*,
+    demandeaaq*/
   },
   data() {
     return {
@@ -132,47 +101,17 @@ export default {
         { path: "nom", title: "Nom", type: "text", sortable: true },
         { path: "prenom", title: "Prénom", type: "text", sortable: true },
         { path: "rolLibelle", title: "Rôle", type: "text", sortable: true },
-        {
-          path: "inscription",
-          title: "Inscription",
-          type: "text",
-          sortable: true
-        },
-        
-        {
-          path: "__slot:actions",
-          title: "Actions",
-          type: "__slot:actions",
-          sortable: false,
-        }
-      ],
-      headersCommentaires: [
-        { path: "nom", title: "Intervenant", type: "text", sortable: true },
-        {
-          path: "commune.com_libellemaj",
-          title: "Lieu",
-          type: "text",
-          sortable: true
-        },
-        {
-          path: "dateIntervention",
-          title: "Date d'intervention",
-          type: "date",
-          sortable: true,
-          filter: "date"
-        },
-        {
-          path: "commentaire",
-          title: "Commentaires",
-          type: "text",
-          sortable: true
-        }
+        { path: "datedemandeaaq", title: "Date demande", type: "text", sortable: true },
+//        { path: "inscription", title: "Inscription",type: "text",sortable: true },
+        { path: "__slot:actions", title: "Actions",type: "__slot:actions",sortable: false}
       ],
       nameFilter: "",
       placeFilter: "",
       nomFilter: "",
       prenomFilter: "",
       inscriptionFilter: "",
+      roleFilter:"MaitreNageur",
+      datedemandeaaq:"",
       profilFilter: "",
       statusFilter: "",
       structureFilter: "",
@@ -181,23 +120,22 @@ export default {
         { text: "Non validée", value: "Non validée" },
         { text: "Tous", value: "Tous" }
       ],
-      listeprofil: [
-        { text: "Administrateur", value: "Administrateur" },
-        { text: "Partenaire", value: "Partenaire" },
-        { text: "Intervenant", value: "Intervenant" },
-        { text: "Tous", value: "Tous" }
-      ],
       liststatus: [
         { text: "Actif", value: "Actif" },
         { text: "Bloqué", value: "Actif" },
         { text: "Tous", value: "Tous" }
-      ]
+      ],
+      listeRole: [
+        { text: "Maitre Nageur AAQ", value: "MaitreNageurAAQ" },
+        { text: "Maitre Nageur", value: "MaitreNageur" },
+        { text: "Tous", value: "Tous" }
+      ],
+      nbdemandeaaq: 0
     };
   },
 
   methods: {
     editUser: function(id) {
-      console.log("Client : User Id : " + id)
       return this.$store.dispatch("get_user", id)
         .then(() => {
           this.$modal.show("editUser");
@@ -209,22 +147,29 @@ export default {
           );
         });
     },
-    editStruct: function(id) {
-      if (id === null) {
-        this.$store.commit("clean_structureSelectionnee");
-        this.$modal.show("editStruct");
-      } else {
-        return this.$store.dispatch("get_structure", id)
-          .then(() => {
-            this.$modal.show("editStruct");
-          })
-          .catch(error => {
-            console.error(
-              "Une erreur est survenue lors de la récupération du détail de la structure",
-              error
-            );
-          });
-      }
+    accepterDemande: function(id) {
+      console.log("id:"+id)
+      /*
+      this.$axios({
+        url: process.env.API_URL + "/demandeaaq/validation?id="+id,
+        // url: apiUrl + '/droits/' + 17,
+        method: "PUT",
+        responseType: "blob"
+      })
+      */
+
+    },
+    refuseDemande: function(id) {
+      console.log("id:"+id)
+      /*
+      this.$axios({
+        url: process.env.API_URL + "/demandeaaq/validation?id="+id,
+        // url: apiUrl + '/droits/' + 17,
+        method: "PUT",
+        responseType: "blob"
+      })
+      */
+
     },
     exportUsersCsv() {
       this.$axios({
@@ -261,7 +206,7 @@ export default {
     filteredUtilisateurs: function() {
       return this.users.filter(user => {
         var isMatch = true;
-        console.log(this.nomFilter);
+        //console.log(this.nomFilter);
         if (this.nomFilter != "") {
           isMatch =
             isMatch &&
@@ -274,6 +219,25 @@ export default {
               -1;
         }
         if (
+          this.roleFilter != "Tous" &&
+          this.roleFilter != undefined &&
+          this.roleFilter != ""
+        ) {
+          console.log ("user.rolLibelle : " + user.rolLibelle)
+          console.log ("this.roleFilter : " + this.roleFilter)
+            if (user.rolLibelle == this.roleFilter) {
+              isMatch = isMatch && true
+            //isMatch =
+            //isMatch && user.rolLibelle.indexOf(this.roleFilter) > -1;
+            }
+            else
+            {
+              isMatch = isMatch && false
+
+            }
+        }
+        /*
+        if (
           this.inscriptionFilter != "Tous" &&
           this.inscriptionFilter != undefined &&
           this.inscriptionFilter != ""
@@ -281,6 +245,8 @@ export default {
           isMatch =
             isMatch && user.inscription.indexOf(this.inscriptionFilter) > -1;
         }
+        */
+       console.log(isMatch)
         return isMatch;
       });
     },
@@ -294,17 +260,20 @@ export default {
           "Une erreur est survenue lors de la récupération des users",
           error
         );
-      })/*,      
-      this.$store.dispatch("get_structures").catch(error => {
+      })
+    ]);
+/*
+    await Promise.all([
+      this.$store.dispatch("get_demandeaaq").catch(error => {
         console.error(
-          "Une erreur est survenue lors de la récupération des structures",
+          "Une erreur est survenue lors de la récupération des users",
           error
         );
-      }),
-      this.$store.dispatch("get_interventions"),*/
+      })
     ]);
+*/
+    this.nbdemandeaaq = this.filteredUtilisateurs.length;
     this.loading = false;
-    
   }
 };
 </script>

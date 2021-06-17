@@ -28,6 +28,9 @@
           <b-img fluid :src="require('assets/ico_diplome.png')" blank-color="rgba(0,0,0,0.5)" img-alt="Espace Instructeur" />
           Espace Instructeur
         </nuxt-link>
+        <nuxt-link to="/structureref" v-if="utilisateurCourant.profilId == 6">
+          <b-button variant="outline-primary" class="settingsBtn"><i class="material-icons" >settings</i> Espace Structures référentes</b-button>
+        </nuxt-link>
       </div>
       <b-dropdown  id="accountBtn"  >
         <template slot="button-content">{{utilisateurCourant && utilisateurCourant.prenom}} {{utilisateurCourant && utilisateurCourant.nom}}</template>

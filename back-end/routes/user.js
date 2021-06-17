@@ -64,13 +64,28 @@ const formatUserCSV = user => {
 router.get('/liste/:roleid', async function (req, res) {
     log.i('::list-roleid - In')
     var roleid = req.params.roleid
+    const utilisateurCourant = req.session.user;
+    console.log("RoleId : "+roleid)
+    console.log("RoleId utilisateur courant : "+utilisateurCourant.rol_id)
     //log.d('::list-roleid - roleid : ',{ req.roleid})
 
-    // si on est admin, on affiche tous les utilisateurs
-    requete = `SELECT uti.*
-    from utilisateur uti 
-    where rol_id = ${roleid}
-    order by uti_nom, uti_prenom asc`;
+    if (utilisateurCourant.rol_id == 1 || utilisateurCourant.rol_id == 5) {
+        // si on est admin, on affiche tous les utilisateurs
+        requete = `SELECT uti.*
+        from utilisateur uti 
+        where rol_id = ${roleid}
+        order by uti_nom, uti_prenom asc`;
+    }
+    else if (utilisateurCourant.rol_id == 6) {
+        // On est utilisateur de structure de référence alors on renvoie tous les utilisateurs de la structure de référence
+        // Pour le rol_id = 3 cela correspond à tous les instructeurs de la structure
+        requete = `SELECT uti.*
+        from utilisateur uti 
+        inner join uti_sre uts on uts.uti_id = uti.uti_id 
+            and uts.sre_id in (select utisre.sre_id from uti_sre utisre where utisre.uti_id = ${utilisateurCourant.uti_id}) 
+        where uti.rol_id = ${roleid}
+        order by uti_nom, uti_prenom asc`;
+    }
 
     log.d('::list-roleid - requete',{ requete })
     pgPool.query(requete, (err, result) => {
@@ -106,17 +121,28 @@ router.get('/csv', async function (req, res) {
         left join commune com on cpi_codeinsee = uti.uti_com_codeinseecontact
         order by 3,4 asc`;
     } 
-    // Je suis utilisateur "Formateur" ==> Export de la liste des maitres nageurs qui m'ont fait la demande
-    if ( utilisateurCourant.rol_id == 3 ) {
+
+    if ( utilisateurCourant.rol_id == 3) {
         requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, lower(uti_mail) as Courriel,  
         to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
-
         from utilisateur  uti
         inner join profil rol on rol.rol_id = uti.rol_id 
         inner join demande_aaq dem on dem.dem_uti_formateur_id = ${utilisateurCourant.uti_id} and dem.dem_uti_demandeur_id = uti.uti_id
         left join commune com on cpi_codeinsee = uti.uti_com_codeinseecontact
         order by 3,4 asc`;
+    }     
+    // Je suis utilisateur "Instructeur" ==> Export de la liste des maitres nageurs qui m'ont fait la demande
+    if ( utilisateurCourant.rol_id == 6) {
+        requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, lower(uti_mail) as Courriel,  
+        to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
+        from utilisateur  uti
+        inner join profil rol on rol.rol_id = uti.rol_id 
+        inner join demande_aaq dem on dem.dem_uti_demandeur_id = uti.uti_id 
+                                and dem.dem_sre_id in (select utisre.sre_id from uti_sre where uti_id = ${utilisateurCourant.uti_id}) 
+        left join commune com on cpi_codeinsee = uti.uti_com_codeinseecontact
+        order by 3,4 asc`;
     } 
+    /*
     else
     // TODO : Refaire l'export pour les autre profils
     {
@@ -128,7 +154,7 @@ router.get('/csv', async function (req, res) {
         join statut_utilisateur  stu on stu.stu_id = uti.stu_id
         where uti.str_id=${utilisateurCourant.str_id} order by 3,4 asc`;
     }
-
+*/
     pgPool.query(requete, (err, result) => {
         if (err) {
             log.w('::csv - Erreur lors de la requête.', { requete, erreur: err.stack});
@@ -190,7 +216,7 @@ router.get('/:id', async function (req, res) {
     if ( utilisateurCourant.rol_id == 1) {
         // si on est admin, on affiche l'utilisateur
         requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, rol.rol_libelle from utilisateur uti 
-        join profil pro on pro.rol_id = uti.rol_id
+        join profil rol on rol.rol_id = uti.rol_id
         where uti_id=${id} order by uti_id asc`;
 
     log.d('::get - select un USER, requête = '+requete)
@@ -216,7 +242,6 @@ router.get('/', async function (req, res) {
     log.i('::list - In')
     const utilisateurCourant = req.session.user
     //const utilisateurId = 1; // TODO à récupérer via GET ?
-    
     if ( utilisateurCourant.rol_id == 1) {
         // si on est admin, on affiche tous les utilisateurs
         requete = `SELECT uti.*, pro.rol_libelle,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription
@@ -226,16 +251,26 @@ router.get('/', async function (req, res) {
         join profil pro on pro.rol_id = uti.rol_id
         order by uti_id asc`;
     }
-    else 
+    // Je suis utilisateur "Formateur" ==> Export de la liste des maitres nageurs qui m'ont fait la demande
+    else if ( utilisateurCourant.rol_id == 6) 
     {
-        // si on est formateur, on affiche seulements les utilisateurs qui on une demande en cours
-        // Sauf les Admin créés sur structure
-        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,pro.rol_libelle, to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
-        from utilisateur uti 
-        join uti_str ust on ust.uti_id = uti.uti_id
-        join structure str on str.str_id = ust.str_id 
-        join profil pro on pro.rol_id = uti.rol_id and pro.rol_id <> 1
-        where uti.str_id=${utilisateurCourant.str_id} order by uti_id asc  `;
+            requete =`SELECT  uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,pro.rol_libelle, to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
+            from utilisateur  uti
+            inner join demande_aaq dem on dem.dem_uti_demandeur_id = uti.uti_id 
+                                    and dem.dem_sre_id in (select utisre.sre_id from uti_sre utisre where utisre.uti_id = ${utilisateurCourant.uti_id}) 
+            inner join profil pro on pro.rol_id = uti.rol_id
+                                    order by 3,4 asc`;
+
+    } 
+    else
+    {
+            // si on est formateur, on affiche seulements les utilisateurs qui on une demande en cours
+            // Sauf les Admin créés sur structure
+            requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,pro.rol_libelle, to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
+            from utilisateur uti 
+            inner join demande_aaq dem on dem.dem_uti_formateur_id = ${utilisateurCourant.uti_id} and uti.uti_id = dem_uti_demandeur_id
+            join profil pro on pro.rol_id = uti.rol_id
+            order by uti_id asc`;
     }
     log.d('::list - requete',{ requete })
     pgPool.query(requete, (err, result) => {
