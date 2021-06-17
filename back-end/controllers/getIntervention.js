@@ -28,6 +28,7 @@ module.exports = async function (req, res) {
          LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
          LEFT JOIN structure str on str.str_id = int.str_id \
+         LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
          where uti.uti_id=${user.uti_id} and int.int_id=${id}`
     } else {
         // Laurent : Pour le moment on met la même chose pour les admin pour éviter que ça plante.
@@ -35,10 +36,11 @@ module.exports = async function (req, res) {
         LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
          LEFT JOIN structure str on str.str_id = int.str_id \
+         LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
          where uti.uti_id=${user.uti_id} and int.int_id=${id}`
     }
 
-    const requete = `SELECT int.*, pis.*,str.* from intervention int 
+    const requete = `SELECT int.*, pis.*,str.*,com.* from intervention int 
     join structure stru on stru.str_id = int.str_id
     ${whereClause}`;
     log.d('::select from intervention - récuperation via la requête.', { requete });

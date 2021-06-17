@@ -111,7 +111,8 @@
     </b-row>
     <div v-if="formIntervention.piscine">
       Adresse : {{ formIntervention.piscine.adresse }} <br />
-      Commune : {{ formIntervention.piscine.cp }}
+      Commune: {{ formIntervention.piscine.cp }} 
+      
     </div>
     <b-row>
       <br />
@@ -355,7 +356,7 @@ var loadFormIntervention = function (intervention) {
       Object.assign(
         {
           strId: null,
-          piscine: null,
+          piscine: {},
           dateDebutIntervention: null,
           dateFinIntervention: null,
           nbSession: "",
@@ -631,7 +632,7 @@ export default {
   },
   watch: {
     intervention(intervention) {
-      console.info("watch.intervention");
+      /*console.info("watch.intervention");
       let formIntervention = JSON.parse(
         JSON.stringify(
           Object.assign(
@@ -643,12 +644,11 @@ export default {
               dateFinIntervention: null,
               nbEnfants: "",
               nbNouveauxEnfants: "",
-              listeEnfants: [],
             },
             intervention
           )
         )
-      );  
+      );  */
       Vue.set(this, "formIntervention", loadFormIntervention(intervention));
     },
     "formIntervention.nbEnfants"() {

@@ -155,7 +155,8 @@ router.get('/', async function (req, res) {
         whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
          LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-         LEFT JOIN structure str on str.str_id = int.str_id
+         LEFT JOIN structure str on str.str_id = int.str_id \
+         LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
          where uti.uti_id=${utilisateurId}`
         // Utilisateur Administrateur : 
     } else {
@@ -164,11 +165,12 @@ router.get('/', async function (req, res) {
         whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
         LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-         LEFT JOIN structure str on str.str_id = int.str_id
+         LEFT JOIN structure str on str.str_id = int.str_id \
+         LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
          where uti.uti_id=${utilisateurId}`
     }
 
-    const requete = `SELECT int.*, pis.*, str.* from intervention int ${whereClause} order by int.int_datefinintervention desc`;
+    const requete = `SELECT int.*, pis.*, str.*,com.com_libelle from intervention int ${whereClause} order by int.int_datefinintervention desc`;
     log.d('::list - récuperation via la requête.', { requete });
 
     (async () => {

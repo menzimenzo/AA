@@ -72,16 +72,19 @@ module.exports = {
   }
   , formatEmail: mail => mail && mail.trim().toLowerCase()
   , formatIntervention: (intervention) => {
+    console.log('avant')
+    console.log(intervention)
     const result = {
       id: intervention.int_id,
       nbEnfants: intervention.int_nombreenfant,
       piscine: {
-        nom: intervention.pis_nom,
         id: intervention.pis_id,
-        adresse: intervention.pis_adr,
-        cp: intervention.cpi_codeinsee,
+        nom: intervention.pis_nom,      
         x: intervention.pis_x,
-        y: intervention.pis_y
+        y: intervention.pis_y,
+        adresse: intervention.pis_adr,
+        cp: intervention.com_libelle,
+       
       },
       structure: {
         id: intervention.str_id,
@@ -101,6 +104,8 @@ module.exports = {
       dateCreation: new Date(intervention.int_datecreation),
       dateMaj: intervention.int_datemaj
     }
+    console.log('apres')
+    console.log(result)
     return result
   },
   logTrace: (batch, codeerreur, startTime) => {
