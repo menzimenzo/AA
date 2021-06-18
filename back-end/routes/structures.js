@@ -131,9 +131,9 @@ router.post('/',  function (req, res) {
 // Retire le lien entre un utilisateur et sa structure.
 router.post('/delete', function (req, res) {
     log.i('::delete - In')
-    const structure = req.body.structureId;
+    const structureId = req.body.structureId;
     const userId = req.body.userId
-    const requete = `DELETE from uti_str where str_id='${structure.id}' AND uti_id='${userId}'`;
+    const requete = `DELETE from uti_str where str_id='${structureId}' AND uti_id='${userId}'`;
 
     return pgPool.query(requete, async (err, result) => {
         if (err) {
@@ -142,7 +142,7 @@ router.post('/delete', function (req, res) {
         }
         else {
             log.i('::delete - Done')
-            return res.status(200).json('structure '+structure.nom+ ' supprimée des favorites');
+            return res.status(200).json('structure supprimée des favorites');
             }
     })
 });

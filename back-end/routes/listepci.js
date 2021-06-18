@@ -11,7 +11,7 @@ router.get('/', function (req, res) {
     // Recherche des communes correspondant au codepostal
     pgPool.query(`SELECT ep.epci_id,ep.epci_code, ep.epci_libelle from epci ep
                 JOIN codepostal_insee cpi on cpi.cpi_codeinsee = ep.com_codeinsee
-                WHERE cpi.cpi_codepostal = ${v_codepostal} limit 1`,
+                WHERE cpi.cpi_codepostal = '${v_codepostal}' limit 1`,
         (err, result) => {
             if (err) {
                 log.w('::listepci - Erreur', err);

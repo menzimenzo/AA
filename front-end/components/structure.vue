@@ -308,7 +308,7 @@ export default {
       return this.$axios
         .$get(url)
         .then((response) => {
-          this.listdepartement = response.departement;
+          this.listdepartement = response.departements;
         })
         .catch((error) => {
           console.error(
