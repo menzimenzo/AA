@@ -1,21 +1,16 @@
 import logger from '~/plugins/logger'
 const log = logger('middleware:checkAuth')
 
+// const accueilRoutes = ['/accueil']
+// const adminRoutes = ['/admin']
+// const partenaireRoutes = ['/partenaire']
+// const fournisseurRoutes = ['/fournisseur']
+// const structurerefRoutes = ['/structureref']
 const logedOutRoutes = ['/']
-const adminRoutes = ['/admin']
-const partenaireRoutes = ['/partenaire']
-const fournisseurRoutes = ['/fournisseur']
-const structurerefRoutes = ['/structureref']
-//const interventionsRoutes = ['/interventions']
-const interventionsRoutes = ['/pageenconstruction']
-
-const accueilRoutes = ['/accueil']
+const interventionsRoutes = ['/interventions']
 
 export default async function({ env, route, store, req, res, redirect, app, isServer }) {
     log.i('In')
-
- 
-    // Transition states
     if (
         route.path.indexOf('/connexion/login') === 0 ||
         route.path.indexOf('/connexion/logout') === 0 || 
@@ -47,7 +42,7 @@ export default async function({ env, route, store, req, res, redirect, app, isSe
             return redirect('/connexion/inscription')
         }
         // Cas du clic sur le logo Ministère taggué "retour à l'Accueil"
-        // Ici la route demandée est / on redirige version /interventions pour
+        // Ici la route demandée est / on redirige vers /interventions pour
         if(logedOutRoutes.indexOf(route.path) > -1){
             // Admin on redirige vers l'écran Admin
             if (store.state.utilisateurCourant.profilId == 1) {
@@ -65,21 +60,5 @@ export default async function({ env, route, store, req, res, redirect, app, isSe
                 return redirect('/accueil')
             }
         }
-/*
-        if(adminRoutes.indexOf(route.path) > -1){
-            if(store.state.utilisateurCourant.profilId != 1){
-                return redirect('/interventions')
-            }
-        }
-        // Route pour les Maîtres nagueurs MN
-        // route utilisée pour une connexion FC déjà
-        if(partenaireRoutes.indexOf(route.path) > -1){
-            if(store.state.utilisateurCourant.profilId != 2){
-                console.log("route accueil check-auth")
-                return redirect('/accueil')
-            }
-        }
-        */
-
     }
 }

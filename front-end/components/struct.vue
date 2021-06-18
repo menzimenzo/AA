@@ -1,7 +1,7 @@
 <template>
   <b-container class="interventionModal">
     <b-col cols="12" class="text-center">
-      <h2 class="mb-3 interventionTitle">
+      <h2 class="mb-3">
         Edition de la structure
         <br>
         <b>{{formStruct.str_libellecourt}}</b>
@@ -149,8 +149,5 @@ export default {
   position: absolute;
   bottom: 10px;
   right: 10px;
-}
-.interventionTitle {
-  color: #252195;
 }
 </style>

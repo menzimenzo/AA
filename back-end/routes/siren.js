@@ -1,11 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const pgPool = require('../pgpool').getPool();
 const axios = require('axios');
 var moment = require('moment');
-const { response } = require('express');
 moment().format();
-
 
 router.get('/siret/:id', async function (req, res) {
   const token = 'c721b7db-7b99-38f4-9261-2e982049df91'
@@ -59,7 +56,6 @@ router.get('/siret/:id', async function (req, res) {
 
 router.get('/siren/:id', async function (req, res) {
   const token = 'c721b7db-7b99-38f4-9261-2e982049df91'
-  const now = moment(new Date()).format('YYYY-MM-DD')
   const siren = req.params.id
   console.log('recherche SIREN :' + siren)
   try {

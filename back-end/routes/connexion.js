@@ -1,23 +1,22 @@
 const express = require('express');
 const crypto = require('crypto');
 const router = express.Router();
+var moment = require('moment');
+moment().format();
 
 const logger = require('../utils/logger')
 const log = logger(module.filename)
 
 const pgPool = require('../pgpool').getPool();
 const config = require('../config');
-const {sendEmail, sendValidationMail, sendResetPasswordMail } = require('../utils/mail-service')
-const {getAuthorizationUrl, getLogoutUrl, formatUtilisateur} = require('../utils/utils')
-const bodyParser = require('body-parser');
-var moment = require('moment');
+const { sendEmail, sendValidationMail, sendResetPasswordMail } = require('../utils/mail-service')
+const { getAuthorizationUrl, getLogoutUrl, formatUtilisateur } = require('../utils/utils')
 const { oauthCallback, pwdLogin, generateForgotPasswordEncryption } = require('../controllers/index')
-moment().format();
 
 router.get('/login', (req, res) => {
     log.i('::login via France Connect')
     return res.send({url: getAuthorizationUrl()});
-});
+})
 
 // Gère une connexion via mot de passe.
 router.post('/pwd-login', pwdLogin)
@@ -32,19 +31,20 @@ router.post('/verify', async (req,res) => {
         log.w('::verify - Aucun ID à ajouter en base.') 
         return res.sendStatus(500)
     }
-    var wasValidated = req.body.validated
+    let wasValidated = req.body.validated
     const tokenFc = req.body.tokenFc
-    var user = formatUtilisateur(req.body, false)
+    let user = formatUtilisateur(req.body, false)
+
     if (user.str_id == 99999) {
         // La structure spécifiée n'existe peut être pas encore
-        const selectRes = await pgPool.query("SELECT str_id from structure where str_typecollectivite is not null and str_libelle = $1",
+        const selectStructureRes = await pgPool.query("SELECT str_id from structure where str_typecollectivite is not null and str_libelle = $1",
             [user.libelleCollectivite]).catch(err => {
                 log.w(err)
                 throw err
             })
 
-        var libelleCourt = ''
-        if (!selectRes.rows[0]) {
+        let libelleCourt = ''
+        if (!selectStructureRes.rows[0]) {
             // Si la structure n'existe pas on la créé
             log.d('::verify - structure a créer')
             if (user.typeCollectivite == 1) {
@@ -56,23 +56,22 @@ router.post('/verify', async (req,res) => {
             if (user.typeCollectivite == 3) {
                 libelleCourt = 'EPCI'
             }
-            const insertRes = await pgPool.query("INSERT INTO structure (str_libellecourt,str_libelle,str_actif,str_federation,str_typecollectivite) \
+            const insertStructure = await pgPool.query("INSERT INTO structure (str_libellecourt,str_libelle,str_actif,str_federation,str_typecollectivite) \
          VALUES ($1,$2,'true','false',$3) RETURNING *",
                 [libelleCourt,user.libelleCollectivite, user.typeCollectivite]).catch(err => {
                     log.w(err)
                     throw err
                 })
-                user.str_id = insertRes.rows[0].str_id
+                user.str_id = insertStructure.rows[0].str_id
             log.d('::verify - structure créée. Str_id : '+user.str_id );
         }
         else {
-            user.str_id = selectRes.rows[0].str_id
-            log.d('::verify - structure déjà existante. Str_id : '+user.str_id );
+            user.str_id = selectStructureRes.rows[0].str_id
+            log.d('::verify - structure déjà existante. Str_id : '+ user.str_id );
         }
         user.uti_structurelocale = user.libelleCollectivite
     }
 
-   
     // Vérifier si l'email est déjà utilisé en base.
     const mailExistenceQuery = await pgPool.query(`SELECT lower(uti_mail) uti_mail,uti_pwd, uti_tockenfranceconnect FROM utilisateur WHERE lower(uti_mail)=lower('${user.uti_mail}')`).catch(err => {
         log.w(err)
@@ -80,14 +79,13 @@ router.post('/verify', async (req,res) => {
     })
 
     if(mailExistenceQuery && mailExistenceQuery.rowCount > 0 && mailExistenceQuery.rows[0].uti_pwd && tokenFc) {
-        log.w('Vérifications complémentaires nécessaires avant ajout en base. ')
+        log.d('Vérifications complémentaires nécessaires avant ajout en base. ')
         return res.status(200).json({ existingUser: formatUtilisateur(mailExistenceQuery.rows[0]) })
     } 
 
     // Pour un maitre nageur, vérifier si le numéro EAPS est présent dans la table ref_eaps
     // Exception pour l'admin, le partenaire
-    if (user.rol_id != 1 && user.rol_id != 2 )
-    {
+    if (user.rol_id != 1 && user.rol_id != 2 ) {
         if (user.eaps != '') {
             log.d('::verify - Recherche numéro EAPS') 
             const eapslExistenceQuery = await pgPool.query(`SELECT eap_numero FROM ref_eaps WHERE eap_numero='${user.uti_eaps}'`).catch(err => {
@@ -99,11 +97,10 @@ router.post('/verify', async (req,res) => {
                 return res.status(200).json({nonAuthorizedUser: 'Vous n\'êtes pas autorisé(e) à vous créer un compte (carte professionnelle invalide)'})
             }
         }
-
     }
 
     log.d('::verify - Mise à jour de l\'utilisateur existant', { insee: user.uti_com_codeinseecontact, mailcontact: user.uti_mailcontact })   
-    const bddRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = lower($1), uti_nom = $2, uti_prenom = $3, uti_validated = true, \
+    const bddUserRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = lower($1), uti_nom = $2, uti_prenom = $3, uti_validated = true, \
     uti_eaps = $4, uti_publicontact = $5, uti_mailcontact = lower($7), uti_sitewebcontact = $8, uti_adrcontact = $9, uti_compadrcontact = $10, uti_telephonecontact = $11,  uti_com_codeinseecontact = $12, uti_com_cp_contact = $13 WHERE uti_id = $6 RETURNING *", 
     [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.uti_mailcontact,user.uti_sitewebcontact,user.uti_adrcontact, user.uti_compadrcontact,user.uti_telephonecontact , user.uti_com_codeinseecontact, user.uti_com_cp_contact]).catch(err => {
         console.log(err)
@@ -123,16 +120,16 @@ router.post('/verify', async (req,res) => {
             })
         }
      
-    user = formatUtilisateur(bddRes.rows[0])
-    req.session.user = bddRes.rows[0]
+    user = formatUtilisateur(bddUserRes.rows[0])
+    req.session.user = bddUserRes.rows[0]
     
-    const isPwdConfirmed = bddRes.rows[0] && bddRes.rows[0].uti_pwd && bddRes.rows[0].pwd_validated
+    const isPwdConfirmed = bddUserRes.rows[0] && bddUserRes.rows[0].uti_pwd && bddUserRes.rows[0].pwd_validated
     if(!isPwdConfirmed && !user.tokenFc) {
         log.d('::verify - mot de passe à valider.')
         await sendValidationMail({
-            email: bddRes.rows[0].uti_mail,
-            pwd: bddRes.rows[0].uti_pwd,
-            id: bddRes.rows[0].uti_id,
+            email: bddUserRes.rows[0].uti_mail,
+            pwd: bddUserRes.rows[0].uti_pwd,
+            id: bddUserRes.rows[0].uti_id,
             siteName: 'Aisance Aquatique',
             url: `${config.FRONT_DOMAIN}`,
         })
@@ -195,6 +192,7 @@ router.post('/create-account-pwd', async (req, res) => {
     log.i('::create-account-pwd - In')
     const { password , mail, confirm, connexionType } = req.body
     if(!password || !mail || !confirm) {
+        log.w('::create-account-pwd - paramètre manquant')
         throw new Error("Un paramètre manque pour effectuer l'inscription.")
     }
     const formatedMail = mail.toLowerCase()
@@ -203,13 +201,12 @@ router.post('/create-account-pwd', async (req, res) => {
     let confirmInscription
     let profil
     // Vérifier si l'email est déjà utilisé en base.
-    const mailExistenceQuery = await pgPool.query(`SELECT uti_id, lower(uti_mail) uti_mail, uti_tockenfranceconnect FROM utilisateur WHERE lower(uti_mail)=lower('${formatedMail}')`).catch(err => {
+    const mailExistenceQuery = await pgPool.query(`SELECT uti_id, lower(uti_mail), uti_tockenfranceconnect, uti_pwd FROM utilisateur WHERE lower(uti_mail)=lower('${formatedMail}')`).catch(err => {
         log.w(err)
         throw err
     })
-
     if(mailExistenceQuery && mailExistenceQuery.rowCount > 0) {
-        if(mailExistenceQuery.rows[0].uti_tockenfranceconnect && !mailExistenceQuery.rows[0].pwd) {
+        if(mailExistenceQuery.rows[0].uti_tockenfranceconnect && !mailExistenceQuery.rows[0].uti_pwd) {
             log.d('::create-account-pwd - Utilisateur déjà connecté via FC.')
             confirmInscription = false
             bddRes = await pgPool.query(`UPDATE utilisateur SET uti_pwd= $1 WHERE uti_id= $2 RETURNING *`, [ crypted, mailExistenceQuery.rows[0].uti_id]
@@ -217,7 +214,6 @@ router.post('/create-account-pwd', async (req, res) => {
                     log.w(err)
                     throw err
                 })
-            log.d(mailExistenceQuery.rows[0])
             await sendValidationMail({
                 email: mailExistenceQuery.rows[0].uti_mail,
                 pwd: crypted,
@@ -231,7 +227,8 @@ router.post('/create-account-pwd', async (req, res) => {
                 throw err
             })
         } else {
-            return res.status(400).json({message: 'Veuillez contacter l\'assistance.'});        
+            log.d('::create-account-pwd - Utilisateur a déjà un password pour ce site.')
+            return res.status(400).json({message: 'Cet email est déjà associé à un mot de passe.'});        
         }
     } else {
         log.d('::create-account-pwd - Nouveau user, authentifié via password, à ajouter en base')
@@ -270,41 +267,30 @@ router.get('/user', (req,res) => {
 
 // Route pour la mise à jour du compte utilisateur à partir de 'MonCompte'
 router.put('/edit-mon-compte/:id', async function (req, res) {
-    log.i('edit-mon-compte::In')
     const profil = req.body.profil
     const id = req.params.id
-    log.d('::edit-mon-compte - In', { id })
+    log.i('::edit-mon-compte - In', { id, profil })
+
     if(!id) {
         return res.status(400).json('Aucun ID fournit pour  identifier l\'utilisateur.');
     }
-    log.d('edit-mon-compte::Profil : ' + profil)
-    log.d('edit-mon-compte::Code Insee : ' + profil.cpi_codeinsee)
-    //insert dans la table intervention
-    /*
-    const requete = `UPDATE utilisateur 
-        SET uti_mail = $1,
-        uti_structurelocale = $2
-        WHERE uti_id = ${id}
-        RETURNING *
-        ;`    
-    */
-        const requete = `UPDATE utilisateur SET  
-                        uti_mail = lower($1), 
-                        uti_nom = $2, 
-                        uti_prenom = $3, 
-                        uti_validated = true, 
-                        uti_eaps = $4, 
-                        uti_publicontact = $5, 
-                        uti_mailcontact = lower($7), 
-                        uti_sitewebcontact = $8, 
-                        uti_adrcontact = $9, 
-                        uti_compadrcontact = $10, 
-                        uti_telephonecontact = $11,  
-                        uti_com_codeinseecontact = $12, 
-                        uti_com_cp_contact = $13 
-                        WHERE uti_id = $6
-                        RETURNING *
-                        ;`
+    const requete = `UPDATE utilisateur SET  
+                    uti_mail = lower($1), 
+                    uti_nom = $2, 
+                    uti_prenom = $3, 
+                    uti_validated = true, 
+                    uti_eaps = $4, 
+                    uti_publicontact = $5, 
+                    uti_mailcontact = lower($7), 
+                    uti_sitewebcontact = $8, 
+                    uti_adrcontact = $9, 
+                    uti_compadrcontact = $10, 
+                    uti_telephonecontact = $11,  
+                    uti_com_codeinseecontact = $12, 
+                    uti_com_cp_contact = $13 
+                    WHERE uti_id = $6
+                    RETURNING *
+                    ;`
 
         
     pgPool.query(requete,[profil.mail, profil.nom, profil.prenom, profil.eaps,Boolean(profil.publicontact), profil.id, profil.mailcontact,profil.sitewebcontact,profil.adrcontact, profil.compadrcontact,profil.telephonecontact , profil.cpi_codeinsee, profil.cp], (err, result) => {
@@ -324,9 +310,7 @@ router.put('/edit-mon-compte/:id', async function (req, res) {
 
 // Validation du mot de passe.
 router.get('/enable-mail/:pwd/user/:id', async function(req, res) {
-    const id = req.params.id
-    const pwd = req.params.pwd
-    
+    const { id, pwd } = req.params
     log.i('::enable-mail - In', { id })
     if(!id) {
         return res.status(400).json('Aucun ID fournit pour  identifier l\'utilisateur.');
@@ -434,7 +418,7 @@ router.get('/logout', async(req, res) => {
     if(req.session.idToken) url = await getLogoutUrl(req)
     req.session && req.session.destroy()
     res.send({url});
-});
+})
 
 // Nettoie la session de l'utilisateur
 router.get('/logged-out', (req, res) => {
@@ -444,10 +428,10 @@ router.get('/logged-out', (req, res) => {
     // Resetting the userInfo.
     req.session.user = null;
     return res.send('OK')
-});
+})
 
 router.get('/', function (req, res) {
     res.send('Ceci est la route de connexion');
-});
+})
 
 module.exports = router;

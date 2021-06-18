@@ -1,14 +1,14 @@
 <template>
   <section class="container">
-    <b-container class="interventions">
+    <b-container class="profil">
       <b-row>
-        <b-col cols="6" offset="3" >
+        <b-col cols="8" offset="2" >
             <div class="text-center mb-3">
               <h1>
                 Édition des informations
               </h1>
             </div>
-            <mon-compte :user="user" :check-legal="false" :submit-txt="'Enregistrer'" :cancel-txt="'Annuler'" @submit="editProfile" @cancel="cancelEdit"/>
+            <user-infos :user="user" :submit-txt="'Enregistrer'" @submit="editProfile" @cancel="cancelEdit" :cancelable="true"/>
         </b-col>
       </b-row>
     </b-container>
@@ -17,7 +17,9 @@
 
 <script>
 import { mapState } from 'vuex'
-import monCompte from '~/components/moncompte.vue'
+import logger from '~/plugins/logger'
+const log = logger('pages:index')
+
 export default {
   computed: {
     ...mapState({
@@ -25,22 +27,20 @@ export default {
     }),
   },
   methods: {
-    // Validation de l'inscription
     async editProfile(){
-        const url = process.env.API_URL + `/connexion/edit-mon-compte/${this.user.id }`
-        //console.log(url)
-        //const url = process.env.API_URL + `/connexion/verify/${this.user.id }`
-        //console.log(this.user.cpi_codeinsee)
-        return this.$axios.$put(url, { profil: this.user })
-        .then(async response => {
-            await this.$store.dispatch('set_utilisateur', response.user);
-            this.$toast.success('Profil enregistré avec succès.')
-            // On renvoie vers la route par défaut (redirigé en fonction du profil par le middleware)
-            this.$router.push('/')
+      const url = process.env.API_URL + `/connexion/edit-mon-compte/${this.user.id }`
+      log.i('editProfile - In', { url })
+      return this.$axios.$put(url, { profil: this.user })
+      .then(async response => {
+          log.i('editProfile - done', { response })
+          await this.$store.dispatch('set_utilisateur', response.user);
+          this.$toast.success('Profil enregistré avec succès.')
+          // On renvoie vers la route par défaut (redirigé en fonction du profil par le middleware)
+          this.$router.push('/')
 
-        }).catch(err => {
-            console.log(err)
-        })
+      }).catch(err => {
+        log.w('editProfile - Error', { err })
+      })
     },
     async cancelEdit(){
       // Annulation des modifications.
@@ -48,10 +48,8 @@ export default {
     },
 
   },
-  components: {monCompte}
+  components: {
+    userInfos: () => import('~/components/userInfos.vue')
+  }
 };
 </script>
-
-<style>
-
-</style>

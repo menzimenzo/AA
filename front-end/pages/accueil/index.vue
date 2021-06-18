@@ -1,10 +1,8 @@
 <template>
   <b-container class="accueil">
-        <b-row style="
-    margin-top:1%">
+    <b-row style="margin-top:1%">
       <b-col  class="col-12 col-md-4">
         <b-img :src="require('assets/MainAisAqua.png')" width="365%"/>
-
       </b-col>
       <b-col  class="col-12 col-md-8" v-if="!loading">
         <b-card class="mb-3" v-if="!maDemande">
@@ -79,23 +77,17 @@
 </template>
 
 <script>
-
 import { mapState } from "vuex";
-//import Editable from "~/components/editable/index.vue";
 
-import moment from "moment";
+import logger from '~/plugins/logger'
+const log = logger('pages:accueil')
 
 export default {
-  components: {
-    
-    
-  },
   data() {
     return {
       loading: false,
       formateurid: null,
       structurerefid: null,
-      iddemande: null,
       maDemande: null,        
       listeformateur: [
           {
@@ -116,54 +108,36 @@ export default {
             courriel: null
           },
         ],
+      listeformateur: [
+          {
+            text: "Veuillez sélectionner un formateur",
+            value: null,
+            id: null,
+            nom: null,
+            prenom: null,
+            mail: null
+          },
+        ],
+
     };
   },
-  watch: {
-    interventions: function() {
-      this.loading = true;
-      if (this.utilisateurCourant.profilId == 2) {
-       //console.info('suppression interventions hors structure_id : '+this.utilisateurCourant.structureId)
-       //console.info('nb inter avant: '+ this.interventions.length)
-        this.interventionsToDisplay = this.interventions.filter(x => {
-          var isMatch = true;
-          isMatch =
-            isMatch &&
-            (String(x.structureId) == this.utilisateurCourant.structureId ||
-              String(x.utiId) == this.utilisateurCourant.id);
-          return isMatch;
-        });
-        //console.info('nb inter apres filtrage structure: '+ this.interventionsToDisplay.length)
-      } else {
-        this.interventionsToDisplay = this.interventions;
-      }
-      this.loading = false;
-    }
-  },
-  computed: mapState([
-    "interventions",
-    "interventionCourrante",
-    "utilisateurCourant",
-    "documents"
-  ]),
+  computed: mapState(["utilisateurCourant", "demandeaaq" ]),
   methods: {
-    //
-    //  fonction de recupération des infos d'une intervention par id
-    //
-    editIntervention: function(idIntervention) {
-      return this.$store
-        .dispatch("get_intervention", idIntervention)
-        .then(() => {
-          this.$modal.show("editIntervention");
+    getFormateurs: function() {
+      log.i('getFormateurs - In')
+      const url = process.env.API_URL + "/user/liste/3"
+      return this.$axios.$get(url)
+        .then(response => {
+          const formateurs = response && response.users
+          log.i('getFormateurs - Done', formateurs.length)
+          return this.listeformateur = formateurs;
         })
         .catch(error => {
-          console.error(
-            "Une erreur est survenue lors de la récupération du détail de l'intervention",
-            error
-          );
+          log.w('getFormateurs - Error', error)
+          return this.$toast.error('Une erreur est survenue lors de la récupération des formateurs.')
         });
-      },
-    rechercheformateur: function() 
-    {
+    },
+    rechercheformateur: function() {
       console.info("Recherche des formateurs");
       // Lance la recherche sur la liste des formateurs 
       const url = process.env.API_URL + "/user/liste/3"
@@ -180,10 +154,8 @@ export default {
             error
           );
         });
-      },      
-
-    recherchestructureref: function() 
-    {
+    },      
+    recherchestructureref: function() {
       console.info("Recherche des structures de référence");
       // Lance la recherche sur la liste des formateurs 
       const url = process.env.API_URL + "/structureref/liste/"
@@ -200,62 +172,56 @@ export default {
             error
           );
         });
-      },      
-  chargedemande: function() {
-      console.log("Charge demande AAQ");
-      // Lance la recherche sur la liste des formateurs 
-      const url = process.env.API_URL + "/demandeaaq?demandeurid=" + this.utilisateurCourant.id
-      console.info(url);
-      return this.$axios
-        .$get(url)
+    },      
+    chargeDemande: function() {
+      const url = process.env.API_URL + "/demandeaaq?demandeurid="+this.utilisateurCourant.id
+      log.i('chargeDemande - In', { url })
+      return this.$axios.$get(url)
         .then( response => {
-          if(response && response.demandeaaq) {
-            console.log("Une demande en cours: " + response.demandeaaq.dem_id)
-            this.maDemande = response.demandeaaq;
-          }
-          else
-          {
-            console.log("Aucune demande en cours")
+          const demandesAaq = response && response.demandesAaq 
+          if(demandesAaq && demandesAaq.length === 1) {
+            log.i('chargeDemande - Une demande est en cours')
+            return this.maDemande = demandesAaq[0];
+          } else if(demandesAaq && demandesAaq.length > 1){
+            log.w('chargeDemande - Plusieurs demandes sont en cours')
+            return this.$toast.error('Il semblerait que vous ayez plusieurs demandes en cours, veuillez contacter l\'assistance.')      
+          } else {
+            log.d('chargeDemande - aucune demande en cours.')
           }
         })
-        .catch(err => {
-          console.log(JSON.stringify(err));
-          this.$toasted.error("Erreur lors du téléchargement: " + err.message);
-        });
+        .catch(error => {
+          log.w('chargeDemande - Une erreur est survenue lors de la récupération de la demande', error)
+          return this.$toast.error('Une erreur est survenue lors de la récupération de la demande.')      
+        })
     },
-    clearIntervention() {
-      this.$store.commit("reset_interventions");
-    },
-    exportCsv() {
-      this.$axios({
-        url:
-          process.env.API_URL +
-          "/interventions/csv/" +
-          this.utilisateurCourant.id,
-        // url: apiUrl + '/droits/' + 17,
-        method: "GET",
-        responseType: "blob"
-      })
-        .then(response => {
-          // https://gist.github.com/javilobo8/097c30a233786be52070986d8cdb1743
-          // Crée un objet blob avec le contenue du CSV et un lien associé
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          // Crée un lien caché pour télécharger le fichier
-          const link = document.createElement("a");
-          link.href = url;
-          const fileName = "Aisance Aquatique - Interventions.csv";
-          link.setAttribute("download", fileName);
-          // Télécharge le fichier
-          link.click();
-          link.remove();
-          console.log("Done - Download", { fileName });
+    postDemandeAaq: function() {
+      log.i('postDemandeAaq - In', this.formateurid)
+      if (!this.formateurid) {
+        return this.$toast.error('Veuillez sélectionner un formateur dans la liste déroulante.')
+      }
+
+      const url = process.env.API_URL + '/demandeaaq/'
+      const body = {
+        formateurId: this.formateurid,
+        demandeurId: this.utilisateurCourant.id
+      }
+
+      log.d('postDemandeAaq - Post', { url, body })
+      return this.$axios.$post(url, body)
+        .then(demande => {
+          log.d('postDemandeAaq - Server responded')
+          this.$toast.success('Votre demande a été soumise.')   
+          return this.maDemande = demande;
+        }).catch(error => {
+          log.w('postDemandeAaq - Server responded', error)
+          return this.$toast.error('Une erreur est survenue lors du dépot de votre demande.')
         })
         .catch(err => {
           console.log(JSON.stringify(err));
           this.$toasted.error("Erreur lors du téléchargement: " + err.message);
         });
       },
-  validerFormateur: function() {
+    validerFormateur: function() {
       console.log('Formateur choisi' + this.formateurid)
       if (this.formateurid) {
         const url = process.env.API_URL + '/demandeaaq/'
@@ -308,33 +274,8 @@ export default {
       }
     }
   },
-  //
-  //  CHARGEMENT ASYNCHRONE DES INTERVENTIONS
-  //
-  async mounted() {
-    //await Promise.all([
-    //  this.$store.dispatch("get_interventions"),
-    //  this.$store.dispatch("get_documents")
-    //]);
-    //console.info("mounted", { interventions: this.interventions});
-    // on supprime les interventions ne relevant pas de la structure si prod_id = 2 (partenaire)
-    /*if (this.utilisateurCourant.profilId == 2) {
-      console.info('2 - suppression interventions hors structure_id : '+this.utilisateurCourant.structureId)
-      console.info('2 - nb inter avant: '+ this.interventions.length)
-      this.interventionsToDisplay = this.interventions.filter(x => {
-        var isMatch = true;
-        isMatch =
-          isMatch &&
-          String(x.structureId) == this.utilisateurCourant.structureId;
-        return isMatch;
-      });
-      console.info('2 - nb inter apres filtrage structure: '+ this.interventionsToDisplay.length)
-    } else {
-      this.interventionsToDisplay = this.interventions;
-    }*/
-    this.loading = false;
-  },
   async created() {
+   log.i('created - In')
    this.loading = true;
    // Chargement de la liste des formateurs
    await this.rechercheformateur()   
@@ -347,43 +288,3 @@ export default {
 };
 </script>
 
-<style>
-.accordionBtn {
-  text-align: left;
-}
-
-.accordionBtn:focus {
-  box-shadow: none;
-}
-
-.accordion-chevron {
-  position: relative;
-  top: 5px;
-
-  -webkit-transition: 0.4s ease-in-out;
-  -moz-transition: 0.4s ease-in-out;
-  -o-transition: 0.4s ease-in-out;
-  transition: 0.4s ease-in-out;
-  color: #252195;
-}
-
-a:not(.collapsed) .accordion-chevron {
-  -webkit-transform: rotate(90deg);
-  transform: rotate(90deg);
-  -moz-transform: rotate(90deg);
-}
-
-.InfoMN {
-  cursor: default;
-  padding-left: 1vw;
-  width: 50em;
-  padding-right: 1vw;
-  border-block-color: rgb(0, 0, 0);
-  font-size: 100%;
-  font-family: sans-serif ;
-  text-align: left;
-  background-color: #ffffff;
-  color:rgb(0, 0, 0)
-}
-
-</style>

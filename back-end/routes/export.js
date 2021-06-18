@@ -2,15 +2,12 @@ const express = require('express');
 const router = express.Router();
 const pgPool = require('../pgpool').getPool();
 var moment = require('moment');
-var fs = require('fs');
 const stringify = require('csv-stringify')
-const config = require('../config');
 const { formatIntervention, formatDate, logTrace } = require('../utils/utils')
 moment().format();
 
 const logger = require('../utils/logger')
 const log = logger(module.filename)
-
 
 /* route d'extraction de la liste d'utilisateurs pour le CSV */
 /* Pas d'argument, on utilise la structure de l'utilisateur en session */

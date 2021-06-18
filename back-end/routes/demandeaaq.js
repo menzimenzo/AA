@@ -1,115 +1,59 @@
 const express = require('express');
 const router = express.Router();
 const pgPool = require('../pgpool').getPool();
-const logger = require('../utils/logger')
-const log = logger(module.filename)
 const config =  require( '../config')
-const {sendEmail } = require('../utils/mail-service')
-/*
-Test : 
-    Sur serveur web backend : 
-        http://localhost:3001/listecommune?codepostal=57530
-    Via l'exposition du backend par le proxy (nginx)  
-        http://localhost/backend/listecommune?codepostal=57530
-*/
+const { sendEmail } = require('../utils/mail-service')
+const { formatDemandeAAQ } = require('../utils/utils')
 
-
-const formatDemandeAAQ = demandeaaq => {
-    var result = {
-        id: demandeaaq.dem_id,
-        structurerefid: demandeaaq.dem_sre_id,
-        formateurid: demandeaaq.dem_uti_formateur_id,
-        demandeurid: demandeaaq.dem_uti_demandeur_id,
-        tockendemandeaccord: demandeaaq.dem_tockendemandeaccord,
-        tockendemanderefus: demandeaaq.dem_tockendemanderefus,
-        datedemande: demandeaaq.dem_datedemande,
-        daterelance: demandeaaq.dem_daterelance,
-        nbrelance: demandeaaq.dem_nbrelance,
-        dateaccord: demandeaaq.dem_dateaccord,
-        daterefus: demandeaaq.dem_daterefus,
-        motifrefus: demandeaaq.dem_motifrefus,
-        dmsid: demandeaaq.dem_dms_id
-    }
-    return result
-}
-
-const formatreversDemandeAAQ = demandeaaq => {
-    var result = {
-        dem_id: demandeaaq.id,
-        dem_sre_id : demandeaaq.structurerefid,
-        dem_uti_formateur_id : demandeaaq.formateurid,
-        dem_uti_demandeur_id : demandeaaq.demandeurid,
-        dem_tockendemandeaccord : demandeaaq.tockendemandeaccord,
-        dem_tockendemanderefus : demandeaaq.tockendemanderefus,
-        dem_datedemande : demandeaaq.datedemande,
-        dem_daterelance : demandeaaq.daterelance,
-        dem_nbrelance : demandeaaq.nbrelance,
-        dem_dateaccord : demandeaaq.dateaccord,
-        dem_daterefus : demandeaaq.daterefus,
-        dem_motifrefus : demandeaaq.motifrefus,
-        dem_dms_id : demandeaaq.dmsid
-    }
-    return result
-}
-
+const logger = require('../utils/logger');
+const log = logger(module.filename)
 
 router.get('/', function (req, res) {
+    const { formateurid, demandeurid } = req.query
+    log.i('::list - In', { formateurid, demandeurid })    
+    if (!formateurid && !demandeurid) {
+        log.W('::list - ID manquant')    
+        return res.sendStatus(400).json({ message: 'L\'identifiant du formateur et du demandeur sont manquants.' })
+    }
 
-        // On bloque si on a pas un des deux paramètres
-        if (!req.query.structurerefid && !req.query.formateurid && !req.query.demandeurid) {
-            return res.sendStatus(400);
-        }
+    let whereClause = null 
+    let id = null
+    if (demandeurid) {
+        id = demandeurid
+        whereClause = 'dem_uti_demandeur_id='
+    }
+    if (formateurid) {
+        id = formateurid
+        whereClause = 'dem_uti_formateur_id='
+    }
+    const requete = `SELECT dem.*,to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq,uti.uti_nom, uti.uti_prenom, uti.uti_mail \ 
+    FROM demande_aaq dem \
+    INNER JOIN utilisateur AS uti ON uti.uti_id = dem.dem_uti_formateur_id \
+    where ${whereClause}${id}`
 
-        var whereClause = null 
-        var id = null
-        if (req.query.structurerefid) {
-            log.d("StructureId",req.query.structurerefid)
-            id = req.query.structurerefid
-            whereClause = 'dem_sre_id='
+    log.i('::list - requête', { requete })    
+    pgPool.query(requete,(err, result) => {
+        if (err) {
+            log.w('::list - error', err)
+            return res.status(400).json({ message: 'erreur sur la requete de recherche demande aaq' });
         }
-        if (req.query.demandeurid) {
-            log.d("DemandeurId",req.query.demandeurid)
-            id = req.query.demandeurid
-            whereClause = 'dem_uti_demandeur_id='
+        else {
+            log.i('::list - Done')    
+            const demandesAaq = result.rows;
+            return res.status(200).json({ demandesAaq });
         }
-        if (req.query.formateurid) {
-            log.d("FormateurId",req.query.formateurid)
-            id = req.query.formateurid
-            whereClause = 'dem_uti_formateur_id='
-        }
-        //,  to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq, uti.uti_nom formateurNom \
-        //
-        const requete = `select dem.*,to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq,uti.uti_nom, uti.uti_prenom, sre.sre_libellecourt, uti.uti_mail, sre.sre_courriel \ 
-        from demande_aaq dem \
-        left join utilisateur as uti on uti.uti_id = dem.dem_uti_formateur_id \
-        left join structure_ref as sre on sre.sre_id = dem.dem_sre_id \        
-        where ${whereClause}${id}`
-
-        log.d(requete)
-        // Recherche des communes correspondant au codepostal
-        pgPool.query(requete,(err, result) => {
-            if (err) {
-                console.log(err);
-                return res.status(400).json({ message: 'erreur sur la requete de recherche demande aaq' });
-            }
-            else {
-                const demandeaaq = result.rows && result.rows[0];
-                return res.status(200).json({ demandeaaq });
-            }
-        });
-        
     });
+        
+})
 
 router.post('/', function (req, res) {
     const { demandeurId, formateurId, structurerefid } = req.body
 
    // gérération des tocken de refus et d'accord pour l'envoie par mail.
-    var tockendemanderefus = null
-    var tockendemandeaccord = null
+    let tockenDemandeRefus = null
+    let tockenDemandeAccord = null
     const now = new Date()
     const datecreation = now.getFullYear() + "-" + eval(now.getMonth() + 1) + "-" + now.getDate()
-    log.d("tockendemanderefus:"+tockendemanderefus)
-    log.d("tockendemandeaccord:"+tockendemandeaccord)
     const requete = `INSERT INTO demande_aaq (dem_uti_demandeur_id,dem_uti_formateur_id,dem_sre_id,dem_tockendemandeaccord,dem_tockendemanderefus,dem_datedemande,dem_dms_id) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`;
     log.d('::post - requete', { requete });
     pgPool.query(requete, [demandeurId, formateurId, structurerefid, tockendemandeaccord, tockendemanderefus, datecreation, 1 ], 
@@ -121,7 +65,7 @@ router.post('/', function (req, res) {
             else {
                 log.d("result.rows : " + result.rows)
                 log.i('::post - Done', result);
-                const demandeclient = formatreversDemandeAAQ( result.rows[0])
+                const demandeclient =  formatDemandeAAQ( result.rows[0])
                 var nomInstructeur
                 var courrielInstructeur
                 if (formateurId) {
@@ -140,8 +84,7 @@ router.post('/', function (req, res) {
                             courrielInstructeur = formateuraaq.uti_mail
                             nomInstructeur = " "+formateuraaq.uti_prenom;
                         }
-                    });
-                    
+                    })
                 }
                 if (structurerefid) {
                     const requete = `select sre_courriel from structure_ref where sre_id = ${structurerefid}`
@@ -158,8 +101,7 @@ router.post('/', function (req, res) {
                             courrielInstructeur = structurerefaaq.sre_courriel
                             nomInstructeur = ""
                         }
-                    });
-                    
+                    })
                 }
                 sendEmail({
                     to: courrielInstructeur,
@@ -170,11 +112,10 @@ router.post('/', function (req, res) {
                         Rappel du site <a href="${config.franceConnect.FS_URL}">SI Aisance Aquatique.<br/></p>`
                     })
                     
-
                 return res.status(200).json({ maDemande: demandeclient });
             }
         })
-});
+})
 
 router.post('/delete/', async function (req, res) {
     const maDemande = req.body.demandeaaq
@@ -202,63 +143,21 @@ router.put('/accord', async (req,res) => {
     const demandeid = demandeaaq && demandeaaq.dem_id
     const formateurid = demandeaaq && demandeaaq.dem_uti_formateur_id
     log.i('::accords - In', {demandeaaq , formateurid})
-   
-
     const bddUpdate =  await pgPool.query("UPDATE demande_aaq SET dem_dateaccord = now(), dem_uti_formateur_id = $1, dem_dms_id = 2 \
     WHERE dem_id = $2 RETURNING *", 
     [formateurid, demandeid]).catch(err => {
         log.w('::accords - Erreur pendant l\'update des infos du demandeaaq', err)
         throw err
     })
-
-      const updatedDemandeaaq = bddUpdate.rows && bddUpdate.rows[0]
-    log.d('::confirm-profil-infos - Done, renvois du user mis à jour', updatedDemandeaaq)
+    const updatedDemandeaaq = bddUpdate.rows && bddUpdate.rows[0]
+    log.i('::confirm-profil-infos - Done, renvois du user mis à jour', updatedDemandeaaq)
     return res.send(updatedDemandeaaq)
 })
-/*
-router.put('/accord/', async function (req, res) {
-    const maDemande = req.body.demandeaaq
 
-    log.i('::update - In', { maDemande.id })
-
-    
-    let { dmsid} = demandeaaq
-
-    // Mise à jour de l'intervention en accord par le formateur
-    const requete = `UPDATE demande_aaq 
-        SET dem_tockendemandeaccord = null,
-        dem_tockendemanderefus = null,
-        dem_motifrefus = null,
-        dem_daterefus = null,
-        dem_dateaccord = now(),
-        dem_uti_formateur_id = ${instructeurid}
-        dem_dms_id = 2
-        WHERE dem_id = ${id}
-        RETURNING *
-        ;`
-
-    log.d('::update - requete', { requete })
-    pgPool.query(requete, [id,instructeurid], (err, result) => {
-            if (err) {
-                log.w('::update - erreur lors de la sauvegarde accord demande_aqq', { requete, erreur: err.stack })
-                return res.status(400).json('erreur lors de la sauvegarde de  accord demande_aqq');
-            }
-            else {
-                log.i('::update - Done')
-                return res.status(200).json({ demandeaaq: formatDemandeAAQ(result.rows[0]) });
-            }
-        })
-})
-
-*/
 router.put('/refus/:id', async function (req, res) {
     const maDemande = req.body.demandeaaq
-
     const id = req.params.id
-    log.i('::update - In', { id })
-
-    
-    let {motifrefus,dmsid} = demandeaaq
+    log.i('::update pour refus - In', { id })    
 
     //Mise à jour de la demande en refusée
     const requete = `UPDATE demande_aaq 
@@ -275,22 +174,19 @@ router.put('/refus/:id', async function (req, res) {
     log.d('::update - requete', { requete })
     pgPool.query(requete, [id], (err, result) => {
             if (err) {
-                log.w('::update - erreur lors de la sauvegarde accord demande_aqq', { requete, erreur: err.stack })
+                log.w('::update pour refus - erreur lors de la sauvegarde accord demande_aqq', { requete, erreur: err.stack })
                 return res.status(400).json('erreur lors de la sauvegarde de  accord demande_aqq');
             }
             else {
-                log.i('::update - Done')
+                log.i('::update pour refus - Done')
                 return res.status(200).json({ demandeaaq: formatDemandeAAQ(result.rows[0]) });
             }
         })
 })
 
-
 router.get('/accord/:tockenaccord/demande/:id', async function(req, res) {
     const id = req.params.id
-    const tockenaccord = req.params.tockenaccord
-    
-    log.i('::enable-mail - In', { id })
+    log.i('::enable-mail with tockenaccord - In', { id })
     if(!id) {
         return res.status(400).json('Aucun ID fournit pour  identifier l\'utilisateur.');
     }
@@ -305,31 +201,25 @@ router.get('/accord/:tockenaccord/demande/:id', async function(req, res) {
         return res.status(404).json({message: "L'utilisateur n'existe pas."});        
     }
 
-    log.d('::enable-mail - user found', { user })
-    if(user.uti_pwd === pwd && !user.pwd_validated) {
-        const requete = `UPDATE utilisateur 
-            SET pwd_validated = $1
-            WHERE uti_id = $2
-            RETURNING *
-            ;`    
-        pgPool.query(requete,[true, id], (err, result) => {
-            if (err) {
-                log.w('::enable-mail - erreur lors de l\'update', {requete, erreur: err.stack});
-                return res.status(400).json('erreur lors de la sauvegarde de l\'utilisateur');
-            }
-            else {
-                log.i('::enable-mail - Done, pwd has been validated.')
-                req.session.user = result.rows[0]
-                req.accessToken = result.rows[0].uti_pwd;
-                req.session.accessToken = result.rows[0].uti_pwd;
-                return res.status(200).json({ user: formatUtilisateur(result.rows[0])});
-            }
-        })
-    } else {
-        log.w('::enable-mail - erreur concernant le user à valider.')
-        return res.status(400).json('L\'utilisateur a déjà validé son mot de passe ou le mot de passe fournit est incorrecte.');
-    }    
+    log.d('::enable-mail with tockenaccord - user found', { user })
+    const requete = `UPDATE utilisateur 
+        SET pwd_validated = $1
+        WHERE uti_id = $2
+        RETURNING *
+        ;`    
+    return pgPool.query(requete,[true, id], (err, result) => {
+        if (err) {
+            log.w('::enable-mail with tockenaccord - erreur lors de l\'update', {requete, erreur: err.stack});
+            return res.status(400).json('erreur lors de la sauvegarde de l\'utilisateur');
+        }
+        else {
+            log.i('::enable-mail with tockenaccord - Done, pwd has been validated.')
+            req.session.user = result.rows[0]
+            req.accessToken = result.rows[0].uti_pwd;
+            req.session.accessToken = result.rows[0].uti_pwd;
+            return res.status(200).json({ user: formatUtilisateur(result.rows[0])});
+        }
+    })
 })
-
 
 module.exports = router;

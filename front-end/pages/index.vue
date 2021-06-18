@@ -1,12 +1,10 @@
 <template>
   <b-container >
-    <b-row style="
-    margin-top:1%">
-      <b-col  class="col-12 col-md-4">
+    <b-row style="margin-top:1%">
+      <b-col class="col-12 col-md-4">
         <b-img :src="require('assets/MainAisAqua.png')" width="365%"/>
-
       </b-col>
-      <b-col   class="col-8 col-md-4" >
+      <b-col class="col-8 col-md-4" >
         <b-row >
           <p class="aa-bouton-connexion"  @click="SeLoguer(1)">▷ Je suis maître nageur<sup>(1)</sup><br>Je m’identifie et renseigne mes données<br><br></p>
         </b-row>
@@ -51,53 +49,70 @@
             
         </b-col>
       </b-row>
+      <div v-if="fc">
+        <b-row class="text-center">
+          <b-col cols="12">
+            <span class="otherConnexion">Ou</span>
+          </b-col>
+        </b-row>
+        <b-row class="text-center">
+          <b-col cols="12">
+            <b-img class="fcBtn" @click="connexionutilisateur()"  fluid  :src="require('assets/FCboutons-10.png')" border="0" style="size: 100%;" />
+            <br>
+            <a
+              href="https://franceconnect.gouv.fr/"
+              target="_blank"
+              style="text-align:center;" 
+              >A propos de FranceConnect</a>
+          </b-col>
+        </b-row>
+      </div>
     </div>
-
-
+    <b-row class="text-center" >
+      <b-col cols="12">
+        <br>
+        <span class="renvoiBasDePage">
+          (1) un maitre-nageur est un éducateur sportif professionnel détenteur d’une carte professionnelle, qualifié pour encadrer contre rémunération l’apprentissage de la natation (ex : BPJEPS AAn, DEJEPS Triathlon, Licence staps entrainement sportif « natation » ...)
+        </span>          
+      </b-col>
+    </b-row>
   </b-container>
 </template>
 
-
 <script>
+import logger from '~/plugins/logger'
+const log = logger('pages:index')
+
 export default {
   components: {
     connectionForm: () => import('~/components/connectionForm.vue')
   },
   data() {
     return {
-      // Booleen Maitre nageur
-      b_MN: true,
-      // Booleen agent de structure
-      // V1 : On ne permet pas l'affichage du bouton Partenaire
-      b_AS: true,
       connexionType: null,
       fc: false
     };
   },
-//
-//  RECHERCHE DE LA COMMUNE PAR CODE POSTAL
-//
   methods: {
     connexionutilisateur: function() {
-      console.info("Recherche de l'utilisateur");
       const url = process.env.API_URL + '/connexion/login'
-      console.info(url);
+      log.i('connexionutilisateur - In', { url })
       this.$axios.$get(url)
       .then(response => {
+        log.i('connexionutilisateur - Done')
         window.location.replace(response.url)
       }).catch(err => {
-        console.log(err)
+        log.w('connexionutilisateur - error', { error })
       })
     },
     login: function(e) {
+      log.i('login - In')
       return this.$store.dispatch('login', e)
         .then(() => {
-            console.log('login success!')
+            log.i('login - done - gestion de l\'utilisateur courant.')
             this.formErrors = []
             this.$modal.hide('connexionForm')
             // Route pour les Maîtres nagueurs MN
-            console.log("route accueil index racine page")
-
             if (this.$store.state.utilisateurCourant.profilId == 1) {
               return this.$router.push('/admin')
             }
@@ -115,50 +130,40 @@ export default {
             } else
             {
               return this.$router.push('/accueil')
-            }
-            
+            }            
         })
         .catch((e) => {
-            console.log('Error during login process', e.stack)
+            log.w('login - error', e.stack)
         })
         .finally(() => {
             this.loading = false
         })
     },
     // Fonction permettant d'afficher dynamiquement la partie Login
+    // V1 : On ne permet pas de basculer d'un bouton à l'autre
     SeLoguer: function(e) {
         this.connexionType = e
     }
-
   },
-
-//
-//  CHARGEMENT ASYNCHRONE DES INTERVENTIONS
-//
   async mounted() {
-    console.info("mounted home");
+    log.i("mounted home - In");
     const url = process.env.API_URL + '/parametres/fcactif'
-      console.info(url);
       this.$axios.$get(url)
       .then(response => {
-        if (response) 
-        {
-          console.debug("France Connect Actif" + response)
+        if (response) {
+          log.d("mounted home - France Connect Actif", response)
           this.fc = true
-        }
-        else
-        {
-          console.debug("France Connect Inactif")
+        } else {
+          log.d("mounted home - France Connect Inactif")
           this.fc = false
         }
+        log.i("mounted home - done")
       }).catch(err => {
-        console.log(err)
+        log.w("mounted home - Error on mounted", err);
       })
-
   }
 };
 </script>
-
 
 <style>
 .renvoiBasDePage {

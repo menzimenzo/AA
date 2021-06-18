@@ -1,7 +1,7 @@
 <template>
   <b-container class="interventionModal">
     <b-col cols="12" class="text-center">
-      <h2 class="mb-3 interventionTitle">
+      <h2 class="mb-3">
         Sélection d'une piscine
         <br />
       </h2>
@@ -154,8 +154,5 @@ export default {
   position: absolute;
   bottom: 10px;
   right: 10px;
-}
-.interventionTitle {
-  color: #252195;
 }
 </style>

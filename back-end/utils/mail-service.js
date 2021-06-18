@@ -9,6 +9,7 @@ const log = logger(module.filename)
 
 module.exports = {
     sendEmail: function(payload){
+        log.i('sendStatusNotification - In')
         payload.from = SENDER_EMAIL
         payload.replyTo = SENDER_EMAIL
         return  axios.post(sendNotificationUrl,  payload).then(() => {
@@ -94,6 +95,7 @@ module.exports = {
     },
     // Fonction de formatage et d'envoi du Mail
     formatAndSendMail: (idUtilisateurCourant, IdUtilisateurIntervention, nomUtilisateurCourant, mailUtilisateurCourant, nbIntervention, interventionACompleter, interventionAVerifier, corpsMail) => {
+        log.i('formatAndSendMail - In')
         var objetMail = ''
         var EnteteMail  = ''
         objetMail = `[AAQ] Intervention`
@@ -124,20 +126,12 @@ module.exports = {
         corpsMail = corpsMail + `<br/>`
         corpsMail = corpsMail + `Cordialement,<br/><br/>`
         corpsMail = corpsMail + `L’équipe « Aisance Aquatique »`
-        /* Mode test pour écriture mail local*/
-        /*
-        fs.writeFile(config.PATH_SUPERVISION_BATCH + '/' + idUtilisateurCourant + '.html', 'idUtilisateurCourant : ' + idUtilisateurCourant + '<br/><br>intervention.utiId : ' + IdUtilisateurIntervention + '<br/><br>Objet : ' + objetMail+ '<br/><br>' + corpsMail, function (err) {
+        log.i('formatAndSendMail - done, EMail to  : ' + mailUtilisateurCourant)
 
-            
-        })    
-        */
-        console.log('EMail to  : ' + mailUtilisateurCourant)
-
-        sendEmail({
+        return sendEmail({
             to: mailUtilisateurCourant,
             subject: objetMail,
             body: corpsMail
         })
-        return 1
     }
 }

@@ -10,13 +10,6 @@
 
 <script>
 export default {
-  data() {
-    return {
-    };
-  },
-//
-//  CHARGEMENT ASYNCHRONE DES INTERVENTIONS
-//
   async mounted() {
     const url = process.env.API_URL + '/connexion/logged-out'
     this.$axios.$get(url)

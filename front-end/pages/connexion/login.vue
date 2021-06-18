@@ -9,30 +9,25 @@
 </template>
 
 <script>
+import logger from '~/plugins/logger'
+const log = logger('pages:connexion/login')
+
 export default {
   data() {
     return {
     };
   },
-//
-//  CHARGEMENT ASYNCHRONE DES INTERVENTIONS
-//
   async mounted() {
-
+    log.i('mounted - In')
     const url = process.env.API_URL + '/connexion/callback?code=' + this.$route.query.code + '&state=' + this.$route.query.state
     this.$axios.$get(url)
     .then(async response => {
+      log.i('mounted - Done')
       await this.$store.dispatch('set_utilisateur', response.user);
-    
-      this.$router.push(response.url)
+      return this.$router.push(response.url)
     }).catch(err => {
-      console.log(err)
+      log.w('mounted - error', { err })
     })
   }
 };
 </script>
-
-<style>
-
-</style>
-

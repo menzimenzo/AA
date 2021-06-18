@@ -1,83 +1,70 @@
 <template>
-  <div>
+  <b-form>
     <b-card class="mb-3">
-      <b-form>
-        <b-form-group
-          id="emailInputGroup"
-          label="Courriel :"
-          label-for="emailInput"
+      <b-form-group
+        id="emailInputGroup"
+        label="Courriel :"
+        label-for="emailInput"
+        required >
+        <b-form-input
+          id="emailInput"
+          type="email"
+          v-model="mail"
           required
-        >
-          <b-form-input
-            id="emailInput"
-            type="email"
-            v-model="mail"
-            required
-            name="mail"
-            key="email-input"
-            v-validate="{ required: true, email: true }"
-            aria-describedby="emailFeedback"
-            placeholder="Courriel"
-            :state="validateState('mail')"
-            :disabled="!isUserRegisteredViaPwd"
-          />
-
-          <b-form-invalid-feedback id="emailFeedback"
-            >Le courriel est obligatoire et doit être
-            valide.</b-form-invalid-feedback
-          >
-        </b-form-group>
-        <b-form-group
-          label="Prénom :"
-          id="prenomInputGroup"
-          label-for="prenomInput"
+          name="mail"
+          v-validate="{ required: true, email: true }"
+          aria-describedby="emailFeedback"
+          placeholder="Courriel"
+          :state="validateState('mail')"
+          :disabled="!isUserRegisteredViaFC"
+        />
+        <b-form-invalid-feedback id="emailFeedback">Le courriel est obligatoire et doit être valide.</b-form-invalid-feedback>
+      </b-form-group>
+      <b-form-group 
+        label="Prénom :"
+        id="prenomInputGroup"
+        label-for="prenomInput"
+        required >
+        <b-form-input
+          id="prenomInput"
+          type="text"
+          v-model="user.prenom"
+          name="prenom"
           required
+          v-validate="{ required: true }"
+          aria-describedby="prenomFeedback"
+          placeholder="Prénom"
+          :disabled="isUserRegisteredViaFC"
+          :state="validateState('prenom')"
+        />
+        <b-form-invalid-feedback id="prenomFeedback">Le prénom est obligatoire.</b-form-invalid-feedback>
+      </b-form-group>
+      <b-form-group 
+        label="Nom :"
+        id="nomInputGroup"
+        label-for="nomInput"
+        required
         >
-          <b-form-input
-            id="prenomInput"
-            type="text"
-            v-model="user.prenom"
-            name="prenom"
-            key="prenom-input"
-            v-validate="{ required: true }"
-            aria-describedby="prenomFeedback"
-            placeholder="Prénom"
-            :disabled="isUserRegisteredViaPwd"
-            :state="validateState('prenom')"
-          />
-          <b-form-invalid-feedback id="prenomFeedback"
-            >Le prénom est obligatoire.</b-form-invalid-feedback
-          >
-        </b-form-group>
-        <b-form-group
-          label="Nom :"
-          id="nomInputGroup"
-          label-for="nomInput"
-          required
-        >
-          <b-form-input
-            id="nomInput"
-            type="text"
-            v-model="user.nom"
-            name="nom"
-            key="nom-input"
-            v-validate="{ required: true }"
-            aria-describedby="nomFeedback"
-            placeholder="Nom"
-            :disabled="isUserRegisteredViaPwd"
-            :state="validateState('nom')"
-          />
-          <b-form-invalid-feedback id="nomFeedback"
-            >Le nom est obligatoire.</b-form-invalid-feedback
-          >
-        </b-form-group>
-        <b-form-group
+        <b-form-input
+          id="nomInput"
+          type="text"
+          v-model="user.nom"
+          name="nom"
+          key="nom-input"
+          v-validate="{ required: true}"
+          aria-describedby="nomFeedback"
+          placeholder="Nom"
+          :disabled="isUserRegisteredViaFC"
+          :state="validateState('nom')"
+        />
+        <b-form-invalid-feedback id="nomFeedback">Le nom est obligatoire.</b-form-invalid-feedback>
+      </b-form-group>
+      <b-form-group 
           label="Numéro de carte professionnelle :"
           id="eapsInputGroup"
           label-for="eapsInput"
           required
-          v-if="user.profilId != 1 && user.profilId != 2"
-        >
+          v-if="user.profilId != 1 && user.profilId != 2">
           <b-form-input
             id="eapsInput"
             type="text"
@@ -90,15 +77,10 @@
             aria-describedby="eapsFeedback"
             placeholder="Numéro de carte professionnelle"
           />
-          <b-form-invalid-feedback id="eapsFeedback"
-            >Le format de la carte professionnelle n'est pas
-            respecté.</b-form-invalid-feedback
-          >
-        </b-form-group>
-      </b-form>
+           <b-form-invalid-feedback id="eapsFeedback">Le format de la carte professionnelle n'est pas respecté.</b-form-invalid-feedback>
+      </b-form-group>
     </b-card>
     <b-card class="mb-3">
-      <!--<div v-if="user.publicontact==true">-->
       <div v-if="user.profilId != 1 && user.profilId != 2">
         <b-form>
           <b-form-group label="Site Web de contact :">
@@ -459,16 +441,23 @@
         </div>
       </b-form>
     </b-card>
-  </div>
+  </b-form>
 </template>
 
 <script>
-import { mapState, mapMutations } from "vuex";
+import { mapState } from "vuex"
+import rechercheCommune from '~/lib/mixins/rechercheCommune'
+
+import logger from '~/plugins/logger'
+const log = logger('components:userInfos')
+
 export default {
+  mixins: [rechercheCommune],
+  props: ["submitTxt", "user", "cancelable" ],
   data() {
     return {
       cp: null,
-      isPubliChecked: "false",
+      isPubliChecked: false,
       accordHonneur: false,
       listecommune: [
         {
@@ -691,7 +680,6 @@ export default {
         return Promise.resolve(null);
       }
     },
-
     recherchesiret: function () {
       if (this.siret && this.siret.length === 14) {
         this.boolSiren = false;
@@ -785,10 +773,9 @@ export default {
     cp() {
       console.info("Saisie CP");
       this.user.cp = this.cp;
-      this.recherchecommune();
+      return this.rechercheCommune();
     },
     cpEpci() {
-      //console.info("Saisie CP");
       this.rechercheepci();
     },
     selectedStructure() {
@@ -801,8 +788,11 @@ export default {
       (this.cp = null), (this.cpEpci = null);
     },
   },
-  async mounted() {
-    await this.$store.dispatch("get_structures");
+  mounted() {
+    this.$store.dispatch("get_structures");
+    if (this.user.profilId < 3) {
+      this.getDepartements();
+    }
     // Chargement du CP et liste commune + sélection
     if (this.user.cp) {
       // Recopie du CP dans le champ code postal
@@ -826,22 +816,22 @@ export default {
         });
       },
     },
-    isUserRegisteredViaPwd() {
+    isUserRegisteredViaFC() {
       return Boolean(this.user && this.user.tokenFc);
     },
     listeStructures() {
+      log.i("listeStructures - In")
       var liste = this.structures;
       if (this.mail && this.mail.indexOf(".gouv.fr") != -1) {
+        log.i("listeStructures - Done")
         return liste;
       } else {
+        log.d("listeStructures - Autre collectivité")
         if (!this.user.typeCollectivite) {
           liste = this.structures.filter((str) => {
-            var isMatch = true;
-            isMatch =
-              isMatch &
-              (String(str.str_libellecourt) != "DS") &
-              (String(str.str_libellecourt) != "DEP") &
-              (String(str.str_libellecourt) != "EPCI") &
+            const isMatch = (String(str.str_libellecourt) != "DS") &&
+              (String(str.str_libellecourt) != "DEP") &&
+              (String(str.str_libellecourt) != "EPCI") &&
               (String(str.str_libellecourt) != "COM");
             return isMatch;
           });
@@ -850,14 +840,45 @@ export default {
       }
     },
   },
-  async mounted() {
-    if (this.user.profilId < 3) {
-      this.getDepartements();
-    }
-  },
+  methods: {
+    submit: function () {
+      log.i('submit - In')
+      if (!this.accordHonneur) { 
+        log.w('submit - accord sur honneur non coché.')
+        // On vide le CodeInsee si le CP n'est pas complet
+        this.user.cpi_codeinsee = null          
+        return this.$toast.error('Veuillez certifier sur l\'honneur l\'exactitude des informations déclarées.');
+      }
+      return this.$validator.validateAll().then((isValid) => {
+        if (isValid) {
+          this.isPubliChecked ? this.user.publicontact = true : this.user.publicontact = false
+          this.$store.dispatch("set_state_element", {
+            key: "utilisateurCourant",
+            value: this.user,
+          });
+          log.i('submit - Done', this.user)
+          return this.$emit("submit");
+        } else {
+          log.w('submit - certains champs ne sont pas valides.')
+          return this.$toast.error('Veuillez vérifier la validité des champs.');
+        }
+      });
+    },
+    validateState(ref) {
+      if (!this.veeFields) {
+        return null;
+      }
+      if (
+        this.veeFields[ref] &&
+        (this.veeFields[ref].dirty || this.veeFields[ref].validated)
+      ) {
+        return !this.errors.has(ref);
+      }
+      return null;
+    },
+    cancel: function () {
+      this.$emit("cancel");
+    },
+  }
 };
 </script>
-
-<style>
-</style>
-

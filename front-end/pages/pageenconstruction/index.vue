@@ -1,17 +1,15 @@
 <template>
   <b-container class="accueil">
-        <b-row style="
-    margin-top:1%">
+    <b-row style="margin-top:1%">
       <b-col  class="col-12 col-md-4">
         <b-img :src="require('assets/MainAisAqua.png')" width="365%"/>
-
       </b-col>
       <b-col  class="col-12 col-md-8" >
         <b-card class="mb-3" >
-          <b-form>          
-            Vous tentez d'accéder aux interventions Aisance Aquatique<br><br>
-            Cette page est actuellement en cours de construction<br><br>
-          </b-form>
+          <p>          
+            Vous tentez d'accéder aux interventions Aisance Aquatique.<br><br>
+            Cette page est actuellement en cours de construction.
+          </p>
         </b-card>            
       </b-col>
     </b-row>
@@ -21,7 +19,6 @@
 <script>
 //import Intervention from "~/components/Intervention.vue";
 import { mapState } from "vuex";
-import moment from "moment";
 export default {
   components: {
   },
@@ -35,15 +32,6 @@ export default {
   computed: mapState([
     "utilisateurCourant"
   ]),
-  methods: 
-  {
-  
-  },
-  //
-  //  CHARGEMENT ASYNCHRONE DES INTERVENTIONS
-  //
-  async created() {
-  }
 };
 </script>
 

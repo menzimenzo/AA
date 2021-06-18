@@ -2,58 +2,88 @@ const express = require('express');
 const router = express.Router();
 const pgPool = require('../pgpool').getPool();
 const stringify = require('csv-stringify')
-const myPdf = require('../utils/pdf')
-const { getIntervention } = require('../controllers');
-const { getUtilisateursFromIntervention } = require('../controllers');
-const { getEnfantsFromIntervention } = require('../controllers/');
-const { postUtilisateursForIntervention } = require('../controllers/');
-const { postEnfantsForIntervention } = require('../controllers/');
-const { deleteEnfantsFromIntervention } = require('../controllers/');
-const { deleteUtilisateursFromIntervention } = require('../controllers/');
+
+const { 
+    getIntervention, 
+    getUtilisateursFromIntervention,
+    getEnfantsFromIntervention,
+    postUtilisateursForIntervention,
+    postEnfantsForIntervention,
+    deleteEnfantsFromIntervention,
+    deleteUtilisateursFromIntervention } = require('../controllers');
 
 const { formatIntervention } = require('../utils/utils')
 
-//const formatIntervention = require('../utils/utils')
-var moment = require('moment');
-moment().format();
-
 const logger = require('../utils/logger');
-
-
 const log = logger(module.filename)
 
-router.get('/delete/:id', async function (req, res) {
-    const intervention = req.body.intervention;
-    const id = req.params.id;
-    log.i('::delete - In', { id })
+router.get('/', async function (req, res) {
+    log.i('::list - In')
+    if (!req.session.user) {
+        log.w('::list - User manquant.')
+        return res.sendStatus(403)
+    }
 
-    //insert dans la table intervention
-    const requete = `DELETE FROM  intervention 
-        WHERE int_id = $1
-        RETURNING *
-        ;`;
+    const user = req.session.user
+    const utilisateurId = user.uti_id
+    var whereClause = ""
 
-    pgPool.query(requete, [id], (err, result) => {
-        if (err) {
-            log.w('::delete - Erreur survenue lors de la suppression.', { requete, err: err.stack })
-            return res.status(400).json('erreur lors de la suppression de l\'intervention ' + id);
+    if (user.rol_id == 3 || user.rol_id == 4) {
+        whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
+         LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
+         LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
+         LEFT JOIN structure str on str.str_id = int.str_id \
+         LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
+         where uti.uti_id=${utilisateurId}`
+        // Utilisateur Administrateur : 
+    } else if (user.rol_id == 2) {
+            whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
+            LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
+             LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
+             LEFT JOIN structure str on str.str_id = int.str_id \
+             LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
+             where str.str_id=${user.structureId}`
+    } else {
+        whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
+        LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
+        LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
+        LEFT JOIN structure str on str.str_id = int.str_id \
+        LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
+        `
+    }
+
+    const requete = `SELECT int.*, pis.*, str.*,com.com_libelle from intervention int ${whereClause} order by int.int_datefinintervention desc`;
+    log.d('::list - récuperation via la requête.', { requete });
+
+    (async () => {
+        try {
+            let result = await pgPool.query(requete)
+            let interventions = result.rows.map(formatIntervention);
+
+            for (const [key, intervention] of Object.entries(interventions)) {
+                await Promise.all([getUtilisateursFromIntervention(intervention.id), getEnfantsFromIntervention(intervention.id)]).then(values => {
+                    interventions[key].utilisateur = values[0];
+                    interventions[key].enfant = values[1];
+                })
+            }
+            res.json({ interventions });
         }
-        else {
-            log.i('::delete - Done')
-            // Suppression effectuée avec succès
-            return res.status(200).json({ intervention: result.rows.map(formatIntervention)[0] });
-
+        catch (err) {
+            throw err
         }
-    })
-})
+    })().catch(err => {
+        log.w('::list - Erreur survenue lors de la récupération', err.stack)
+        return res.status(400).json('erreur lors de la récupération des interventions')
+    }
+    )
+
+});
 
 router.get('/csv/:utilisateurId', async function (req, res) {
-
     // Modification de la récupération de l'utilisateur courant 
     if (!req.session.user) {
         return res.sendStatus(403)
     }
-    const id = req.params.id
     const user = req.session.user
     const utilisateurId = user.uti_id
     const stru = user.uti_id
@@ -79,38 +109,38 @@ router.get('/csv/:utilisateurId', async function (req, res) {
     order by int_id asc`;
     log.d('::csv - requet', { requete })
 
-    pgPool.query(requete, (err, result) => {
+    return pgPool.query(requete, (err, result) => {
         if (err) {
             log.w('::csv - erreur lors de la requête.', err.stack);
             return res.status(400).json('erreur lors de la récupération de l\'intervention');
         }
         else {
-            var interventions = result.rows;
-            interventions = interventions.map(intervention => {
-                var newIntervention = formatIntervention(intervention)
-                delete newIntervention.commune
-                newIntervention.commune = intervention.int_com_libelle
-                newIntervention.codeinsee = intervention.int_com_codeinsee
-                newIntervention.dep_num = intervention.int_dep_num
-                newIntervention.reg_num = intervention.int_reg_num
-                    newIntervention.dateCreation = newIntervention.dateCreation.toISOString(),
-                    newIntervention.dateMaj = newIntervention.dateMaj.toISOString()
-                delete newIntervention.structureCode;
-                delete newIntervention.structureLibelle;
-                delete newIntervention.StructureLocaleUtilisateur;
-                newIntervention.structureCode = intervention.str_libellecourt;
-                newIntervention.structureLibelle = intervention.str_libelle;
-                newIntervention.StructureLocaleUtilisateur = intervention.uti_structurelocale;
-                // Suppression du commentaire dans l'export CSV
-                delete newIntervention.commentaire
-
-                return newIntervention
-            })
+            let interventions = result.rows;
             if (!interventions || !interventions.length) {
                 log.w('::csv - Intervention inexistante.', err.stack);
                 return res.status(400).json({ message: 'Interventions inexistante' });
             }
-            stringify(interventions, {
+            interventions = interventions.map(intervention => {
+                const clientInter = formatIntervention(intervention)
+                delete clientInter.commune
+                clientInter.commune = intervention.int_com_libelle
+                clientInter.codeinsee = intervention.int_com_codeinsee
+                clientInter.dep_num = intervention.int_dep_num
+                clientInter.reg_num = intervention.int_reg_num
+                clientInter.dateCreation = clientInter.dateCreation.toISOString(),
+                clientInter.dateMaj = clientInter.dateMaj.toISOString()
+                delete clientInter.structureCode;
+                delete clientInter.structureLibelle;
+                delete clientInter.StructureLocaleUtilisateur;
+                clientInter.structureCode = intervention.str_libellecourt;
+                clientInter.structureLibelle = intervention.str_libelle;
+                clientInter.StructureLocaleUtilisateur = intervention.uti_structurelocale;
+                // Suppression du commentaire dans l'export CSV
+                delete clientInter.commentaire
+                return clientInter
+            })
+
+            return stringify(interventions, {
                 quoted: '"',
                 header: true
             }, (err, csvContent) => {
@@ -138,83 +168,12 @@ router.get('/:id', async function (req, res) {
     return res.status('200').json({ intervention: inter[0] })
 });
 
-router.get('/', async function (req, res) {
-    log.i('::list - In')
-    if (!req.session.user) {
-        log.w('::list - User manquant.')
-        return res.sendStatus(403)
-    }
-
-    const user = req.session.user
-    const utilisateurId = user.uti_id
-    var whereClause = ""
-
-
-    if (user.rol_id == 3 || user.rol_id == 4) {
-        whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
-         LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
-         LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-         LEFT JOIN structure str on str.str_id = int.str_id \
-         LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
-         where uti.uti_id=${utilisateurId}`
-        // Utilisateur Administrateur : 
-    } else {
-        if (user.rol_id == 2) {
-            whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
-            LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
-             LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-             LEFT JOIN structure str on str.str_id = int.str_id \
-             LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
-             where str.str_id=${user.structureId}`
-        }
-        else {
-        whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
-        LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
-         LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-         LEFT JOIN structure str on str.str_id = int.str_id \
-         LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
-         `
-        }
-    }
-
-    const requete = `SELECT int.*, pis.*, str.*,com.com_libelle from intervention int ${whereClause} order by int.int_datefinintervention desc`;
-    log.d('::list - récuperation via la requête.', { requete });
-
-    (async () => {
-        try {
-            let result = await pgPool.query(requete)
-            let interventions = result.rows.map(formatIntervention);
-
-            for (const [key, intervention] of Object.entries(interventions)) {
-                await Promise.all([getUtilisateursFromIntervention(intervention.id), getEnfantsFromIntervention(intervention.id)]).then(values => {
-                    interventions[key].utilisateur = values[0];
-                    interventions[key].enfant = values[1];
-                })
-            }
-            console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-            console.log(interventions)
-            res.json({ interventions });
-        }
-        catch (err) {
-            throw err
-        }
-    })().catch(err => {
-        log.w('::list - Erreur survenue lors de la récupération', err.stack)
-        return res.status(400).json('erreur lors de la récupération des interventions')
-    }
-    )
-
-});
-
-
 router.put('/:id', async function (req, res) {
     const intervention = req.body.intervention
-    const user = req.session.user
     const id = req.params.id
     log.i('::update - In', { id })
-    let { strId, nbEnfants, piscine, dateDebutIntervention,dateFinIntervention,utilisateur,enfant,nbSession,cai,classe } = intervention
+    const { strId, nbEnfants, piscine, dateDebutIntervention,dateFinIntervention,utilisateur,enfant,nbSession,cai,classe } = intervention
 
-    //insert dans la table intervention
     const requete = `UPDATE intervention 
         SET str_id= $1,
         int_nombreenfant= $2,
@@ -226,11 +185,10 @@ router.put('/:id', async function (req, res) {
         int_age = $8,
         int_datemaj = now()
         WHERE int_id = ${id}
-        RETURNING *
-        ;`
+        RETURNING *;`
 
     log.d('::update - requete', { requete })
-    pgPool.query(requete, [strId,
+    return pgPool.query(requete, [strId,
         nbEnfants,
         piscine.id,
         dateDebutIntervention,
@@ -238,21 +196,17 @@ router.put('/:id', async function (req, res) {
         nbSession,
         cai,
         classe
-    ], async (err, result) => {
+    ], (err, result) => {
         if (err) {
             log.w('::update - erreur lors de la sauvegarde', { requete, erreur: err.stack })
             return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
         }
         else {
             log.i('::update - Done')
-            // generation du pdf (synchrone)
-
             // suppression des données utilisateurs et enfants
-            await Promise.all([deleteUtilisateursFromIntervention([id]),deleteEnfantsFromIntervention([id])]).then(async () => {
-                
-                // Ajout des données utilsiateurs et enfants
-                await Promise.all([postUtilisateursForIntervention([utilisateur,id]),postEnfantsForIntervention([enfant,id])]).then(async () => {
-                
+            return Promise.all([deleteUtilisateursFromIntervention([id]),deleteEnfantsFromIntervention([id])]).then(() => {  
+                // MAJ des données utilsiateurs et enfants
+                return Promise.all([postUtilisateursForIntervention([utilisateur,id]),postEnfantsForIntervention([enfant,id])]).then(async () => {
                     const user = req.session.user
                     const params = {
                         id: result.rows[0].int_id,
@@ -262,13 +216,15 @@ router.put('/:id', async function (req, res) {
                     log.i('::post - Done')
                     return res.status(200).json({ intervention: inter[0] })
                 })
-
+            }).catch( error => {
+                log.w('::update - erreur lors de la mise à jour des utilisateurs ou des enfants pour une intervention.', error)
+                return res.status(400).json('Erreur lors de la mise à jour des utilisateurs ou des enfants pour une intervention')
             })
         }
     })
 })
 
-router.post('/', async function (req, res) {
+router.post('/', function (req, res) {
     log.i('::post - In')
     const intervention = req.body.intervention
     if ( ! intervention.classe) { intervention.classe = null}
@@ -277,8 +233,7 @@ router.post('/', async function (req, res) {
                     (pis_id,str_id,int_nombreenfant,int_datedebutintervention,int_datefinintervention,int_nbsession, int_cai, int_age,int_datecreation,int_datemaj) 
                     values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10 ) RETURNING int_id AS int_id`;
 
-    //console.log(requete)
-    await pgPool.query(requete, [intervention.piscine.id,
+    return pgPool.query(requete, [intervention.piscine.id,
     intervention.strId,
     intervention.nbEnfants,
     intervention.dateDebutIntervention,
@@ -287,7 +242,7 @@ router.post('/', async function (req, res) {
     intervention.cai,
     intervention.classe,
     new Date().toISOString(),
-    new Date().toISOString()], async (err, result) => {
+    new Date().toISOString()], (err, result) => {
         if (err) {
             log.w('::post - erreur lors de l\'insertion dans la table des interventions', { requete, erreur: err.stack })
             return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
@@ -295,18 +250,38 @@ router.post('/', async function (req, res) {
         else {
             log.d('::post - insert dans intervention Done');
             let int_id = result.rows[0].int_id;
-            await Promise.all([postUtilisateursForIntervention([intervention.utilisateur, int_id]),postEnfantsForIntervention([intervention.enfant, int_id])]).then(async () => {
-                
+            return Promise.all([postUtilisateursForIntervention([intervention.utilisateur, int_id]),postEnfantsForIntervention([intervention.enfant, int_id])]).then(async () => {
                 const user = req.session.user
                 const params = {
                     id: int_id,
                     user: user
                 }
-                let inter = await getIntervention(params)
+                const inter = await getIntervention(params)
                 log.i('::post - Done')
                 return res.status(200).json({ intervention: inter[0] })
+            }).catch( error => {
+                log.w('::post - erreur lors des suppresions des utilisateurs ou des enfants pour une intervention.', error)
+                return res.status(400).json('Erreur lors des ajouts des utilisateurs ou des enfants pour votre intervention')
             })
-            
+        }
+    })
+})
+
+router.get('/delete/:id', async function (req, res) {
+    const id = req.params.id;
+    log.i('::delete - In', { id })
+
+    const requete = `DELETE FROM intervention WHERE int_id = $1 RETURNING *;`;
+
+    return pgPool.query(requete, [id], (err, result) => {
+        if (err) {
+            log.w('::delete - Erreur survenue lors de la suppression.', { requete, err: err.stack })
+            return res.status(400).json('erreur lors de la suppression de l\'intervention ' + id);
+        }
+        else {
+            log.i('::delete - Done')
+            // Suppression effectuée avec succès
+            return res.status(200).json('Intervention supprimée avec succès.');
         }
     })
 })

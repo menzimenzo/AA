@@ -14,12 +14,12 @@ const path = require('path');
 
 router.get('/', async function (req, res) {
     res.send("done root");
-});
+})
 
 router.get('/pdf/:id', async function (req, res) {
     const id = req.params.id
     log.i('::pdf - In', { id })
-    var doc = new PDFDocument({
+    let doc = new PDFDocument({
         size: 'legal',
         layout: 'landscape' // default is portrait
       });
@@ -145,40 +145,13 @@ res.json({ message: 'Le document a été uploadé'});
         });
     */
 
-});
-/*
-router.get('/', async function (req, res) {
-    const client = new Client({
-        user: config.postgres.user,
-        host: config.postgres.host,
-        database: config.postgres.database,
-        password: config.postgres.password,
-        port: config.postgres.port,
-    })
-
-    client.connect();
-
-    client.query('SELECT * from attestation', (err, result) => {
-        if (err) {
-            console.log(err.stack);
-            client.end();
-            return res.status(400).json('erreur lors de la récupération des interventions');
-        }
-        else {
-            client.end();
-            const attestations = result.rows;
-            res.json({ attestations });
-        }
-    })
-});
-*/
-
+})
 
 router.post('/', function (req, res) {
     log.i('::post - In')
     const nbEnfants = req.body.params.nbenfants
-    var nbGarcons = req.body.params.nbgarcons
-    var nbFilles = req.body.params.nbfilles
+    let nbGarcons = req.body.params.nbgarcons
+    let nbFilles = req.body.params.nbfilles
     const commune = req.body.params.commune
     const cai = req.body.params.cai
     const blo_id = req.body.params.blod_id
@@ -194,10 +167,11 @@ router.post('/', function (req, res) {
     const datecreation = now.getFullYear() + "-" + eval(now.getMonth() + 1) + "-" + now.getDate()
 
     //insert dans la table intervention
-    const requete = `insert into intervention 
+    const requete = `INSERT INTO intervention 
                     (cai_id,blo_id,int_com_codeinsee,int_com_codepostal,int_com_libelle,int_nombreenfant,int_nombregarcon,int_nombrefille,int_dateintervention,int_datecreation,int_commentaire,int_dep_num,int_reg_num,int_siteintervention) 
-                    values(` + cai + `,` + blo_id + `,` + commune.cpi_codeinsee + `,` + codepostal + `,'` + commune.com_libellemaj + `',` + nbEnfants + `,` + nbGarcons + `,` + nbFilles + `,'` + dateintervention + `','` + datecreation + `','` + commentaire + `',` + commune.dep_num + `,94,'` + siteintervention + `')`
+                    VALUES(` + cai + `,` + blo_id + `,` + commune.cpi_codeinsee + `,` + codepostal + `,'` + commune.com_libellemaj + `',` + nbEnfants + `,` + nbGarcons + `,` + nbFilles + `,'` + dateintervention + `','` + datecreation + `','` + commentaire + `',` + commune.dep_num + `,94,'` + siteintervention + `')`
     log.d('::post - requete', { requete })
+
     pgPool.query(requete, (err, result) => {
         if (err) {
             log.w(err.stack)
@@ -209,6 +183,5 @@ router.post('/', function (req, res) {
         }
     })
 })
-
 
 module.exports = router;

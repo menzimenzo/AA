@@ -1,5 +1,5 @@
 <template>
-  <b-container class="interventions">
+  <b-container class="partenaires">
     <b-row>
       <b-col cols="12">
         <!--  ACCORDEON -- JE SAISIS UNE INTERVENTION -->

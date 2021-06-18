@@ -6,7 +6,7 @@
         v-if="intervention && intervention.id"
         class="text-center"
       >
-        <h2 class="mb-3 interventionTitle">
+        <h2 class="mb-3">
           Intervention n°{{ intervention.id }} du
           {{ intervention.dateDebutIntervention | date }} au
           {{ intervention.dateFinIntervention | date }}
@@ -576,8 +576,6 @@ export default {
         console.info("Formulaire invalide", this.erreurformulaire);
         return;
       }
-      //console.log(this.formIntervention)
-      const url = process.env.API_URL + "/interventions";
       const intervention = {
         id: this.formIntervention.id,
         strId: this.formIntervention.structure.id,
@@ -592,7 +590,7 @@ export default {
         enfant: this.$store.state.enfants,
       };
 
-      const action = intervention.id ? "put_intervention" : "post_intervention";
+      const action = intervention && intervention.id ? "put_intervention" : "post_intervention";
       console.info({ intervention, action });
       return this.$store
         .dispatch(action, intervention)
@@ -731,9 +729,6 @@ export default {
   position: absolute;
   bottom: 10px;
   right: 10px;
-}
-.interventionTitle {
-  color: #252195;
 }
 .input-group-display {
   display: flex;

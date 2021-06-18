@@ -5,6 +5,7 @@ var moment = require('moment');
 var fs = require('fs');
 const stringify = require('csv-stringify')
 const ftp = require("basic-ftp")
+
 const config = require('../config');
 const { sendEmail, formatAndSendMail } = require('../utils/mail-service');
 const { formatIntervention, formatDate, logTrace } = require('../utils/utils')
@@ -104,7 +105,7 @@ router.get('/csvopendatasoft', async function (req, res) {
     //logTrace('aaq-csvods',0,startTime)
     log.i('::csvopendatasoft - Done')
     return res.status(200).json('OK')
-});
+})
 
 // V1.0.1 : Création du socle technique pour l'envoie de mail de relance
 // A compléter en V1.0.2
@@ -293,7 +294,7 @@ STATE_DEPENDENT=4
             res.json({ interventions });
         }
     })
-});
+})
 
 router.get('/testmail', function (req, res) {
 
@@ -312,6 +313,6 @@ router.get('/testmail', function (req, res) {
     logTrace('aaq-testmail',0,startTime)
     log.i('::testmail - Done')
     return res.send(formatDate());
-});
+})
 
 module.exports = router;
