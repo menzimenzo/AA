@@ -60,16 +60,16 @@
             data-title="Actions">
             <div class="btn-group" role="group"
                 v-if="creable || editable || removable">
-                <a class="btn-editer btn-rounded btn-shadow"
+                <a class="btn-color btn-editer btn-rounded btn-shadow"
                     v-if="editable && isFieldsEditable"
                     role="button"
                     aria-label="Modifier l'élément"
                     data-test-link="editable-edit"
                     @click="edit"
                     title="Modifier">
-                    <btnEditer color="#fff" />
+                    <btnEditer color="#252195" />
                 </a>
-                <a class="btn-remove btn-rounded btn-shadow no-margin-left"
+                <a class="btn-color btn-remove btn-rounded btn-shadow no-margin-left"
                     v-if="removable"
                     role="button"
                     aria-label="Supprimer cet élément"

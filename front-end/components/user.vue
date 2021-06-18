@@ -47,8 +47,49 @@
           label="Profil :"
           class="mb-3 mt-3"> 
           <b-form-select
-            v-model="formUser.role"
+            v-model="role"
             :options="listeprofil"/>
+        </b-form-group>
+        <b-form-group v-if="renseignerstructureref"
+          label="Structure de dépendance"
+          label-for="lststructureref" 
+          required>
+            <b-form-select 
+              class="liste-deroulante"
+              v-model="formUser.structurerefid"
+              name="lststructureref"
+              aria-describedby="lststructurerefFeedback">
+              <option :value="null">-- Choix de la structure de référence --</option>
+              <option
+                v-for="structureref in listestructureref"
+                :key="structureref.id"
+                :value="structureref.id"
+              >{{ structureref.libellecourt }}</option>
+            </b-form-select>
+        </b-form-group>   
+        <!-- Si c'est un profil Structure ref,
+            le changement de profil MN en MN AAQ entraine
+            l'obligation de rentrer le formateur qui a assurer la formation
+        -->
+        <b-form-group 
+          v-if="renseignerinstructeur"
+          label="* Instructeur ayant assuré la formation :"
+          label-for="lstinstructeur" 
+          required>
+            <b-form-select 
+              class="liste-deroulante"
+              v-model="instructeurid"
+              name="lstinstructeur"
+              v-validate="{ required: true }"
+              aria-describedby="lstinstructeurFeedback">
+              <option :value="null">-- Choix de l'instructeur --</option>
+              <option
+                v-for="instructeur in listeinstructeur"
+                :key="instructeur.id"
+                :value="instructeur.id"
+              >{{ instructeur.nom }} {{ instructeur.prenom }}</option>
+            </b-form-select>
+            <b-form-invalid-feedback id="lstinstructeurFeedback">Un instructeur doit être sélectionné.</b-form-invalid-feedback>
         </b-form-group>
         <div v-if="isAdmin()">
           <b-form-group 
@@ -214,7 +255,7 @@ export default {
     };
   },
   methods: {
-    checkform: function () {
+    checkform() {
       console.info("Validation du formulaire");
       this.erreurformulaire = [];
       var formOK = true;
@@ -321,143 +362,7 @@ export default {
           );
         });
     },
-    isAdmin: function(){
-      if(this.$store.state.utilisateurCourant.profilId=="1") {
-        return true;
-      } else {
-        return false;
-      }
-   },
-   // Recherche s'il faut faire apparaitre le fait saisir l'instructure
-   // qui a assuré la formation AAQ 
-    renseignerinstructeur: function(){
-      console.log(this.formUser.role)
-      if(this.$store.state.utilisateurCourant.profilId=="6" && this.formUser.role =="4") {
-        return true;
-      } else {
-        return false;
-      }
-   },
-   // Recherche s'il faut faire apparaitre le fait de saisir une structure de référence
-   renseignerstructureref: function(){
-      console.log(this.formUser.role)
-      if(this.$store.state.utilisateurCourant.profilId=="1" && this.formUser.role =="3") {
-        return true;
-      } else {
-        return false;
-      }
-   },
-    recherchecommune: function() {
-      console.info("Recherche de la commune" + this.formUser.cp);
-      if (this.formUser.cp.length === 5) {
-        // Le code postal fait bien 5 caractères
-        const url =
-          process.env.API_URL +
-          "/listecommune?codepostal=" +
-          this.formUser.cp;
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then(response => {
-            this.listecommune = response.communes;
-            console.info("recherchecommune : this.listecommune " + this.listecommune );
-          })
-          .catch(error => {
-            console.error(
-              "Une erreur est survenue lors de la récupération des communes",
-              error
-            );
-          });
-      } else {
-        // On vide la liste car le code postal a changé
-        this.listecommune = ["Veuillez saisir un code postal"];
-        return Promise.resolve(null);
-      }
-    },   
-    rechercheinstructeurs: function() 
-    {
-      if(this.$store.state.utilisateurCourant.profilId=="6")
-      {
-        console.info("Recherche des instructeurs");
-        // Lance la recherche sur la liste des formateurs 
-        const url = process.env.API_URL + "/user/liste/3"
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then(response => {
-            this.listeinstructeur = response.users;
-            console.info("rechercheinstructeurs : this.listeinstructeur " + this.listeinstructeur );
-          })
-          .catch(error => {
-            console.error(
-              "Une erreur est survenue lors de la récupération des instructeurs",
-              error
-            );
-          });
-      }
-    },
-    recherchestructureref: function() 
-    {
-      console.info("Recherche des structures de référence");
-      // Lance la recherche sur la liste des formateurs 
-      const url = process.env.API_URL + "/structureref/liste/"
-      console.info(url);
-      return this.$axios
-        .$get(url)
-        .then(response => {
-          this.listestructureref = response.structureref;
-          console.info("recherche structureref : this.listestructureref " + this.listestructureref );
-        })
-        .catch(error => {
-          console.error(
-            "Une erreur est survenue lors de la récupération des structures de référence",
-            error
-          );
-        });
-      },   
-    },
-  watch: {
-      cp() {
-        log.i('cp - saisie du CP')
-        this.formUser.cp = this.cp;
-        return this.rechercheCommune();
-      },
-  },
-  computed: { 
-    ...mapState(["utilisateurCourant"]),
-    formUser() {
-      log.i('formUser - In')
-      return loadFormUser(this.$store.state.utilisateurSelectionne)
-    },
-    role() {
-      console.debug("Renseigner instructeur ?");
-      this.formUser.role = this.role;
-      this.renseignerinstructeur();
-    }
- },
-
-  computed: { ...mapState(["structures", "utilisateurCourant"]) 
-  },
-  async mounted() {
-    await this.$store.dispatch("get_users");
-    console.log("StructureRef : " + this.formUser.structurerefid)
-    await this.recherchestructureref()  
-
-    log.i('mounted - In')
-    this.loading = false;
-    this.role = this.formUser.role;
-    if (!this.isAdmin()) {
-      this.listeprofil.splice(0, 2);
-    }
-    if(this.formUser.cp) {
-      // Recopie du CP dans le champ code postal
-      this.cp = this.formUser.cp
-      // Recherche de la liste des commune
-      this.rechercheCommune()
-    }
-  },
-  methods: {
-    editUtilisateur: function () {
+    editUtilisateur() {
       log.i('editUtilisateur - In')
       return this.$store.dispatch("put_user", this.formUser)
         .then(() => {
@@ -470,10 +375,79 @@ export default {
           return this.$toast.error('Une erreur est survenue lors de la mise à jour de l\'utilisateur')
         })
     },
-    isAdmin: function(){
+    isAdmin() {
       return this.utilisateurCourant && this.utilisateurCourant.profilId=="1"
+    },
+    renseignerinstructeur() {
+      return this.utilisateurCourant.profilId=="6" && this.formUser.role =="4"
+    },
+    // Recherche s'il faut faire apparaitre le fait de saisir une structure de référence
+    renseignerstructureref() {
+      return this.utilisateurCourant.profilId=="1" && this.formUser.role =="3"
+    }, 
+    rechercheinstructeurs() {
+      log.i('rechercheinstructeurs - In')
+      if(this.$store.state.utilisateurCourant.profilId=="6") {
+        // Lance la recherche sur la liste des formateurs 
+        const url = process.env.API_URL + "/user/liste/3"
+        return this.$axios.$get(url)
+          .then(response => {
+            log.i('rechercheinstructeurs - Done')
+            return this.listeinstructeur = response.users;
+          })
+          .catch(error => {
+            log.w('rechercheinstructeurs -', error)
+            return this.$toast.error("Une erreur est survenue lors de la récupération des instructeurs")
+        });
+      }
+    },
+    recherchestructureref() {
+      log.i('recherchestructureref - In')
+      // Lance la recherche sur la liste des formateurs 
+      const url = process.env.API_URL + "/structureref/liste/"
+      return this.$axios.$get(url)
+        .then(response => {
+          log.i('recherchestructureref - Done')
+          return this.listestructureref = response.structureref;
+        })
+        .catch(error => {
+          log.i('recherchestructureref -', { error })
+          return this.$toast.error("Une erreur est survenue lors de la récupération des structures de référence")
+        });
+      },   
+    },
+  watch: {
+      cp() {
+        log.i('cp - saisie du CP')
+        this.formUser.cp = this.cp;
+        return this.rechercheCommune();
+      },
+      role() {
+        log.i('cp - saisie du CP')
+        this.formUser.role = this.role;
+        this.renseignerinstructeur();
     }
   },
+  computed: { 
+    ...mapState(["utilisateurCourant"]) 
+  },
+  async mounted() {
+    log.i('mounted - In')
+    await this.$store.dispatch("get_users");
+    await this.rechercheinstructeurs();
+    // Chargement de la liste des structures de référence
+    await this.recherchestructureref() 
+    this.role = this.formUser.role;
+    if (!this.isAdmin()) {
+      this.listeprofil.splice(0, 2);
+    }
+    if(this.formUser.cp) {
+      // Recopie du CP dans le champ code postal
+      this.cp = this.formUser.cp
+      // Recherche de la liste des commune
+      this.rechercheCommune()
+    }
+  }
 };
 </script>
 

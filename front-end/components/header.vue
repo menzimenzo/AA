@@ -1,5 +1,5 @@
 <template>
-  <b-container>
+  <b-container fluid>
     <b-row class="text-center main-header">
       <b-col cols="2">
         <nuxt-link to="/" title="Afficher la page d'accueil" style="text-decoration: none" >
@@ -11,7 +11,6 @@
       </b-col>
     </b-row>
     <div class="accountMenu" v-if="utilisateurCourant">
-      <div>
       <nuxt-link to="/structureref" v-if="utilisateurCourant.profilId == 6">
         <b-button variant="outline-primary" class="settingsBtn"><i class="material-icons" >settings</i> Espace Structures référentes</b-button>
       </nuxt-link>

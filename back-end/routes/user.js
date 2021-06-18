@@ -181,22 +181,23 @@ router.get('/:id', async function (req, res) {
         left join uti_sre on uti_sre.uti_id = uti.uti_id and uti_sre.uts_actif = true
         where uti.uti_id=${id} order by uti.uti_id asc`;
 
-    log.d('::get - select un USER, requête = '+requete)
-    pgPool.query(requete, (err, result) => {
-        if (err) { 
-            log.w('::get - Erreur lors de la requête', err.stack)
-            return res.status(400).json('erreur lors de la récupération de l\'utilisateur');
-        }
-        else {
-            const user = result.rows && result.rows.length && result.rows[0];
-            if (!user) {
-                log.w('::get - Utilisateur inexistant')
-                return res.status(400).json({ message: 'Utilisateur inexistant' });
+        log.d('::get - select un USER, requête = '+requete)
+        pgPool.query(requete, (err, result) => {
+            if (err) { 
+                log.w('::get - Erreur lors de la requête', err.stack)
+                return res.status(400).json('erreur lors de la récupération de l\'utilisateur');
             }
-            log.d('::get - Done')
-            res.json({ user: formatUser(user) });
-        }
-    })
+            else {
+                const user = result.rows && result.rows.length && result.rows[0];
+                if (!user) {
+                    log.w('::get - Utilisateur inexistant')
+                    return res.status(400).json({ message: 'Utilisateur inexistant' });
+                }
+                log.d('::get - Done')
+                res.json({ user: formatUser(user) });
+            }
+        })
+    }
 });
 
 router.get('/', async function (req, res) {

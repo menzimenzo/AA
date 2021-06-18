@@ -55,7 +55,7 @@ router.get('/', async function (req, res) {
     const requete = `SELECT int.*, pis.*, str.*,com.com_libelle from intervention int ${whereClause} order by int.int_datefinintervention desc`;
     log.d('::list - récuperation via la requête.', { requete });
 
-    const result = await pgPool.query(requete)
+    let result = await pgPool.query(requete)
     let interventions = result.rows.map(formatIntervention);
     if(interventions) {
         log.d('::list - interventions trouvées.')

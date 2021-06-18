@@ -1,226 +1,198 @@
 <template>
-  <b-container class="interventionModal">
+  <b-container class="structureModal p-5">
     <b-col cols="12" class="text-center">
-      <h2 class="mb-3 interventionTitle">
-        Sélection d'une structure
-        <br />
-      </h2>
+      <h2 class="mb-3">Sélection d'une structure</h2>
     </b-col>
-
-    <b-form-group label="Structure">
-      <b-form-select class="liste-deroulante" v-model="selectedStructure">
-        <option :value="null">-- Choix de la Structure --</option>
-        <option
-          v-for="stru in listeStructure"
-          :key="stru.type"
-          :value="stru.type"
-        >
-          {{ stru.nom }}
-        </option>
-      </b-form-select>
-    </b-form-group>
-    &nbsp;
-    <div v-if="selectedStructure == 1">
-      <b-form-group
-        required
-        id="typeCollectivite"
-        label="Type de collectivité territoriale :"
-        label-for="typeCollectiviteSelect"
-      >
-        <b-form-select id="typeCollectiviteSelect" v-model="typeCollectivite">
-          <option
-            v-for="type in listtypecol"
-            :key="type.value"
-            :value="type.value"
-          >
-            {{ type.text }}
-          </option>
-        </b-form-select>
-      </b-form-group>
-      <!-- DEPARTEMENT -->
-      <div v-if="typeCollectivite == 2">
-        <b-form-group
-          id="Departement"
-          label="Département :"
-          required
-          label-for="departementSelect"
-        >
-          <b-form-select
-            id="departementSelect"
-            v-model="collectivite"
-            name="departement"
-          >
+    <b-row>
+      <b-col cols="12">
+        <b-form-group label="Structure :">
+          <b-form-select v-model="selectedStructure">
+            <option :value="null">-- Choix de la Structure --</option>
             <option
-              v-for="departement in listdepartement"
-              :key="departement.dep_num"
-              :value="departement"
-            >
-              {{ departement.dep_libelle }}
+              v-for="stru in listeStructure"
+              :key="stru.type"
+              :value="stru.type">
+              {{ stru.nom }}
             </option>
           </b-form-select>
         </b-form-group>
-      </div>
-      <!-- COMMUNE-->
-      <div v-if="typeCollectivite == 1">
-        <b-form-group id="CodePostal" label="Code Postal :" label-for="cp">
-          <b-form-input
-            v-model="cp"
-            name="cp"
-            key="cp"
-            id="cp"
-            type="number"
-            placeholder="CP de la commune"
-          />
-        </b-form-group>
-        <b-form-group
-          id="Commune"
-          label="Commune :"
-          required
-          label-for="communeInput"
-        >
-          <b-form-select
-            name="commune"
-            key="commune"
-            type="text"
-            v-model="collectivite"
-            id="communeSelect"
-          >
-            <option :value="null">-- Choix de la commune --</option>
-            <option
-              v-for="commune in listecommune"
-              :key="commune.cpi_codeinsee"
-              :value="commune"
-            >
-              {{ commune.com_libellemaj }}
-            </option>
-          </b-form-select>
-        </b-form-group>
-      </div>
-      <!--EPCI -->
-      <div v-if="typeCollectivite == 3">
-        <b-form-group
-          id="CodePostalEpci"
-          label="Code Postal EPCI:"
-          label-for="cpEpci"
-        >
-          <b-form-input
-            v-model="cpEpci"
-            name="cpEpci"
-            key="cpEpci"
-            id="cpEpci"
-            type="number"
-            placeholder="CP d'une des communes de l'EPCI"
-          />
-        </b-form-group>
-        <div v-if="boolEpci == true">
-          <b-form-group id="ECPI" label="EPCI :" label-for="epciInput">
-            <b-form-select id="epciSelect" v-model="collectivite" name="epcis">
+        <div v-if="selectedStructure == 1">
+          <b-form-group
+            required
+            id="typeCollectivite"
+            label="Type de collectivité territoriale :"
+            label-for="typeCollectiviteSelect">
+            <b-form-select id="typeCollectiviteSelect" v-model="typeCollectivite">
               <option
-                v-for="epci in listepci"
-                :key="epci.epci_code"
-                :value="epci"
+                v-for="type in listtypecol"
+                :key="type.value"
+                :value="type.value"
               >
-                {{ epci.epci_libelle }}
+                {{ type.text }}
+              </option>
+            </b-form-select>
+          </b-form-group>
+          <!-- DEPARTEMENT -->
+          <div v-if="typeCollectivite == 2">
+            <b-form-group
+              id="Departement"
+              label="Département :"
+              required
+              label-for="departementSelect"
+            >
+              <b-form-select
+                id="departementSelect"
+                v-model="collectivite"
+                name="departement"
+              >
+                <option
+                  v-for="departement in listdepartement"
+                  :key="departement.dep_num"
+                  :value="departement"
+                >
+                  {{ departement.dep_libelle }}
+                </option>
+              </b-form-select>
+            </b-form-group>
+          </div>
+          <!-- COMMUNE-->
+          <div v-if="typeCollectivite == 1">
+            <b-form-group id="CodePostal" label="Code Postal :" label-for="cp">
+              <b-form-input
+                v-model="cp"
+                name="cp"
+                key="cp"
+                id="cp"
+                type="number"
+                placeholder="CP de la commune"
+              />
+            </b-form-group>
+            <b-form-group
+              id="Commune"
+              label="Commune :"
+              required
+              label-for="communeInput">
+              <b-form-select
+                name="commune"
+                key="commune"
+                type="text"
+                v-model="collectivite"
+                id="communeSelect"
+              >
+                <option :value="null">-- Choix de la commune --</option>
+                <option
+                  v-for="commune in listecommune"
+                  :key="commune.cpi_codeinsee"
+                  :value="commune"
+                >
+                  {{ commune.com_libellemaj }}
+                </option>
+              </b-form-select>
+            </b-form-group>
+          </div>
+          <!--EPCI -->
+          <div v-if="typeCollectivite == 3">
+            <b-form-group
+              id="CodePostalEpci"
+              label="Code Postal EPCI:"
+              label-for="cpEpci">
+              <b-form-input
+                v-model="cpEpci"
+                name="cpEpci"
+                key="cpEpci"
+                id="cpEpci"
+                type="number"
+                placeholder="CP d'une des communes de l'EPCI"
+              />
+            </b-form-group>
+            <div v-if="boolEpci == true">
+              <b-form-group id="ECPI" label="EPCI :" label-for="epciInput">
+                <b-form-select id="epciSelect" v-model="collectivite" name="epcis">
+                  <option
+                    v-for="epci in listepci"
+                    :key="epci.epci_code"
+                    :value="epci"
+                  >
+                    {{ epci.epci_libelle }}
+                  </option>
+                </b-form-select>
+              </b-form-group>
+            </div>
+            <b-form-group v-if="boolEpci == false">Aucun EPCI correspondant</b-form-group>
+          </div>
+        </div>
+        <b-row class="mb-3 mt-3" align-v="end" v-if="selectedStructure == 2">
+          <b-col cols="9">
+            Numéro SIREN ou SIRET :
+            <b-form-input
+              aria-describedby="inputFormatterHelp"
+              v-model="siret"
+              type="text" />
+          </b-col>
+          <b-col cols="3">
+            <b-button variant="success" v-on:click="recherchesiret">Rechercher</b-button>
+          </b-col>
+        </b-row>
+        <div v-if="boolSiren && selectedStructure == 2">
+          <b-form-group id="etab" label="Liste des établissements :">
+            <b-form-select
+              name="etab"
+              key="etab"
+              type="text"
+              v-model="etab"
+              id="etabSelect"
+            >
+              <option v-for="etab in listeEtab" :key="etab.siret" :value="etab">
+                {{ etab.siret + " - " + etab.nom + " - " + etab.adresse }}
               </option>
             </b-form-select>
           </b-form-group>
         </div>
-        <b-form-group v-if="boolEpci == false">
-          Aucun EPCI correspondant</b-form-group
-        >
-      </div>
-    </div>
-    <div class="mb-3 mt-3" v-if="selectedStructure == 2">
-      <b-col>
-        Numéro SIREN ou SIRET :
-        <b-form-input
-          aria-describedby="inputFormatterHelp"
-          v-model="siret"
-          type="text"
-        ></b-form-input>
+        <div class="mb-3 mt-3" v-if="boolSiret && selectedStructure == 2">
+          nom :
+          <b-form-input v-model="etab.nom" type="text"></b-form-input>
+          adresse :
+          <b-form-input v-model="etab.adresse" type="text"></b-form-input>
+        </div>
+        <b-row class="mb-3 mt-3" align-v="end" v-if="selectedStructure == 3">
+          <b-col>
+            Numéro UAI ou code postal :
+            <b-form-input
+              aria-describedby="inputFormatterHelp"
+              v-model="uai"
+              type="text"
+            ></b-form-input>
+          </b-col>
+          <b-col>
+              <b-button variant="success" v-on:click="rechercheEcole">Rechercher</b-button>
+          </b-col>
+        </b-row>
+        <div v-if="boolEcoleCP && selectedStructure == 3">
+          <b-form-group id="etab" label="Liste des établissements :">
+            <b-form-select
+              name="ecoles"
+              key="ecoles"
+              type="text"
+              v-model="etab"
+              id="ecoleSelect">
+              <option v-for="ecole in listeEtab" :key="ecole.uai" :value="ecole">
+                {{ ecole.nom + " - " + ecole.adresse + " - " + ecole.adresse + " " + ecole.cp + " " + ecole.libelleCommune }}
+              </option>
+            </b-form-select>
+          </b-form-group>
+        </div>
+        <div class="mb-3 mt-3" v-if="boolUAI && selectedStructure == 3">
+          nom :
+          <b-form-input v-model="etab.nom" type="text"></b-form-input>
+          adresse :
+          <b-form-input v-model="etab.adresse" type="text"></b-form-input>
+        </div>
       </b-col>
-      <b-col>
-        <p class="modal-btns">
-          <b-button variant="success" v-on:click="recherchesiret"
-            >Rechercher</b-button
-          >
-        </p>
-      </b-col>
-    </div>
-    <div v-if="boolSiren && selectedStructure == 2">
-      <b-form-group id="etab" label="Liste des établissements :">
-        <b-form-select
-          name="etab"
-          key="etab"
-          type="text"
-          v-model="etab"
-          id="etabSelect"
-        >
-          <option v-for="etab in listeEtab" :key="etab.siret" :value="etab">
-            {{ etab.siret + " - " + etab.nom + " - " + etab.adresse }}
-          </option>
-        </b-form-select>
-      </b-form-group>
-    </div>
-    <div class="mb-3 mt-3" v-if="boolSiret && selectedStructure == 2">
-      nom :
-      <b-form-input v-model="etab.nom" type="text"></b-form-input>
-      adresse :
-      <b-form-input v-model="etab.adresse" type="text"></b-form-input>
-    </div>
-    <div class="mb-3 mt-3" v-if="selectedStructure == 3">
-      <b-col>
-        Numéro UAI ou code postal :
-        <b-form-input
-          aria-describedby="inputFormatterHelp"
-          v-model="uai"
-          type="text"
-        ></b-form-input>
-      </b-col>
-      <b-col>
-        <p class="modal-btns">
-          <b-button variant="success" v-on:click="rechercheEcole"
-            >Rechercher</b-button
-          >
-        </p>
-      </b-col>
-    </div>
-    <div v-if="boolEcoleCP && selectedStructure == 3">
-      <b-form-group id="etab" label="Liste des établissements :">
-        <b-form-select
-          name="ecoles"
-          key="ecoles"
-          type="text"
-          v-model="etab"
-          id="ecoleSelect"
-        >
-          <option v-for="ecole in listeEtab" :key="ecole.uai" :value="ecole">
-            {{
-              ecole.nom +
-              " - " +
-              ecole.adresse +
-              " " +
-              ecole.cp +
-              " " +
-              ecole.libelleCommune
-            }}
-          </option>
-        </b-form-select>
-      </b-form-group>
-    </div>
-    <div class="mb-3 mt-3" v-if="boolUAI && selectedStructure == 3">
-      nom :
-      <b-form-input v-model="etab.nom" type="text"></b-form-input>
-      adresse :
-      <b-form-input v-model="etab.adresse" type="text"></b-form-input>
-    </div>
-
-    <b-row >
-      <p class="modal-btns">
-        <b-button v-on:click="cancel">Annuler</b-button>
-        <b-button variant="success" v-on:click="addStructure">Ajouter</b-button>
-      </p>
     </b-row>
+    <div class="modal-btns">
+      <b-button v-on:click="cancel">Annuler</b-button>
+      <b-button variant="success" v-on:click="addStructure">Ajouter</b-button>
+    </div>
   </b-container>
 </template>
 <script>
@@ -283,11 +255,9 @@ export default {
   },
   watch: {
     cp() {
-      //console.info("Saisie CP");
       this.recherchecommune();
     },
     cpEpci() {
-      //console.info("Saisie CP");
       this.rechercheepci();
     },
     selectedStructure() {
@@ -553,17 +523,3 @@ export default {
   },
 };
 </script>
-
-<style>
-.interventionModal {
-  padding: 30px;
-}
-.modal-btns {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-}
-.interventionTitle {
-  color: #252195;
-}
-</style>

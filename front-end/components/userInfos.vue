@@ -501,99 +501,152 @@ export default {
       boolUAI: false,
     };
   },
-  props: ["submitTxt", "user", "checkLegal"],
+  watch: {
+    cp() {
+      this.user.cp = this.cp;
+      return this.rechercheCommune();
+    },
+    cpEpci() {
+      this.rechercheepci();
+    },
+    selectedStructure() {
+      this.boolEpci = false;
+      this.boolSiret = false;
+      this.boolUAI = false;
+      this.boolEcoleCP = false;
+      this.siret = null;
+      this.typeCollectivite = null;
+      (this.cp = null), (this.cpEpci = null);
+    },
+  },
+  mounted() {
+    this.$store.dispatch("get_structures");
+    if (this.user.profilId < 3) {
+      this.getDepartements();
+    }
+  },
+  computed: {
+    ...mapState(["structures"]),
+    mail: {
+      get() {
+        return this.$store.state.utilisateurCourant.mail;
+      },
+      set(value) {
+        return this.$store.dispatch("set_state_element", {
+          key: "utilisateurCourant.mail",
+          value,
+        });
+      },
+    },
+    isUserRegisteredViaFC() {
+      return Boolean(this.user && this.user.tokenFc);
+    },
+    listeStructures() {
+      log.i("listeStructures - In")
+      var liste = this.structures;
+      if (this.mail && this.mail.indexOf(".gouv.fr") != -1) {
+        log.i("listeStructures - Done")
+        return liste;
+      } else {
+        log.d("listeStructures - Autre collectivité")
+        if (!this.user.typeCollectivite) {
+          liste = this.structures.filter((str) => {
+            const isMatch = (String(str.str_libellecourt) != "DS") &&
+              (String(str.str_libellecourt) != "DEP") &&
+              (String(str.str_libellecourt) != "EPCI") &&
+              (String(str.str_libellecourt) != "COM");
+            return isMatch;
+          });
+        }
+        return liste;
+      }
+    },
+  },
   methods: {
     submit: function () {
+      log.i('submit - In')
       this.$validator.validateAll().then((isValid) => {
-        if (this.accordHonneur) {
-          if (isValid) {
-            if (this.user.profilId != 1 && this.user.profilId != 2) {
-              this.$store.dispatch("set_state_element", {
-                key: "utilisateurCourant",
-                value: this.user,
-              });
-              return this.$emit("submit");
-            } else {
-              let structure = {
-                id: null,
-                code: null,
-                nom: null,
-                type: this.selectedStructure,
-                soustype: null,
-                commune: null,
-                adresse: null,
-                actif: true,
-              };
-              switch (this.selectedStructure) {
+        if (!this.accordHonneur) { 
+          log.w('submit - Honor issue')
+          this.user.cpi_codeinsee = null;
+          return this.$toast.error("Veuillez certifier sur l'honneur l'exactitude des informations déclarées.");
+        }
+        if (!isValid) { 
+          log.w('submit - Not valid form')
+          return this.$toast.error("Veuillez vérifier la validité des champs.");
+        }
+        if (this.user.profilId != 1 && this.user.profilId != 2) {
+          log.d('submit - Starting to submit') 
+          this.$store.dispatch("set_state_element", {
+            key: "utilisateurCourant",
+            value: this.user,
+          });
+          return this.$emit("submit");
+        } else {
+          log.d('submit - Profil ID not 1 or 2')
+          let structure = {
+            id: null,
+            code: null,
+            nom: null,
+            type: this.selectedStructure,
+            soustype: null,
+            commune: null,
+            adresse: null,
+            actif: true,
+          };
+          switch (this.selectedStructure) {
+            case 1:
+              structure.soustype = this.typeCollectivite;
+              switch (structure.soustype) {
                 case 1:
-                  structure.soustype = this.typeCollectivite;
-                  switch (structure.soustype) {
-                    case 1:
-                      structure.nom =
-                        "Commune - " + this.collectivite.com_libelle;
-                      structure.code = this.collectivite.cpi_codeinsee;
-                      structure.commune = this.collectivite.cpi_codeinsee;
-                      break;
-                    case 2:
-                      structure.nom =
-                        "Conseil Général - " + this.collectivite.dep_libelle;
-                      structure.code = this.collectivite.dep_num;
-                      break;
-                    case 3:
-                      structure.nom =
-                        "EPCI - " + this.collectivite.epci_libelle;
-                      structure.code = this.collectivite.epci_code;
-                      break;
-                  }
+                  structure.nom =
+                    "Commune - " + this.collectivite.com_libelle;
+                  structure.code = this.collectivite.cpi_codeinsee;
+                  structure.commune = this.collectivite.cpi_codeinsee;
                   break;
                 case 2:
-                  structure.nom = this.etab.nom;
-                  structure.code = this.etab.siret;
-                  structure.commune = this.etab.commune;
-                  structure.adresse = this.etab.adresse;
-                  structure.soustype = this.etab.activite;
+                  structure.nom =
+                    "Conseil Général - " + this.collectivite.dep_libelle;
+                  structure.code = this.collectivite.dep_num;
                   break;
                 case 3:
-                  structure.nom = this.etab.nom;
-                  structure.code = this.etab.uai;
-                  structure.commune = this.etab.commune;
-                  structure.adresse =
-                    this.etab.adresse +
-                    " " +
-                    this.etab.cp +
-                    " " +
-                    this.etab.libelleCommune;
-                  structure.soustype = this.etab.type_libe;
+                  structure.nom =
+                    "EPCI - " + this.collectivite.epci_libelle;
+                  structure.code = this.collectivite.epci_code;
                   break;
               }
-              return this.$store
-                .dispatch("post_structure", [
-                  structure,
-                  this.$store.state.utilisateurCourant.id,
-                ])
-                .then(() => {
-                  this.$store.dispatch(
-                    "get_structureByUser",
-                    this.$store.state.utilisateurCourant.id
-                  );
-                  this.$store.dispatch("set_state_element", {
-                    key: "utilisateurCourant",
-                    value: this.user,
-                  });
-                  return this.$emit("submit");
-                });
-            }
-          } else {
-            this.$toast.error("Veuillez vérifier la validité des champs.");
+              break;
+            case 2:
+              structure.nom = this.etab.nom;
+              structure.code = this.etab.siret;
+              structure.commune = this.etab.commune;
+              structure.adresse = this.etab.adresse;
+              structure.soustype = this.etab.activite;
+              break;
+            case 3:
+              structure.nom = this.etab.nom;
+              structure.code = this.etab.uai;
+              structure.commune = this.etab.commune;
+              structure.adresse =
+                this.etab.adresse +
+                " " +
+                this.etab.cp +
+                " " +
+                this.etab.libelleCommune;
+              structure.soustype = this.etab.type_libe;
+              break;
           }
-        } else {
-          // On vide le CodeInsee si le CP n'est pas complet
-          this.user.cpi_codeinsee = null;
-          this.$toast.error(
-            "Veuillez certifier sur l'honneur l'exactitude des informations déclarées."
-          );
+          return this.$store.dispatch("post_structure", [
+              structure,
+              this.$store.state.utilisateurCourant.id,
+            ])
+            .then(() => {
+              this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id);
+              this.$store.dispatch("set_state_element", { key: "utilisateurCourant", value: this.user });
+              return this.$emit("submit");
+            });
         }
-      });
+      }) 
     },
     validateState(ref) {
       if (!this.veeFields) {
@@ -607,33 +660,6 @@ export default {
       }
 
       return null;
-    },
-    recherchecommune: function () {
-      console.info("Recherche de la commune" + this.user.cp);
-      if (this.user.cp.length === 5) {
-        // Le code postal fait bien 5 caractères
-        const url =
-          process.env.API_URL + "/listecommune?codepostal=" + this.user.cp;
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then((response) => {
-            this.listecommune = response.communes;
-            console.info(
-              "recherchecommune : this.listecommune " + this.listecommune
-            );
-          })
-          .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la récupération des communes",
-              error
-            );
-          });
-      } else {
-        // On vide la liste car le code postal a changé
-        this.listecommune = ["Veuillez saisir un code postal"];
-        return Promise.resolve(null);
-      }
     },
     getDepartements: function () {
       console.info("recupération de la liste des départements");
@@ -767,117 +793,6 @@ export default {
         key: "utilisateurCourant",
         value: this.user,
       });
-    },
-  },
-  watch: {
-    cp() {
-      console.info("Saisie CP");
-      this.user.cp = this.cp;
-      return this.rechercheCommune();
-    },
-    cpEpci() {
-      this.rechercheepci();
-    },
-    selectedStructure() {
-      this.boolEpci = false;
-      this.boolSiret = false;
-      this.boolUAI = false;
-      this.boolEcoleCP = false;
-      this.siret = null;
-      this.typeCollectivite = null;
-      (this.cp = null), (this.cpEpci = null);
-    },
-  },
-  mounted() {
-    this.$store.dispatch("get_structures");
-    if (this.user.profilId < 3) {
-      this.getDepartements();
-    }
-    // Chargement du CP et liste commune + sélection
-    if (this.user.cp) {
-      // Recopie du CP dans le champ code postal
-      this.cp = this.user.cp;
-      // Recherche de la liste des commune
-      this.recherchecommune();
-      // Sélection de la commune correspondant à celle de l'utilisateur dans la liste
-      //this.selectedCommune = this.user.cpi_codeinsee
-    }
-  },
-  computed: {
-    ...mapState(["structures"]),
-    mail: {
-      get() {
-        return this.$store.state.utilisateurCourant.mail;
-      },
-      set(value) {
-        return this.$store.dispatch("set_state_element", {
-          key: "utilisateurCourant.mail",
-          value,
-        });
-      },
-    },
-    isUserRegisteredViaFC() {
-      return Boolean(this.user && this.user.tokenFc);
-    },
-    listeStructures() {
-      log.i("listeStructures - In")
-      var liste = this.structures;
-      if (this.mail && this.mail.indexOf(".gouv.fr") != -1) {
-        log.i("listeStructures - Done")
-        return liste;
-      } else {
-        log.d("listeStructures - Autre collectivité")
-        if (!this.user.typeCollectivite) {
-          liste = this.structures.filter((str) => {
-            const isMatch = (String(str.str_libellecourt) != "DS") &&
-              (String(str.str_libellecourt) != "DEP") &&
-              (String(str.str_libellecourt) != "EPCI") &&
-              (String(str.str_libellecourt) != "COM");
-            return isMatch;
-          });
-        }
-        return liste;
-      }
-    },
-  },
-  methods: {
-    submit: function () {
-      log.i('submit - In')
-      if (!this.accordHonneur) { 
-        log.w('submit - accord sur honneur non coché.')
-        // On vide le CodeInsee si le CP n'est pas complet
-        this.user.cpi_codeinsee = null          
-        return this.$toast.error('Veuillez certifier sur l\'honneur l\'exactitude des informations déclarées.');
-      }
-      return this.$validator.validateAll().then((isValid) => {
-        if (isValid) {
-          this.isPubliChecked ? this.user.publicontact = true : this.user.publicontact = false
-          this.$store.dispatch("set_state_element", {
-            key: "utilisateurCourant",
-            value: this.user,
-          });
-          log.i('submit - Done', this.user)
-          return this.$emit("submit");
-        } else {
-          log.w('submit - certains champs ne sont pas valides.')
-          return this.$toast.error('Veuillez vérifier la validité des champs.');
-        }
-      });
-    },
-    validateState(ref) {
-      if (!this.veeFields) {
-        return null;
-      }
-      if (
-        this.veeFields[ref] &&
-        (this.veeFields[ref].dirty || this.veeFields[ref].validated)
-      ) {
-        return !this.errors.has(ref);
-      }
-      return null;
-    },
-    cancel: function () {
-      this.$emit("cancel");
     },
   }
 };

@@ -63,17 +63,14 @@ export default {
           .$get(url)
           .then((response) => {
             if (response) {
-            this.$store.commit("put_enfant", {
-              enfant: response.enfant,
-              index: this.index,
-            });
+            this.$store.commit("UPDATE_ARRAY_ELM", { key: 'enfants', index: this.index, value: response.enfant});
             this.$toast.success(
               `recupération des données de l\'enfant ${this.idEnfant} effectuée`
             );
-            this.$modal.hide("saisieIndex");
+            return this.$modal.hide("saisieIndex");
             }
             else {
-              this.$toast.error(`L\'enfant ${this.idEnfant} n\'a pu être trouvé`);  
+              return this.$toast.error(`L\'enfant ${this.idEnfant} n\'a pu être trouvé`);  
             }
           })
           .catch((error) => {

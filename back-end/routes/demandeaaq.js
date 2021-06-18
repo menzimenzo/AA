@@ -12,7 +12,7 @@ router.get('/', function (req, res) {
     const { formateurid, demandeurid } = req.query
     log.i('::list - In', { formateurid, demandeurid })    
     if (!formateurid && !demandeurid) {
-        log.W('::list - ID manquant')    
+        log.w('::list - ID manquant')    
         return res.sendStatus(400).json({ message: 'L\'identifiant du formateur et du demandeur sont manquants.' })
     }
 

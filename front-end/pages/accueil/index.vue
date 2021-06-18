@@ -63,10 +63,6 @@
             Vous avez une demande en cours pour passer en "Maître Nageur Aisance Aquatique".
             Demande effectuée le {{ this.maDemande.datedemandeaaq}} auprès de {{ this.maDemande.sre_libellecourt}} {{ this.maDemande.uti_prenom}} {{ this.maDemande.uti_nom}} ({{this.maDemande.sre_courriel}} {{ this.maDemande.uti_mail}})<br><br>
           </b-form>
-          <!-- // TODO Implémentation du bouton Annuler la demande à faire
-               // Ajouter le statut "Annulé"
-            <b-button variant="danger" v-on:click="annulerDemande()">Annuler ma demande</b-button>
-          -->
         </b-card>            
       </b-col>
       <b-col class="col-12 col-md-8" v-else>
@@ -90,35 +86,24 @@ export default {
       structurerefid: null,
       maDemande: null,        
       listeformateur: [
-          {
-            text: "Veuillez sélectionner un formateur",
-            value: null,
-            id: null,
-            nom: null,
-            prenom: null,
-            mail: null
-          },
-        ],
+        {
+          text: "Veuillez sélectionner un formateur",
+          value: null,
+          id: null,
+          nom: null,
+          prenom: null,
+          mail: null
+        },
+      ],
       listestructureref: [
-          {
-            text: "Veuillez sélectionner une structure de référence",
-            value: null,
-            id: null,
-            libellecourt: null,
-            courriel: null
-          },
-        ],
-      listeformateur: [
-          {
-            text: "Veuillez sélectionner un formateur",
-            value: null,
-            id: null,
-            nom: null,
-            prenom: null,
-            mail: null
-          },
-        ],
-
+        {
+          text: "Veuillez sélectionner une structure de référence",
+          value: null,
+          id: null,
+          libellecourt: null,
+          courriel: null
+        },
+      ]
     };
   },
   computed: mapState(["utilisateurCourant", "demandeaaq" ]),
@@ -138,39 +123,29 @@ export default {
         });
     },
     rechercheformateur: function() {
-      console.info("Recherche des formateurs");
-      // Lance la recherche sur la liste des formateurs 
+      log.i('rechercheformateur - In')
       const url = process.env.API_URL + "/user/liste/3"
-      console.info(url);
-      return this.$axios
-        .$get(url)
+      return this.$axios.$get(url)
         .then(response => {
-          this.listeformateur = response.users;
-          console.info("rechercheformateur : this.listeformateur " + this.listeformateur );
+          log.i('rechercheformateur - Done')
+          return this.listeformateur = response.users;
         })
         .catch(error => {
-          console.error(
-            "Une erreur est survenue lors de la récupération des formateurs",
-            error
-          );
+          log.w('rechercheformateur - ', { error })
+          return this.$toast.error("Une erreur est survenue lors de la récupération des formateurs")
         });
     },      
     recherchestructureref: function() {
-      console.info("Recherche des structures de référence");
-      // Lance la recherche sur la liste des formateurs 
+      log.i('recherchestructureref - In')
       const url = process.env.API_URL + "/structureref/liste/"
-      console.info(url);
-      return this.$axios
-        .$get(url)
+      return this.$axios.$get(url)
         .then(response => {
-          this.listestructureref = response.structureref;
-          console.info("recherche structureref : this.listestructureref " + this.listestructureref );
+          log.i('recherchestructureref - Done')
+          return this.listestructureref = response.structureref;
         })
         .catch(error => {
-          console.error(
-            "Une erreur est survenue lors de la récupération des structures de référence",
-            error
-          );
+          log.w('recherchestructureref - ', { error })
+          return this.$toast.error("Une erreur est survenue lors de la récupération des structures de référence")
         });
     },      
     chargeDemande: function() {
@@ -220,7 +195,7 @@ export default {
           console.log(JSON.stringify(err));
           this.$toasted.error("Erreur lors du téléchargement: " + err.message);
         });
-      },
+    },
     validerFormateur: function() {
       console.log('Formateur choisi' + this.formateurid)
       if (this.formateurid) {
@@ -282,7 +257,7 @@ export default {
    // Chargement de la liste des structures de référence
    await this.recherchestructureref()   
    // Chargement de la demande
-   await  this.chargedemande() 
+   await this.chargedemande() 
    this.loading = false;
   }
 };

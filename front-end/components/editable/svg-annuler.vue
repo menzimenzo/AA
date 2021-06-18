@@ -37,7 +37,7 @@ svg{
     height: 32px;
 }
 .st0{fill:#44B69E;}
-.st1{fill:#FFFFFF;}
+.st1{fill:#252195;}
 .st2{display:none;}
 .st3{display:inline;}
 .st4{fill:none;stroke:#000000;stroke-width:0.1;stroke-miterlimit:10;}

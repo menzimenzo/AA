@@ -1,343 +1,173 @@
 <template>
-  <b-container class="interventions">
+  <b-container fluid class="interventions">
     <b-row>
-      <b-col cols="12">
-        <!--  ACCORDEON -- JE SAISIS UNE INTERVENTION -->
-        <b-card no-body class="mb-3">
-          <b-card-header header-tag="header" class="p-1" role="tab">
-            <b-form-row>
-              <b-col>
-                <!-- IMAGE RAYEE BANNER INTERVENTION -->
-                <b-img
-                  fluid
-                  :src="require('assets/banner_ray_blue.png')"
-                  blank-color="rgba(0,0,0,0.5)"
-                />
-                <b-btn
-                  class="accordionBtn"
-                  block
-                  href="#"
-                  v-b-toggle.accordion1
-                  variant="Dark link"
-                >
-                  <h4>
-                    <i class="material-icons accordion-chevron"
-                      >chevron_right</i
+      <b-col cols="3">
+        <Menu @displayDashboard="displayDashboard" @resetForm="resetIntervention" />
+      </b-col>
+      <b-col cols="9" class="custom-box">
+        <b-collapse id="mesInterventions" accordion="my-accordion" role="tabpanel">
+            <div v-if="interventions.length > 0">
+              <b-btn
+                @click="exportCsv()"
+                class="mb-2"
+                variant="primary">
+                <i class="material-icons" style="font-size: 18px; top: 4px">import_export</i>
+                Export CSV
+              </b-btn>
+              <editable
+                :columns="headersInterventions"
+                :data="this.interventionsToDisplay"
+                :removable="false"
+                :creable="false"
+                :editable="false"
+                :noDataLabel="''"
+                tableMaxHeight="none"
+                :loading="loadingInt"
+                :defaultSortField="{
+                  key: 'dateFinIntervention',
+                  order: 'desc',
+                }" >
+                <template slot-scope="props" slot="actions">
+                  <div style="min-width: 147px">
+                    <b-btn
+                      @click="editIntervention(props.data.item.id)"
+                      size="sm"
+                      class="ml-1"
+                      variant="primary"
+                      v-b-modal.modal-intervention
+                      v-b-popover.hover="`Modifier l'intervention`"
                     >
-                    <i class="material-icons ml-2 mr-1">create</i> Je saisis une
-                    intervention
-                  </h4>
-                </b-btn>
+                      <i class="material-icons">edit</i>
+                    </b-btn>
+                    <b-btn
+                      @click="downloadPdf(props.data.item.id)"
+                      v-if="props.data.blocId == '3'"
+                      size="sm"
+                      class="ml-1"
+                      variant="primary"
+                      v-b-popover.hover="`Télécharger l'attestation`"
+                    >
+                      <i class="material-icons">cloud_download</i>
+                    </b-btn>
+                    <b-btn
+                      @click="deleteIntervention(props.data.item.id)"
+                      size="sm"
+                      class="ml-1"
+                      variant="danger"
+                      v-b-popover.hover="`Supprimer l'intervention`"
+                    >
+                      <i class="material-icons">delete_forever</i>
+                    </b-btn>
+                  </div>
+                </template>
+              </editable>
+            </div>
+            <h4 class="text-center" v-if="interventions.length == 0 && loadingInt === false">
+              Aucune intervention n'a été créée pour le moment.
+            </h4>
+        </b-collapse>
+        <b-collapse id="addIntervention" accordion="my-accordion" role="tabpanel" >
+          <Intervention :intervention="interventionCourrante" />
+        </b-collapse>
+        <b-collapse id="piscines" accordion="my-accordion" role="tabpanel">
+          <b-container>
+            <editable
+              :columns="headersPiscine"
+              :data="mesPiscines"
+              :removable="false"
+              :creable="false"
+              :editable="false"
+              :noDataLabel="''"
+              tableMaxHeight="none"
+            >
+              <template slot-scope="props" slot="actions">
+                <div style="min-width: 147px">
+                  <b-btn
+                    @click="deletePiscine(props.data.item)"
+                    size="sm"
+                    class="ml-1"
+                    variant="danger"
+                    v-b-popover.hover="`Supprimer l'intervention`"
+                  >
+                    <i class="material-icons">delete_forever</i>
+                  </b-btn>
+                </div>
+              </template>
+            </editable>
+            <b-btn
+              @click="editPiscine(null)"
+              class="btn btn-primary btn-lg btn-block"
+            >
+              <i class="material-icons">add</i>
+            </b-btn>
+          </b-container>
+        </b-collapse>
+        <b-collapse id="structures" accordion="my-accordion" role="tabpanel">
+          <b-container>
+            <editable
+              :columns="headersStructures"
+              :data=structures
+              :removable="false"
+              :creable="false"
+              :editable="false"
+              :noDataLabel="''"
+              tableMaxHeight="none">
+              <template slot-scope="props" slot="actions">
+                <div style="min-width: 147px">
+                  <b-btn
+                    @click="deleteStructure(props.data.item)"
+                    size="sm"
+                    class="ml-1"
+                    variant="danger"
+                    v-b-popover.hover="`Supprimer la structure de vos structures favorites`"
+                  >
+                    <i class="material-icons">delete_forever</i>
+                  </b-btn>
+                </div>
+              </template>
+            </editable>
+            <b-btn
+              @click="editStructure()"
+              class="btn btn-primary btn-lg btn-block"
+            >
+              <i class="material-icons">add</i>
+            </b-btn>
+          </b-container>
+        </b-collapse>
+        <b-collapse id="documents" accordion="my-accordion" role="tabpanel">
+          <b-container>
+            <b-row>
+              <b-col cols="12">
+                <h5 class="mb-3">Documents disponibles:</h5>
+                <ul v-if="documents.length > 0">
+                  <li v-for="doc in documents" :key="doc.doc_id">
+                    {{ doc.doc_libelle }}
+                    <b-img
+                      class="img-icon"
+                      fluid
+                      @click="downloadDoc(doc)"
+                      :src="require('assets/pdf-240x240.png')"
+                      blank-color="rgba(0,0,0,0.5)"
+                    />
+                  </li>
+                </ul>
+                <p v-else>
+                  Aucun document n'est disponible actuellement.
+                </p>
               </b-col>
-            </b-form-row>
-          </b-card-header>
-          <b-collapse id="accordion1" accordion="my-accordion" role="tabpanel" >
-            <Intervention :intervention="interventionCourrante" />
-          </b-collapse>
-        </b-card>
-        <!--  ACCORDEON -- MES INTERVENTIONS -->
-        <b-card no-body class="mb-3">
-          <b-card-header header-tag="header" class="p-1" role="tab">
-            <b-form-row>
-              <b-col>
-                <!-- IMAGE RAYEE BANNER INTERVENTION -->
-               <b-img
-                  fluid
-                  :src="require('assets/banner_ray_blue.png')"
-                  blank-color="rgba(0,0,0,0.5)"
-                />
-                <b-btn
-                  class="accordionBtn"
-                  block
-                  href="#"
-                  v-b-toggle.accordion2
-                  variant="Dark link"
-                >
-                  <h4>
-                    <i class="material-icons accordion-chevron"
-                      >chevron_right</i
-                    >
-                    <i class="material-icons ml-2 mr-1">list</i> Mes
-                    interventions
-                  </h4>
-                </b-btn>
-              </b-col>
-            </b-form-row>
-          </b-card-header>
-          <b-collapse id="accordion2" accordion="my-accordion" role="tabpanel">
-            <b-card-body>
-              <b-container>
-                <b-row>
-                  <b-col cols="12">
-                    <div v-if="interventions.length > 0">
-                      <b-btn
-                        @click="exportCsv()"
-                        class="mb-2"
-                        variant="primary"
-                      >
-                        <i
-                          class="material-icons"
-                          style="font-size: 18px; top: 4px"
-                          >import_export</i
-                        >
-                        Export CSV
-                      </b-btn>
-                     <editable
-                        :columns="headers"
-                        :data="this.interventionsToDisplay"
-                        :removable="false"
-                        :creable="false"
-                        :editable="true"
-                        :noDataLabel="''"
-                        tableMaxHeight="none"
-                        :loading="loadingInt"
-                        :defaultSortField="{
-                          key: 'dateFinIntervention',
-                          order: 'desc',
-                        }"
-                      >
-                        <template slot-scope="props" slot="actions">
-                          <div style="min-width: 147px">
-                            <b-btn
-                              @click="editIntervention(props.data.item.id)"
-                              size="sm"
-                              class="ml-1"
-                              variant="primary"
-                              v-b-popover.hover="`Modifier l'intervention`"
-                            >
-                              <i class="material-icons">edit</i>
-                            </b-btn>
-                            <b-btn
-                              @click="downloadPdf(props.data.item.id)"
-                              v-if="props.data.blocId == '3'"
-                              size="sm"
-                              class="ml-1"
-                              variant="primary"
-                              v-b-popover.hover="`Télécharger l'attestation`"
-                            >
-                              <i class="material-icons">cloud_download</i>
-                            </b-btn>
-                            <b-btn
-                              @click="deleteIntervention(props.data.item.id)"
-                              size="sm"
-                              class="ml-1"
-                              variant="danger"
-                              v-b-popover.hover="`Supprimer l'intervention`"
-                            >
-                              <i class="material-icons">delete_forever</i>
-                            </b-btn>
-                          </div>
-                        </template>
-                      </editable>
-                    </div>
-                    <h4
-                      class="text-center"
-                      v-if="interventions.length == 0 && loadingInt === false"
-                    >
-                      Aucune intervention n'a été créée pour le moment.
-                    </h4>
-                  </b-col>
-                </b-row>
-              </b-container>
-            </b-card-body>
-          </b-collapse>
-        </b-card>
-        <!--  ACCORDEON -- MES PISCINES -->
-        <b-card no-body class="mb-3">
-          <b-card-header header-tag="header" class="p-1" role="tab">
-            <b-form-row>
-              <b-col>
-                <!-- IMAGE RAYEE BANNER INTERVENTION -->
-                <b-img
-                  fluid
-                  :src="require('assets/banner_ray_blue.png')"
-                  blank-color="rgba(0,0,0,0.5)"
-                />
-                <b-btn
-                  class="accordionBtn"
-                  block
-                  href="#"
-                  v-b-toggle.accordion3
-                  variant="Dark link"
-                >
-                  <h4>
-                    <i class="material-icons accordion-chevron"
-                      >chevron_right</i
-                    >
-                    <i class="material-icons ml-2 mr-2">list</i>Mes Piscines
-                  </h4>
-                </b-btn>
-              </b-col>
-            </b-form-row>
-          </b-card-header>
-          <b-collapse id="accordion3" accordion="my-accordion" role="tabpanel">
-            <b-card-body>
-              <b-container>
-                <b-row>
-                  <b-col cols="12">
-                    <div>
-                      <editable
-                        :columns="headersPiscine"
-                        :data="mesPiscines"
-                        :removable="false"
-                        :creable="false"
-                        :editable="false"
-                        :noDataLabel="''"
-                        tableMaxHeight="none"
-                      >
-                        <template slot-scope="props" slot="actions">
-                          <div style="min-width: 147px">
-                            <b-btn
-                              @click="deletePiscine(props.data.item)"
-                              size="sm"
-                              class="ml-1"
-                              variant="danger"
-                              v-b-popover.hover="`Supprimer l'intervention`"
-                            >
-                              <i class="material-icons">delete_forever</i>
-                            </b-btn>
-                          </div>
-                        </template>
-                      </editable>
-                      <b-btn
-                        @click="editPiscine(null)"
-                        class="btn btn-primary btn-lg btn-block"
-                      >
-                        <i class="material-icons">add</i>
-                      </b-btn>
-                    </div>
-                  </b-col>
-                </b-row>
-              </b-container>
-            </b-card-body>
-          </b-collapse>
-        </b-card>
-        <!--  ACCORDEON -- MES STRUCTURES -->
-          <b-card no-body class="mb-3">
-          <b-card-header header-tag="header" class="p-1" role="tab">
-            <b-form-row>
-              <b-col>
-                <!-- IMAGE RAYEE BANNER INTERVENTION -->
-                <b-img
-                  fluid
-                  :src="require('assets/banner_ray_blue.png')"
-                  blank-color="rgba(0,0,0,0.5)"
-                />
-                <b-btn
-                  class="accordionBtn"
-                  block
-                  href="#"
-                  v-b-toggle.accordion4
-                  variant="Dark link"
-                >
-                  <h4>
-                    <i class="material-icons accordion-chevron"
-                      >chevron_right</i
-                    >
-                    <i class="material-icons ml-2 mr-2">list</i>Mes Structures organisatrices
-                  </h4>
-                </b-btn>
-              </b-col>
-            </b-form-row>
-          </b-card-header>
-          <b-collapse id="accordion4" accordion="my-accordion" role="tabpanel">
-            <b-card-body>
-              <b-container>
-                <div>
-                      <editable
-                        :columns="headersStructures"
-                        :data=structures
-                        :removable="false"
-                        :creable="false"
-                        :editable="false"
-                        :noDataLabel="''"
-                        tableMaxHeight="none"
-                      >
-                        <template slot-scope="props" slot="actions">
-                          <div style="min-width: 147px">
-                            <b-btn
-                              @click="deleteStructure(props.data.item)"
-                              size="sm"
-                              class="ml-1"
-                              variant="danger"
-                              v-b-popover.hover="`Supprimer la structure de vos structures favorites`"
-                            >
-                              <i class="material-icons">delete_forever</i>
-                            </b-btn>
-                          </div>
-                        </template>
-                      </editable>
-                      <b-btn
-                        @click="editStructure()"
-                        class="btn btn-primary btn-lg btn-block"
-                      >
-                        <i class="material-icons">add</i>
-                      </b-btn>
-                    </div>
-              </b-container>
-            </b-card-body>
-          </b-collapse>
-        </b-card>
-        <b-card no-body class="mb-3">
-          <b-card-header header-tag="header" class="p-1" role="tab">
-            <b-form-row>
-              <b-col>
-                <!-- IMAGE RAYEE BANNER INTERVENTION -->
-                <b-img
-                  fluid
-                  :src="require('assets/banner_ray_blue.png')"
-                  blank-color="rgba(0,0,0,0.5)"
-                />
-                <b-btn
-                  class="accordionBtn"
-                  block
-                  href="#"
-                  v-b-toggle.accordion4
-                  variant="Dark link"
-                >
-                  <h4>
-                    <i class="material-icons accordion-chevron"
-                      >chevron_right</i
-                    >
-                    <i class="material-icons ml-2 mr-2">list</i>Documents utiles
-                  </h4>
-                </b-btn>
-              </b-col>
-            </b-form-row>
-          </b-card-header>
-          <b-collapse id="accordion4" accordion="my-accordion" role="tabpanel">
-            <b-card-body>
-              <b-container>
-                <b-row>
-                  <b-col cols="12">
-                    <h5 class="mb-3">Documents disponibles:</h5>
-                    <ul>
-                      <li v-for="doc in documents" :key="doc.doc_id">
-                        {{ doc.doc_libelle }}
-                        <b-img
-                          class="img-icon"
-                          fluid
-                          @click="downloadDoc(doc)"
-                          :src="require('assets/pdf-240x240.png')"
-                          blank-color="rgba(0,0,0,0.5)"
-                        />
-                      </li>
-                    </ul>
-                  </b-col>
-                </b-row>
-              </b-container>
-            </b-card-body>
-          </b-collapse>
-        </b-card>
+            </b-row>
+          </b-container>
+        </b-collapse>
+        <Dashboard v-if="showDashboard"/>
       </b-col>
     </b-row>
-    <modal name="editIntervention" :scrollabe="true" height="1100px" width="1100px" @closed="clearIntervention()">
+    <b-modal id="modal-intervention" scrollabe size="xl" @closed="resetIntervention()">
       <Intervention :intervention="interventionCourrante" />
-    </modal>
-    <modal name="newPiscine" height="auto" width="900px" :scrollabe="true">
+    </b-modal>
+    <modal name="newPiscine" height="auto" width="900px" scrollabe>
       <Piscine :dansInt="false"/>
     </modal>
-    <modal name="newStructure" height="500px" width="800px" :scrollabe="true">
+    <modal name="newStructure" height="auto" width="800px" scrollabe>
        <Structure :dansInt="false"/>
     </modal>
   </b-container>
@@ -345,23 +175,31 @@
 
 <script>
 import Intervention from "~/components/Intervention.vue";
-import Piscine from "~/components/piscine.vue";
-import Structure from "~/components/structure.vue";
-import { mapState } from "vuex";
+import Piscine from "~/components/element/piscine.vue";
+import Structure from "~/components/element/structure.vue";
 import Editable from "~/components/editable/index.vue";
+import Menu from "~/components/navigation/menu-left.vue"
+import Dashboard from "~/components/dashboard.vue"
+
+import { mapState } from "vuex";
+import logger from '~/plugins/logger'
+const log = logger('pages:interventions')
 
 export default {
   components: {
     Intervention,
     Editable,
     Piscine,
-    Structure
+    Structure,
+    Menu,
+    Dashboard
   },
   data() {
     return {
       loadingInt: false,
       interventionsToDisplay: null,
-      headers: [
+      showDashboard: true,
+      headersInterventions: [
         {
           path: "id",
           title: "N° d'intervention",
@@ -483,26 +321,25 @@ export default {
   computed: mapState([
     "interventions",
     "mesPiscines",
-    "mesStructures",
     "interventionCourrante",
     "utilisateurCourant",
     "documents",
     "structures"
   ]),
+  async mounted() {
+    await this.$store.dispatch("get_mesPiscines"),
+    await this.$store.dispatch("get_interventions")
+    await this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id)
+    await this.$store.commit("CLEAN", { key: 'enfants', isArray: true });
+  },
   methods: {
     editIntervention: function (idIntervention) {
-      return this.$store
-        .dispatch("get_intervention", idIntervention)
-        .then(() => {
-          //console.log(this.$store.state.interventionCourrante)
-          this.$modal.show("editIntervention");
-        })
+      log.i('editIntervention - In')
+      return this.$store.dispatch("get_intervention", idIntervention)
         .catch((error) => {
-          console.error(
-            "Une erreur est survenue lors de la récupération du détail de l'intervention",
-            error
-          );
-        });
+          log.w('editIntervention', error)
+          return this.$toast.error("Une erreur est survenue lors de la récupération du détail de l'intervention")
+        })
     },
     editPiscine: function () {
       this.$modal.show("newPiscine");
@@ -510,81 +347,66 @@ export default {
     editStructure: function () {
       this.$modal.show("newStructure");
     },
-    deleteIntervention: function (idIntervention) {
-      console.info("Suppression d'une intervention : " + idIntervention);
-      //this.$dialog.confirm({ text: 'Confirmez-vous la suppression définitive d\'intervention', title: 'Suppression'});
+    deleteIntervention: function(idIntervention) {
+      log.i('deleteIntervention - In', { idIntervention })
       if (confirm("Confirmez-vous la suppression définitive d'intervention")) {
         this.loading = true;
-        const url =
-          process.env.API_URL + "/interventions/delete/" + idIntervention;
-        console.info(url);
-        return this.$axios
-          .$get(url)
+        const url = process.env.API_URL + "/interventions/delete/" + idIntervention;
+        return this.$axios.$get(url)
           .then((response) => {
+            log.d('deleteIntervention - Done on server', { response })
             this.$store.dispatch("get_interventions");
-            //this.resetform();
-            this.clearIntervention();
-            this.$toast.success(
-              `Intervention #${idIntervention} a bien été supprimée`,
-              {}
-            );
+            this.resetIntervention();
+            this.loading = false;
+            log.i('deleteIntervention - Done')
+            return this.$toast.success(`Intervention #${idIntervention} a bien été supprimée`)
           })
           .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la suppresion de l'intervention",
-              error
-            );
+            log.w('deleteIntervention', { error })
+            this.loading = false;
+            return this.$toast.error('Une erreur est survenue lors de la suppresion de l\'intervention')
           });
-        this.loading = false;
       }
     },
     deletePiscine: function (piscine) {
+      log.i('deletePiscine - In', { piscine })
       this.loading = true;
-      console.log(piscine)
       const url = process.env.API_URL + "/piscine/delete/";
       piscine.uti_id = this.$store.state.utilisateurCourant.id;
-      return this.$axios
-        .$post(url, { piscine })
+      return this.$axios.$post(url, { piscine })
         .then((response) => {
+          log.d('deletePiscine - Done on server', { response  })
           this.$store.dispatch("get_mesPiscines");
           this.loading = false;
-          this.$toast.success(
-            `#${piscine.nom} a bien été supprimée de vos piscines favorites`,
-            {}
-          );
+          log.i('deletePiscine - Done')
+          return this.$toast.success(`#${piscine.nom} a bien été supprimée de vos piscines favorites`)
         })
         .catch((error) => {
-          console.error(
-            "Une erreur est survenue lors de la suppresion de la piscine favorite",
-            error
-          );
+          log.w('deletePiscine', { error })
           this.loading = false;
+          return this.$toast.error('Une erreur est survenue lors de la suppresion de la piscine')
         });
     },
     deleteStructure: function (structure) {
+      log.i('deleteStructure - In', { structure })
       this.loading = true;
-      console.log(structure)
       const url = process.env.API_URL + "/structures/delete";
       const param = {
         structureId: structure.id,
         userId : this.$store.state.utilisateurCourant.id
       }
-      return this.$axios
-        .$post(url, param)
+      return this.$axios.$post(url, param)
         .then((response) => {
+          log.d('deleteStructure - Done on server', { response })
           this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id)
           this.loading = false;
-          this.$toast.success(
-            response,
-            {}
-          );
+          log.i('deleteStructure - Done')
+          return this.$toast.success('La structure a bien été supprimée de vos structures favorites')
         })
         .catch((error) => {
-          console.error(
-            "Une erreur est survenue lors de la suppresion de la structure favorite",
-            error
-          );
+          log.w('deleteStructure', { error })
           this.loading = false;
+          return this.$toast.error('Une erreur est survenue lors de la suppresion de la structure')
         });
     },
     downloadPdf: function (id) {
@@ -605,7 +427,6 @@ export default {
           idformate = "0" + idformate;
         }
         idformate = "AAQ_Attestation-" + idformate;
-        console.log(idformate);
         link.setAttribute("download", `${idformate}.pdf`); //or any other extension
         document.body.appendChild(link);
         // Télécharge le fichier
@@ -631,15 +452,10 @@ export default {
           // Télécharge le fichier
           link.click();
           link.remove();
-          console.log("Done - Download", { fileName });
         })
         .catch((err) => {
-          console.log(JSON.stringify(err));
           this.$toasted.error("Erreur lors du téléchargement: " + err.message);
         });
-    },
-    clearIntervention() {
-      this.$store.commit("reset_interventions");
     },
     exportCsv() {
       this.$axios({
@@ -663,28 +479,27 @@ export default {
           // Télécharge le fichier
           link.click();
           link.remove();
-          console.log("Done - Download", { fileName });
         })
         .catch((err) => {
-          console.log(JSON.stringify(err));
           this.$toasted.error("Erreur lors du téléchargement: " + err.message);
         });
     },
-  },
-  //
-  //  CHARGEMENT ASYNCHRONE DES INTERVENTIONS
-  //
-  async mounted() {
-    this.$store.dispatch("get_mesPiscines"),
-    this.$store.dispatch("get_interventions")
-    this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id)
-    this.$store.commit("clean_enfants");
-    
-  },
+    displayDashboard(bool) {
+      return this.showDashboard = bool
+    },
+    resetIntervention() {
+      this.$store.commit("CLEAN", { key: 'enfants', isArray: true});
+      return this.$store.commit("CLEAN", { key: 'interventionCourrante'});
+    }
+  }
 };
 </script>
 
 <style>
+.custom-box {
+    min-height: 66vh;
+    border-left: 1px solid rgba(173,173,173,0.5);
+}
 .accordionBtn {
   text-align: left;
 }
@@ -708,5 +523,9 @@ a:not(.collapsed) .accordion-chevron {
   -webkit-transform: rotate(90deg);
   transform: rotate(90deg);
   -moz-transform: rotate(90deg);
+}
+
+#modal-intervention___BV_modal_footer_ {
+  display: none;
 }
 </style>

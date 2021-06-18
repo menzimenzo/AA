@@ -352,17 +352,17 @@
       <Piscine :dansInt="false"/>
     </modal>
     <modal name="newStructure" height="500px" width="800px" :scrollabe="true">
-       <Structure :dansInt="false"/>
+      <Structure :dansInt="false"/>
     </modal>
   </b-container>
 </template>
 
 <script>
 import Intervention from "~/components/Intervention.vue";
-import Piscine from "~/components/piscine.vue";
-import Structure from "~/components/structure.vue";
-import { mapState } from "vuex";
+import Piscine from "~/components/element/piscine.vue";
+import Structure from "~/components/element/structure.vue";
 import Editable from "~/components/editable/index.vue";
+import { mapState } from "vuex";
 
 export default {
   components: {

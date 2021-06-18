@@ -52,7 +52,7 @@
                 :loading="loading"
                 :defaultSortField="{ key: 'nom', order: 'asc' }">
                 <template slot-scope="props" slot="actions">
-                  <b-btn @click="editUser(props.data.item.id)" size="sm" class="mr-1" variant="primary">
+                  <b-btn @click="getUser(props.data.item.id)" size="sm" class="mr-1" variant="primary">
                     <i class="material-icons">edit</i>
                   </b-btn>
                 </template>
@@ -143,70 +143,8 @@ export default {
       ]
     };
   },
-
-  methods: {
-    editUser: function(id) {
-      console.log("Client : User Id : " + id)
-      return this.$store.dispatch("get_user", id)
-        .then(() => {
-          this.$modal.show("editUser");
-        })
-        .catch(error => {
-          console.error(
-            "Une erreur est survenue lors de la récupération du détail de l'user",
-            error
-          );
-        });
-    },
-    editStruct: function(id) {
-      if (id === null) {
-        this.$store.commit("clean_structureSelectionnee");
-        this.$modal.show("editStruct");
-      } else {
-        return this.$store.dispatch("get_structure", id)
-          .then(() => {
-            this.$modal.show("editStruct");
-          })
-          .catch(error => {
-            console.error(
-              "Une erreur est survenue lors de la récupération du détail de la structure",
-              error
-            );
-          });
-      }
-    },
-    exportUsersCsv() {
-      this.$axios({
-        url: process.env.API_URL + "/user/csv", // + this.utilisateurCourant.id,
-        // url: apiUrl + '/droits/' + 17,
-        method: "GET",
-        responseType: "blob"
-      })
-        .then(response => {
-          // https://gist.github.com/javilobo8/097c30a233786be52070986d8cdb1743
-          // Crée un objet blob avec le contenue du CSV et un lien associé
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          // Crée un lien caché pour télécharger le fichier
-          const link = document.createElement("a");
-          link.href = url;
-          const fileName = "Aisance Aquatique - Utilisateurs.csv";
-          link.setAttribute("download", fileName);
-          // Télécharge le fichier
-          link.click();
-          link.remove();
-          console.log("Done - Download", { fileName });
-        })
-        .catch(err => {
-          console.log(JSON.stringify(err));
-          this.$toasted.error("Erreur lors du téléchargement: " + err.message);
-        });
-    },
-  },
-  //
-  //  CHARGEMENT ASYNCHRONE DES USERS, STRUCTURES ET INTERVENTIONS
-  //
   computed: {
-    ...mapState(["interventions", "users", "structures", "statStructure"]),
+    ...mapState(["users"]),
     filteredUtilisateurs: function() {
       log.i('filteredUtilisateurs - In')
       return this.users.filter(user => {

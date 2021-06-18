@@ -1,25 +1,18 @@
 <template>
-  <b-container class="interventionModal">
+  <b-container>
     <b-row>
-      <b-col
-        cols="12"
-        v-if="intervention && intervention.id"
-        class="text-center"
-      >
-        <h2 class="mb-3">
+      <b-col cols="12" class="text-center">
+        <h2 v-if="intervention && intervention.id" class="mb-3">
           Intervention n°{{ intervention.id }} du
           {{ intervention.dateDebutIntervention | date }} au
           {{ intervention.dateFinIntervention | date }}
         </h2>
+        <h2 v-else class="mb-3">Saisie d'une nouvelle intervention</h2>
       </b-col>
     </b-row>
     <b-row>
-      <div class="mb-3">
-        Liste des intervenants présents durant l'intervention
-      </div>
-    </b-row>
-    <b-row>
-      <b-col cols="10">
+      <b-col cols="12">
+        <p class="mb-3">Liste des intervenants présents durant l'intervention :</p>
         <editable
           :columns="headersEncadrants"
           :data="formIntervention.utilisateur"
@@ -34,130 +27,99 @@
               @click="deleteMN(props.data.item)"
               size="sm"
               class="mr-1"
-              variant="primary"
-            >
+              variant="primary">
               <i class="material-icons">delete</i>
             </b-btn>
           </template>
         </editable>
         <b-btn
           @click="editIntervenant(null)"
-          class="btn btn-primary btn-lg btn-block"
-        >
+          class="btn btn-primary btn-lg btn-block">
           <i class="material-icons">add</i>
         </b-btn>
       </b-col>
     </b-row>
     <b-row>
-      <br />
-      <br />
-    </b-row>
-    <b-row>
-      <div class="input-group-display">
-        <b-col cols="10">
-          <span>structure pour laquelle j'interviens * :</span>
+        <b-col cols="6">
+          <p>Structure pour laquelle j'interviens * :</p>
           <b-form-select
             class="liste-deroulante"
-            v-model="formIntervention.structure"
-          >
+            v-model="formIntervention.structure">
             <option :value="null">-- Choix de la structure --</option>
             <option
-              v-for="structure in this.$store.state.structures"
+              v-for="structure in structures"
               :key="structure.id"
-              :value="structure"
-            >
+              :value="structure">
               {{ structure.nom }}
             </option>
           </b-form-select>
-        </b-col>
-        <b-col cols="2">
-          <b-btn v-if="this.$store.state.utilisateurCourant.profilId != 2"
+          <b-btn v-if="utilisateurCourant.profilId != 2"
             @click="addStructure()"
-            class="btn btn-primary btn-lg btn-block"
-          >
+            class="btn btn-primary ml-3">
             <i class="material-icons">add</i>
           </b-btn>
         </b-col>
-      </div>
-    </b-row>
-    <b-row>
-      <br />
-      <br />
-    </b-row>
-    <b-row>
-      <div class="input-group-display">
-        <b-col cols="10">
-          <span>Lieu d'intervention * :</span>
+        <b-col cols="6">
+          <p>Lieu d'intervention * :</p>
           <b-form-select
             class="liste-deroulante"
-            v-model="formIntervention.piscine"
-          >
+            v-model="formIntervention.piscine">
             <option :value="null">-- Choix de la Piscine --</option>
             <option
-              v-for="piscine in this.$store.state.mesPiscines"
+              v-for="piscine in mesPiscines"
               :key="piscine.id"
               :value="piscine"
             >
               {{ piscine.nom }}
             </option>
           </b-form-select>
-        </b-col>
-        <b-col cols="2">
-          <b-btn @click="addPiscine()" class="btn btn-primary btn-lg btn-block">
+          <b-btn @click="addPiscine()" class="btn btn-primary ml-3">
             <i class="material-icons">add</i>
           </b-btn>
         </b-col>
-      </div>
     </b-row>
-    <div v-if="formIntervention.piscine.nom" >
-      Adresse : {{ formIntervention.piscine.adresse }} <br />
-      Commune: {{ formIntervention.piscine.cp }} 
-      
-    </div>
-    <b-row>
-      <br />
-      <br />
+    <b-row v-if="formIntervention.piscine.nom" class="mt-2">
+      <b-col cols="6">
+        <span>Commune: {{ formIntervention.piscine.cp }}</span>      
+      </b-col>
+      <b-col cols="6">
+        <span>Adresse : {{ formIntervention.piscine.adresse }}</span>
+      </b-col>
     </b-row>
     <b-row>
-      <span>Période d'intervention * :</span>
+      <b-col cols="12">
+        <p>Période d'intervention * :</p>
+      </b-col>
     </b-row>
     <b-row>
-      <div class="input-group-display">
+      <b-col cols="4">
         <span> Du :&nbsp;</span>
         <b-form-input
           maxlength="10"
           v-model="formIntervention.dateDebutIntervention"
           type="date"
-          class="text-date date-input-width"
-        ></b-form-input>
+          class="text-date input-width" />
+      </b-col>
+      <b-col cols="4">
         <span>&nbsp; Au :&nbsp;</span>
         <b-form-input
           maxlength="10"
           v-model="formIntervention.dateFinIntervention"
           type="date"
-          class="text-date date-input-width"
-        ></b-form-input>
+          class="text-date input-width"/>
+      </b-col>
+      <b-col cols="4">
         <span>&nbsp;Nombre de séances en piscine :&nbsp;</span>
         <b-form-input
           maxlength="2"
           v-model="formIntervention.nbSession"
           type="number"
-          class="text-date date-input-width"
-        ></b-form-input>
-      </div>
+          class="text-date input-width"/>
+      </b-col>
     </b-row>
     <b-row>
-      <br />
-      <br />
-    </b-row>
-    <b-row>
-      <div class="input-group-display">
-        <span> Cadre d'intervention :&nbsp;</span>
-
-        <i class="material-icons" :id="randomId" style="cursor: pointer"
-          >info</i
-        >
-        :
+      <b-col cols="3">
+        <p> Cadre d'intervention &nbsp;<i class="material-icons" :id="randomId" style="cursor: pointer">info</i>:
         <b-popover :target="randomId" triggers="hover focus">
           <b>Péri-scolaire</b> : concerne les activités organisées durant les
           jours d’école ainsi que le mercredi, qu’il y ait ou non école le
@@ -166,166 +128,129 @@
           <b>Extra-scolaire</b> : concerne les accueils organisés les samedis
           sans école, les dimanches et pendant les congés scolaires.
         </b-popover>
-        <b-form-group class="ml-3">
-          <b-form-radio-group
-            v-model="formIntervention.cai"
-            :options="listecadreintervention"
-            plain
-            name="plainStacked"
-          />
-        </b-form-group>
-      </div>
+        </p>
+      </b-col>
+      <b-col cols="9">
+        <b-form-radio-group
+          v-model="formIntervention.cai"
+          :options="listecadreintervention"
+          class="plainStacked"
+          name="plainStacked"
+        />
+      </b-col>
     </b-row>
-    <b-row>
-      <div class="input-group-display" v-if="formIntervention.cai == 1">
+    <b-row v-if="formIntervention.cai == 1">
+      <b-col cols="12" class="my-3">
         <span>Classe concernée * :</span>
         <b-form-select
           class="liste-deroulante"
-          v-model="formIntervention.classe"
-        >
+          v-model="formIntervention.classe">
           <option :value="null">-- Choix de la classe --</option>
           <option
             v-for="classe in listeclasse"
             :key="classe.text"
-            :value="classe.value"
-          >
+            :value="classe.value">
             {{ classe.text }}
           </option>
         </b-form-select>
-      </div>
+      </b-col>
     </b-row>
     <b-row>
-      <br />
-      <br />
+      <b-col cols="4">
+        <span>Niveau initial :&nbsp;</span>
+        <b-form-select v-model="niveauInitial" class="input-width">
+          <option
+            v-for="classe in listeniveau"
+            :key="classe.value"
+            :value="classe.value">
+            {{ classe.lib }}
+          </option>
+        </b-form-select>
+      </b-col>
+      <b-col cols="4">
+        <span>Niveau final :&nbsp;</span>
+        <b-form-select v-model="niveauFinal" class="input-width">
+          <option
+            v-for="classe in listeniveau"
+            :key="classe.value"
+            :value="classe.value">
+            {{ classe.lib }}
+          </option>
+        </b-form-select>
+      </b-col>
+      <b-col cols="4">
+        <span>Nombre d'enfants * :&nbsp;</span>
+        <b-form-input
+          v-model="formIntervention.nbEnfants"
+          type="number"
+          min="0"
+          class="input-width"/>
+      </b-col>
     </b-row>
-    <b-row>
-      <div class="input-group-display">
-        <b-col>
-          <span>Nombre d'enfants * :&nbsp;</span>
-          <b-form-input
-            v-model="formIntervention.nbEnfants"
-            type="number"
-            min="0"
-            class="text-cinq-car"
-          ></b-form-input>
-        </b-col>
-        <b-col>
-          <span>Niveau initial :&nbsp;</span>
-          <b-form-select v-model="niveauInitial" class="liste-deroulante">
-            <option
-              v-for="classe in listeniveau"
-              :key="classe.value"
-              :value="classe.value"
-            >
-              {{ classe.lib }}
-            </option>
-
-            ></b-form-select
-          >
-        </b-col>
-        <b-col>
-          <span>Niveau final :&nbsp;</span>
-          <b-form-select v-model="niveauFinal" class="liste-deroulante">
-            <option
-              v-for="classe in listeniveau"
-              :key="classe.value"
-              :value="classe.value"
-            >
-              {{ classe.lib }}
-            </option>
-
-            ></b-form-select
-          >
-        </b-col>
-      </div>
-    </b-row>
-    <br />
-    <br />
-
-    <b-row>
-      <span>Liste des {{ formIntervention.nbEnfants }} enfants * :</span>
-    </b-row>
-    <b-row>
-      <div class="input-group-display">
-        <editable
-          :columns="headersEnfants"
-          :data="this.$store.state.enfants"
-          :removable="true"
-          :creable="false"
-          :editable="true"
-          :noDataLabel="''"
-          :edit-by-line="true"
-          tableMaxHeight="none"
-          @update="updateEnfant"
-          @remove="removeEnfant"
-        >
-          <template slot-scope="props" slot="actions">
-            <b-btn
-              @click="searchEnfant(props.data)"
-              size="sm"
-              class="mr-1"
-              variant="primary"
-            >
-              <i class="material-icons">edit</i>
-            </b-btn>
-          </template>
-        </editable>
-      </div>
-    </b-row>
-
-    <div id="error" v-if="erreurformulaire.length == 1">
+    <div v-if="hasEnfantsDeclared">
       <b-row>
-        Veuillez renseigner le champ :
-        <ul>
-          <li v-for="erreur in erreurformulaire" :key="erreur">
-            {{ erreur }}
-          </li>
-        </ul>
+        <b-col cols="12">
+          <p>Liste des {{ formIntervention.nbEnfants }} enfants * :</p>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="12">
+          <editable
+            :columns="headersEnfants"
+            :data="enfants"
+            :removable="true"
+            :creable="false"
+            :editable="true"
+            :noDataLabel="''"
+            :edit-by-line="true"
+            tableMaxHeight="none"
+            @update="updateEnfant"
+            @remove="removeEnfant">
+            <template slot-scope="props" slot="actions">
+              <b-btn
+                @click="searchEnfant(props.data)"
+                size="sm"
+                class="mr-1"
+                variant="primary">
+                <i class="material-icons">search</i>
+              </b-btn>
+            </template>
+          </editable>
+        </b-col>
       </b-row>
     </div>
-    <div id="error" v-if="erreurformulaire.length > 1">
-      <b-row>
-        Veuillez renseigner les champs suivants :
-        <ul>
-          <li v-for="erreur in erreurformulaire" :key="erreur">
-            {{ erreur }}
-          </li>
-        </ul>
-      </b-row>
-    </div>
-
+    <b-row id="error" v-if="erreurformulaire.length > 0">
+      <span>{{ erreurformulaire.length == 1 ? 'Veuillez renseigner le champ :' : 'Veuillez renseigner les champs suivants :' }}</span>
+      <ul>
+        <li v-for="erreur in erreurformulaire" :key="erreur">
+          {{ erreur }}
+        </li>
+      </ul>
+    </b-row>
     <b-row>
-      <p class="modal-btns">
-        <b-button
-          v-on:click="resetform()"
-          v-if="intervention.id"
-          title="Réinitialiser le formulaire"
-          >Annuler</b-button
-        >
-        <b-button
-          v-on:click="resetform()"
-          v-if="!intervention.id"
-          title="Réinitialiser le formulaire"
-          >Réinitialiser le formulaire</b-button
-        >
-
-        <b-button variant="success" v-on:click="checkform"
-          >Enregistrer</b-button
-        >
-      </p>
+      <b-col cols="12" class="mt-5 text-right">
+        <b-button @click="resetform()" v-if="intervention.id">
+          Annuler
+        </b-button>
+        <b-button @click="resetform()" v-else>
+          Réinitaliser le formulaire
+        </b-button>
+        <b-button variant="success" v-on:click="checkform">
+          Enregistrer
+        </b-button>
+      </b-col>
     </b-row>
     <modal
       name="editIntervenant"
       height="auto"
       width="1100px"
-      :scrollabe="true"
-    >
-      <Intervenant :intervention="this.formIntervention" />
+      :scrollabe="true">
+      <Intervenant :intervention="formIntervention" />
     </modal>
     <modal name="editPiscine" height="auto" width="1100px" :scrollabe="true">
       <Piscine :intervention="this.formIntervention" :dansInt="true" />
     </modal>
-    <modal name="editStructure" height="auto" width="400px" :scrollabe="true">
+    <modal name="editStructure" height="auto" width="600px" :scrollabe="true">
       <Structure :intervention="this.formIntervention" :dansInt="true" />
     </modal>
     <modal name="saisieIndex" height="auto" width="400px" :scrollabe="true">
@@ -334,24 +259,22 @@
   </b-container>
 </template>
 <script>
+import Editable from "~/components/editable/index.vue";
+import Intervenant from "~/components/element/Intervenant.vue";
+import Piscine from "~/components/element/piscine.vue";
+import Structure from "~/components/element/structure.vue";
+import Saisieindex from "~/components/saisieIndex.vue";
+
+import { debounce } from 'lodash';
+import { mapState } from "vuex";
 import Vue from "vue";
 import moment from "moment";
-import Editable from "~/components/editable/index.vue";
-import Intervenant from "~/components/Intervenant.vue";
-import Piscine from "~/components/piscine.vue";
-import Structure from "~/components/structure.vue";
-import Saisieindex from "~/components/saisieindex.vue";
+import logger from '~/plugins/logger'
+const log = logger('components:intervention')
 
-const listeniveau = [
-  { lib: "Débutant", value: 0 },
-  { lib: "Palier 1", value: "1" },
-  { lib: "Palier 2", value: "2" },
-  { lib: "Palier 3 ", value: "3" },
-];
-
-var loadFormIntervention = function (intervention) {
-  console.info("loadFormIntervention");
-  let formIntervention = JSON.parse(
+const loadFormIntervention = function (intervention) {
+  log.i("loadFormIntervention - In");
+  const formIntervention = JSON.parse(
     JSON.stringify(
       Object.assign(
         {
@@ -370,12 +293,10 @@ var loadFormIntervention = function (intervention) {
       )
     )
   );
-  let dateDebutIntervention = moment(intervention.dateDebutIntervention);
-  formIntervention.dateDebutIntervention =
-    dateDebutIntervention.format("YYYY-MM-DD");
-  let dateFinIntervention = moment(intervention.dateFinIntervention);
-  formIntervention.dateFinIntervention =
-    dateFinIntervention.format("YYYY-MM-DD");
+  const dateDebutIntervention = moment(intervention.dateDebutIntervention);
+  formIntervention.dateDebutIntervention = dateDebutIntervention.format("YYYY-MM-DD");
+  const dateFinIntervention = moment(intervention.dateFinIntervention);
+  formIntervention.dateFinIntervention = dateFinIntervention.format("YYYY-MM-DD");
   return formIntervention;
 };
 
@@ -397,6 +318,7 @@ export default {
   },
   data() {
     return {
+      formIntervention: loadFormIntervention(this.intervention),
       erreurformulaire: [],
       index: null,
       niveauInitial: null,
@@ -412,7 +334,6 @@ export default {
           sortable: false,
         },
       ],
-      formIntervention: loadFormIntervention(this.intervention),
       listecadreintervention: [
         { text: `Scolaire`, value: "1" },
         { text: `Péri-scolaire`, value: "2" },
@@ -451,7 +372,12 @@ export default {
           path: "niv_ini",
           title: "niveau initial",
           type: "select",
-          options: listeniveau,
+          options: [
+            { lib: "Débutant", value: 0 },
+            { lib: "Palier 1", value: "1" },
+            { lib: "Palier 2", value: "2" },
+            { lib: "Palier 3 ", value: "3" },
+          ],
           sortable: true,
           editable: true,
         },
@@ -459,7 +385,12 @@ export default {
           path: "niv_fin",
           title: "niveau final atteint",
           type: "select",
-          options: listeniveau,
+          options: [
+            { lib: "Débutant", value: 0 },
+            { lib: "Palier 1", value: "1" },
+            { lib: "Palier 2", value: "2" },
+            { lib: "Palier 3 ", value: "3" },
+          ],
           sortable: true,
           editable: true,
         },
@@ -474,19 +405,82 @@ export default {
       randomId: "popover-" + Math.floor(Math.random() * 100000),
     };
   },
+  computed: {
+    ...mapState([
+      "mesPiscines",
+      "interventionCourrante",
+      "utilisateurCourant",
+      "structures",
+      "piscines",
+    ]),
+    hasEnfantsDeclared() {
+      return this.intervention.id ? this.intervention.nbEnfants > 0 : this.formIntervention.nbEnfants && this.formIntervention.nbEnfants > 0
+    },
+    enfants() {
+        return this.$store.state.enfants
+    }
+  },
+  watch: {
+    intervention(intervention) {
+      Vue.set(this, "formIntervention", loadFormIntervention(intervention));
+    },
+    "formIntervention.nbEnfants": debounce(function() {
+        log.i("Watch - In - formIntervention.nbEnfants")
+        if (this.formIntervention.id) {
+          return
+        }
+        if(this.formIntervention.nbEnfants !=="" && (!this.niveauInitial || !this.niveauFinal)) {
+          return this.$toast.error('Veuillez d\'abord sélectionner les niveaux liés à cette intervention. Vous pourrez les changer par la suite.')
+        }
+
+        const reference = parseInt(this.formIntervention.nbEnfants)
+        const enfantsStore = JSON.parse(JSON.stringify(this.enfants))
+        let array = []
+        let enfant = {
+            id: null,
+            prenom: null,
+            niv_ini: this.niveauInitial,
+            niv_fin: this.niveauFinal,
+        }
+        if (enfantsStore.length == 0) {
+          for (let i = 0; i < this.formIntervention.nbEnfants; i++) {
+            array.push(enfant)
+          }
+          this.$store.commit('SET', { key: 'enfants', value: array })
+        } else if (enfantsStore.length !== reference){
+          const isSuperior = enfantsStore.length > reference
+
+          log.d('Watch - formIntervention.nbEnfants', { isSuperior })
+          if(isSuperior) {
+            const nbLgnes = enfantsStore.length - reference
+            let msg = ''
+            nbLgnes == 1 ? msg = "Vous allez effacer la dernière ligne saisie. Êtes vous sûr ?" : msg = "Vous allez effacer les " + nbLgnes + " dernières lignes saisies. Êtes vous sûr ?";
+            if (confirm(msg)) {
+                this.$store.commit("SPLICE_END", { key: 'enfants', number: nbLgnes});
+            }
+          } else {
+            const nbLgnes= reference - enfantsStore.length
+            for (let i = 0; i < nbLgnes; i++) {
+              enfantsStore.push(enfant)
+            }
+            return this.$store.commit('SET', { key: 'enfants', value: enfantsStore })
+          }
+        }
+      }, 500)
+  },
+  mounted() {
+    return this.resetform()
+  },
   methods: {
     removeEnfant: function (evenement) {
-      console.info("removeEnfant");
-      const indexT = evenement.index;
-      this.$store.commit("splice_enfant", indexT);
-      this.formIntervention.nbEnfants = this.$store.state.enfants.length;
+      log.i("removeEnfant - In");
+      const index = evenement.index;
+      this.$store.commit("SPLICE", { key: 'enfants', index });
+      return this.formIntervention.nbEnfants = this.enfants.length;
     },
     updateEnfant: function (evenement) {
-      const param = {
-        enfant: evenement.item,
-        index: evenement.index,
-      };
-      this.$store.commit("put_enfant", param);
+      log.i("updateEnfant - In");
+      return this.$store.commit("UPDATE_ARRAY_ELM", { key: 'enfants', index: evenement.index, value: evenement.item});
     },
     searchEnfant: function (param) {
       this.index = param.index;
@@ -502,45 +496,29 @@ export default {
       this.$modal.show("editIntervenant");
     },
     deleteMN: function (mn) {
-      for (const [key, user] of Object.entries(
-        this.formIntervention.utilisateur
-      )) {
-        if (user.id == mn.id) {
-          this.formIntervention.utilisateur.splice(key, 1);
-        }
-        idformate = "AAQ_Attestation-" + idformate;
-        console.log("intervention : " + idformate);
-        link.setAttribute("download", `${idformate}.pdf`); //or any other extension
-        document.body.appendChild(link);
-        link.click();
-      }
+      log.i('deleteMN - In')
+      const Index = this.formIntervention.utilisateur.findIndex(uti => uti.id == mn.id)
+      log.i('deleteMN - Done')
+      return this.formIntervention.utilisateur.splice(Index, 1);
     },
-    resetform: async function () {
+    resetform: function () {
+      log.i('resetform - In')
       this.erreurformulaire = [];
-      const action = "reset_interventions";
-      console.info({ action });
-      await Promise.all([this.$store.commit(action)]).then(() => {
+      return Promise.all([this.$store.commit("CLEAN", { key: 'interventionCourrante'})]).then(() => {
+        log.i('resetform - Done')
         this.formIntervention.nbEnfants = "";
-        if (
-          (this.$store.state.utilisateurCourant.profilId == 3 ||
-            this.$store.state.utilisateurCourant.profilId == 4) &&
-          !this.$store.state.interventionCourrante.id
-        ) {
-          this.formIntervention.utilisateur.push(
-            this.$store.state.utilisateurCourant
-          );
+        if ((this.utilisateurCourant.profilId == 3 || this.utilisateurCourant.profilId == 4) && !this.interventionCourrante.id) {
+          log.d('resetForm - resetting users.')
+          return this.formIntervention.utilisateur.push(this.utilisateurCourant)
         }
       });
     },
     checkform: function () {
-      console.info("Validation du formulaire");
+      log.i("checkform - In");
       this.erreurformulaire = [];
       var formOK = true;
 
-      if (
-        !this.formIntervention.utilisateur ||
-        this.formIntervention.utilisateur.length == 0
-      ) {
+      if (!this.formIntervention.utilisateur || this.formIntervention.utilisateur.length == 0) {
         this.erreurformulaire.push("Les intervenants");
         formOK = false;
       }
@@ -573,9 +551,10 @@ export default {
         formOK = false;
       }
       if (!formOK) {
-        console.info("Formulaire invalide", this.erreurformulaire);
+        log.i("checkForm - Done - Formulaire invalide", this.erreurformulaire);
         return;
       }
+      log.d("checkForm - Done - formulaire valide.");
       const intervention = {
         id: this.formIntervention.id,
         strId: this.formIntervention.structure.id,
@@ -583,19 +562,17 @@ export default {
         dateFinIntervention: this.formIntervention.dateFinIntervention,
         nbSession: this.formIntervention.nbSession,
         piscine: this.formIntervention.piscine,
-        nbEnfants: this.$store.state.enfants.length,
+        nbEnfants: this.enfants.length,
         cai: this.formIntervention.cai,
         classe: this.formIntervention.classe,
         utilisateur: this.formIntervention.utilisateur,
-        enfant: this.$store.state.enfants,
+        enfant: this.enfants,
       };
 
       const action = intervention && intervention.id ? "put_intervention" : "post_intervention";
-      console.info({ intervention, action });
-      return this.$store
-        .dispatch(action, intervention)
-        .then(async (serverIntervention) => {
-          console.info(serverIntervention);
+      log.d('checkForm - action on store', { intervention, action });
+      return this.$store.dispatch(action, intervention).then(serverIntervention => {
+          log.d('checkForm - response from server', serverIntervention)
           var action = [];
           if (intervention.blocId == "3") {
             action.push({
@@ -606,142 +583,34 @@ export default {
               class: "toastLink",
             });
           }
-          var interventionLabel = serverIntervention.id
-            ? "#" + serverIntervention.id
-            : "";
-          this.$toast.success(`Intervention ${interventionLabel} enregistrée`, {
-            action,
-          });
-          //this.$store.dispatch("get_intervention", serverIntervention.id);
-          this.resetform();
+          var interventionLabel = serverIntervention.id ? "#" + serverIntervention.id : "";
+          log.i('checkForm - Done')
+          this.$toast.success(`Intervention ${interventionLabel} enregistrée`)
+          return this.resetform();
         })
         .catch((error) => {
-          console.error(
-            "Une erreur est survenue lors de la sauvegarde de l'intervention",
-            error
-          );
-          this.$toast.error(
-            `Erreur lors de la sauvegarde de l'intervention ${interventionLabel}`
-          );
+          log.w("Une erreur est survenue lors de la sauvegarde de l'intervention", error);
+          this.$toast.error(`Erreur lors de la sauvegarde de l'intervention ${interventionLabel}`)
         });
     },
-  },
-  watch: {
-    intervention(intervention) {
-      /*console.info("watch.intervention");
-      let formIntervention = JSON.parse(
-        JSON.stringify(
-          Object.assign(
-            {
-              strId: "",
-              piscine: {},
-              maitreNageur: {},
-              dateDebutIntervention: null,
-              dateFinIntervention: null,
-              nbEnfants: "",
-              nbNouveauxEnfants: "",
-            },
-            intervention
-          )
-        )
-      );  */
-      Vue.set(this, "formIntervention", loadFormIntervention(intervention));
-    },
-    "formIntervention.nbEnfants"() {
-      if (!this.formIntervention.id) {
-        console.info("formIntervention.nbEnfants");
-        let enfant = {
-          id: null,
-          prenom: null,
-          niv_ini: this.niveauInitial,
-          niv_fin: this.niveauFinal,
-        };
-        if (this.formIntervention.nbEnfants == "") {
-          this.$store.commit("clean_enfants");
-        } else {
-          if (this.$store.state.enfants.length == 0)
-            for (let i = 0; i < this.formIntervention.nbEnfants; i++) {
-              this.$store.commit("add_enfant", enfant);
-            }
-          else {
-            if (
-              this.formIntervention.nbEnfants < this.$store.state.enfants.length
-            ) {
-              const nbLgnes =
-                this.$store.state.enfants.length -
-                this.formIntervention.nbEnfants;
-              let msg = "";
-              if (nbLgnes == 1) {
-                msg =
-                  "Vous allez effacer la dernière ligne saisie. Êtes vous sûr ?";
-              } else {
-                msg =
-                  "Vous allez effacer les " +
-                  nbLgnes +
-                  " dernières lignes saisies. Êtes vous sûr ?";
-              }
-              if (confirm(msg)) {
-                for (let i = 0; i < nbLgnes; i++) {
-                  this.$store.commit("splice_enfant");
-                }
-              } else {
-                this.formIntervention.nbEnfants =
-                  this.$store.state.enfants.length;
-              }
-            } else {
-              if (
-                this.formIntervention.nbEnfants !=
-                this.$store.state.enfants.length
-              ) {
-                for (
-                  let i = 0;
-                  i <
-                  this.formIntervention.nbEnfants -
-                    this.$store.state.enfants.length +
-                    1;
-                  i++
-                ) {
-                  this.$store.commit("add_enfant", enfant);
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-  },
-  async mounted() {
-    if (!this.intervention.id) {
-      this.resetform();
-    } else {
-      this.$store.commit("set_enfants", this.intervention.enfant);
-    }
   },
 };
 </script>
 
 <style>
-.interventionModal {
-  padding: 30px;
-  overflow-y: scroll;
-}
-.modal-btns {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-}
-.input-group-display {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-.input-group-display span {
-  margin-top: 5px;
-}
 ul {
   list-style-type: none;
 }
-.date-input-width {
-  width: 190px;
+.input-width {
+  width: 100%;
+}
+.liste-deroulante {
+  width: 80%;
+}
+p {
+  font-size: 1.3em;
+}
+.plainStacked {
+  margin-top: 22px;
 }
 </style>

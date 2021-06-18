@@ -126,7 +126,7 @@
                     data-test-link="editable-save"
                     @click="validate"
                     title="Enregistrer">
-                    <btnEnregistrer color="#fff" />
+                    <btnEnregistrer color="#252195" />
                 </a>
                 <a class="btn-remove btn-rounded btn-shadow no-margin-left"
                     role="button"

@@ -1,11 +1,11 @@
-#! /bin/sh
-#psql -c "DROP DATABASE aaq_dev if EXISTS"
+! /bin/sh
+psql -c "DROP DATABASE aaq_dev if EXISTS"
 
-#echo '01-CreationBDD :'
-#psql -f /docker-entrypoint-initdb.d/scripts/01-CreationBDD.sql
+echo '01-CreationBDD :'
+psql -f /docker-entrypoint-initdb.d/scripts/01-CreationBDD.sql
 
-#echo '02-SQL_CreationBase :'
-#psql -d aaq_dev -U u_aaq_dev -f /docker-entrypoint-initdb.d/scripts/02-SQL_CreationBase.sql
+echo '02-SQL_CreationBase :'
+psql -d aaq_dev -U u_aaq_dev -f /docker-entrypoint-initdb.d/scripts/02-SQL_CreationBase.sql
 
 echo '03-SQL_PeuplementReferentielBase :'
 psql -d aaq_dev -U u_aaq_dev -f /docker-entrypoint-initdb.d/scripts/03-SQL_PeuplementReferentielBase.sql

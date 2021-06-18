@@ -51,133 +51,45 @@ export const mutations = {
     })
     Vue.set(origin, lastKey, null)
   },
-  set_statStructure(state, statStructure) {
-    log.i(`mutations::set_statStructure`)
-    state.statStructure = statStructure;
-  },
-  set_interventionCourrantes(state, interventions) {
-    log.i(`mutations::set_interventionCourrantes`)
-    state.interventions = interventions;
-  },
-  set_interventionCourrante(state, intervention) {
-    log.i(`mutations::set_interventionCourrante`, { intervention })
-    state.interventionCourrante = intervention;
-  },
-  put_intervention(state, { intervention, index }) {
-    log.i(`mutations::put_interventionCourrante`, { intervention })
-    Vue.set(state.interventions, index, intervention);
-  },
-  add_intervention(state, intervention) {
-    log.i(`mutations::add_interventionCourrante`, { intervention })
-    state.interventions.push(intervention);
-  },
-  clean_interventions(state) {
-    log.i(`mutations::clean_interventionCourrante`)
-    state.interventions = [];
-  },
-  reset_interventions(state) {
-    log.i(`mutations::reset_interventionCourrante`)
-    state.interventionCourrante = {};
-  },
-  select_intervention(state, index) {
-    log.i(`mutations::select_intervention`)
-    state.intervention = state.interventions[index];
-  },
-  set_utilisateurCourant(state, utilisateur) {
-    log.i("::mutations::set_utilisateurCourant - In");
-    state.utilisateurCourant = utilisateur;
-  },
-  set_utilisateurSelectionne(state, utilisateur) {
-    log.i(`mutations::set_utilisateurSelectionne`)
-    state.utilisateurSelectionne = utilisateur;
-  },
-  put_user(state, { utilisateurSelectionne, index }) {
-    log.i(`mutations::put_user`)
-    Vue.set(state.utilisateurSelectionne, index, utilisateurSelectionne);
-  },
-  clean_utilisateurCourant(state) {
-    log.i(`mutations::clean_utilisateurCourant`)
-    state.utilisateurCourant = null;
-  },
-  set_users(state, users){
-    log.i(`mutations::set_users`)
-    state.users = users
-  },
-  add_piscine(state, piscine) {
-    log.i(`mutations::add_piscine`, { piscine })
-    state.interventions.push(piscine);
-  },
-  set_mesPiscines(state, piscine) {
-    log.i("::mutations::set_mesPiscines - In");
-    state.mesPiscines = piscine;
-  },
-  set_maPiscine(state, piscine) {
-    log.i("::mutations::set_maPiscine - In");
-    state.maPiscine = piscine;
-  },
-  clean_mesPiscines(state) {
-    log.i(`mutations::clean_mesPiscines`)
-    state.mesPiscines = null;
-  },
-  set_enfants(state,enfant) {
-    log.i(`mutations::set_enfants`, { enfant })
-    state.enfants = enfant
-  },
-  add_enfant(state, enfant) {
-    log.i(`mutations::add_enfant`, { enfant })
-    state.enfants.push(enfant);
-  },
-  splice_enfant(state,index) {
-    log.i(`mutations::splice_enfant`)
-    if ( index > -1) {
-      state.enfants.splice(index,1);
-    }
-    else {
-      state.enfants.splice(-1);
-    }
-  },
-  put_enfant(state, {enfant,index}) {
-    log.i(`mutations::put_enfant`, { enfant })
-    Vue.set(state.enfants, index, enfant);
-  },
-  clean_enfants(state) {
-    log.i(`mutations::clean_enfants`)
-    state.enfants = [];
-  },
-  put_user(state, {user, index}){
-    log.i(`mutations::put_user`)
-    Vue.set(state.users, index, user)
-  },
-  set_structures(state, structures){
-    log.i(`mutations::set_structures`)
-    state.structures = structures
-  },
-  set_documents(state, documents){
-    log.i(`mutations::set_documents`)    
-    state.documents = documents
-  },
-  UPDATE_ARRAY_ELM(state, { key, value }) {
+  UPDATE_ARRAY_ELM(state, { key, value, index }) {
     log.i('mutations::index/UPDATE_ARRAY_ELM', { key, value })
     const data = _.get(state, key)
-    const index = data.findIndex(d => d.id === value.id)
-    if (index === -1) {
-        log.w('mutations::index/UPDATE_ARRAY_ELM', 'Élément non présent dans la liste')
-        data.push(value)
+    if(!index) {
+      const i = data.findIndex(d => d.id === value.id)
+      if (i === -1) {
+          log.w('mutations::index/UPDATE_ARRAY_ELM', 'Élément non présent dans la liste')
+          return data.push(value)
+      }
+      return Vue.set(data, i, value)
     }
-    Vue.set(data, index, value)
+    return Vue.set(data, index, value)
   },
   CLEAN(state, { key, isArray=false }) {
     log.i(`mutations::CLEAN:`, { key, isArray })
-    return state[key] = isArray ? [] : null
+    return state[key] = isArray ? [] : {}
   },
-  // reset_interventions(state) {
-  //   log.i(`mutations::reset_interventionCourrante`)
-  //   state.interventionCourrante = {};
-  // },
-  // select_intervention(state, index) {
-  //   log.i(`mutations::select_intervention`)
-  //   state.intervention = state.interventions[index];
-  // }
+  SPLICE(state,{ key, index }) {
+    log.i(`mutations::splice`, { key })
+    if ( index > -1) {
+      state[key].splice(index,1);
+    }
+    else {
+      state[key].splice(-1);
+    }
+  },
+  SPLICE_END(state,{ key, number }) {
+    log.i(`mutations::splice`, { key })
+    const length = state[key].length
+    if (number > length) {
+      return state[key] = []
+    } else {
+      state[key].splice(length - number, number);
+    }
+  },
+  put_user(state, { utilisateurSelectionne, index }) {
+    log.i(`mutations::put_user`)
+    return Vue.set(state.utilisateurSelectionne, index, utilisateurSelectionne);
+  }
 };
 
 export const actions = {
@@ -215,10 +127,11 @@ export const actions = {
     const url = process.env.API_URL + "/interventions/" + idIntervention;
     return this.$axios.$get(url)
       .then(response => {
-        response.intervention.dateCreation = new Date(response.intervention.dateCreation)
-        commit("set_interventionCourrante", response.intervention);
-        log.i("actions::get_intervention - done", { intervention: response.intervention });
-        return commit("SET", { key: 'set_interventionCourrante', value: response.intervention });
+        const intervention = response.intervention
+        intervention.dateCreation = new Date(intervention.dateCreation)
+        log.i("actions::get_intervention - done", { intervention });
+        commit("SET", { key: 'enfants', value: intervention.enfant })
+        return commit("SET", { key: 'interventionCourrante', value: intervention });
       })
       .catch(error => {
         log.w("actions::get_intervention - erreur", error);
@@ -249,49 +162,44 @@ export const actions = {
       log.w("actions::put_intervention - erreur", error);
     })
   },
-  async get_mesPiscines({ commit, state }) {
+  get_mesPiscines({ commit, state }) {
     const url = process.env.API_URL + "/piscine/user/" + state.utilisateurCourant.id;
-    log.i("get_mesPiscines - In", { url });
+    log.i("actions::get_mesPiscines - In", { url });
     return this.$axios.$get(url)
       .then(response => {
-        commit("set_mesPiscines", response.mesPiscines);
-        log.i("fetched mesPiscines - Done", {
-        //  mesPiscines: this.mesPiscines
-        });
-        // this.interventions = response.interventions
+        log.i("actions::fetched mesPiscines - Done")
+        return commit("SET", { key: 'mesPiscines', value: response.mesPiscines });
       })
       .catch(error => {
-        log.w(
-          "Une erreur est survenue lors de la récupération des piscines de l'utilisateur " + state.utilisateurCourant.id,
-          error
-        );
-        commit('CLEAN', { key: 'mesPiscines' })
+        log.w("actions::get_mesPiscines - Une erreur est survenue lors de la récupération des piscines de l'utilisateur " + state.utilisateurCourant.id, error);
+        return commit('CLEAN', { key: 'mesPiscines' })
       });
   },
-  async get_maPiscine({ commit, state },id) {
+  get_maPiscine({ commit, state }, id) {
     const url = process.env.API_URL + "/piscine/" + id;
-    log.i("get_maPiscine - In", { url });
-    return await this.$axios
-      .$get(url)
+    log.i("actions::get_maPiscine - In", { url });
+    return this.$axios.$get(url)
       .then(response => {
-        commit("set_maPiscine", response.maPiscine);
-        log.i("fetched maPiscine - Done", {
-        });
+        log.i("actions::fetched maPiscine - Done")
+        return commit("SET", { key: 'maPiscine', value: response.maPiscine })
       })
       .catch(error => {
-        log.w(
-          "Une erreur est survenue lors de la récupération d'une piscine de l'utilisateur " + state.utilisateurCourant.id,
-          error
-        );
-        commit("clean_mesPiscines");
+        log.w("actions::get_maPiscine - Une erreur est survenue lors de la récupération d'une piscine de l'utilisateur " + state.utilisateurCourant.id, error)
+        return commit("clean_mesPiscines")
       });
   },
-  async post_maPiscine({ commit, state }, maPiscine) {
+  post_maPiscine({ commit, state }, maPiscine) {
+    log.i('pactions::post_maPiscine - In')
     maPiscine.utilisateurId = state.utilisateurCourant.id
     const url = process.env.API_URL + "/piscine/"
-    return await this.$axios.$post(url, { maPiscine }).then(({ maPiscine }) => {
-      commit('add_piscine', { maPiscine })
+    return this.$axios.$post(url, { maPiscine }).then(({ maPiscine }) => {
+      log.d('pactions::post_maPiscine - Done')
+      return commit('UPDATE_ARRAY_ELM', { key: 'mesPiscines', value: maPiscine })
     })
+    .catch(error => {
+      log.w("actions::post_maPiscine - Une erreur est survenue lors de la récupération d'une piscine de l'utilisateur ", error)
+      return commit("clean_mesPiscines")
+    });
   },
   set_utilisateur({ commit }, utilisateur) {
     return commit("SET", { key: 'utilisateurCourant', value: utilisateur });
@@ -342,27 +250,29 @@ export const actions = {
   logout({ commit }) {
     return commit("SET", { key: 'utilisateurCourant', value: null });
   },
-  async get_structureByUser({ commit,state }, userId) {
+  get_structureByUser({ commit,state }, userId) {
     log.i("actions::get_structure - In", { userId });  
-    const url = process.env.API_URL + "/structures/user/" + userId;
-    return await this.$axios
-      .$get(url)
+    const url = process.env.API_URL + "/structures/user/" + userId
+    return this.$axios.$get(url)
       .then(response => {
-        commit("set_structures", response.structures);
-        console.log("actions::get_structure - done");  
+        log.i("actions::get_structure - done")
+        return commit("SET", { key: 'structures', value: response.structures });
       })
       .catch(error => {
-        log.w("actions::get_structure - erreur", { error });  
-      });
+        log.w("actions::get_structure - erreur", { error }) 
+      })
   },
-  async post_structure({ commit, state }, [structure,userId]) {
+  post_structure({ commit, state }, [structure,userId]) {
     const url  = process.env.API_URL + "/structures";
     log.i("actions::post_structure - In", { url });  
-    return await this.$axios.$post(url, { structure, userId }).then(({ structure }) => {
-      log.i("actions::post_structure - done");  
+    return this.$axios.$post(url, { structure, userId }).then(({ structure }) => {
+      log.i("actions::post_structure - done")
       commit('UPDATE_ARRAY_ELM', { key: 'structures', value: structure })
       return structure
-    });
+      })
+      .catch(error => {
+        log.w("actions::post_structure - erreur", { error }) 
+      })
   },
   get_documents({ commit }) {
     const url = process.env.API_URL + '/documents'

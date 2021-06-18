@@ -19,7 +19,6 @@ module.exports = async function(req, res) {
 
     const requete = `SELECT * FROM utilisateur WHERE lower(uti_mail)=lower('${mail}')`;
     const crypted = await crypto.createHash('md5').update(password).digest('hex');
-
     pgPool.query(requete, (err, result) => {
         if (err) { 
             log.w(err.stack);

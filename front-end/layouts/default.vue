@@ -1,7 +1,7 @@
 <template>
   <div>
     <Header/>
-    <nuxt/>
+    <nuxt class="min-height"/>
     <Footer/>
   </div>
 </template>
@@ -22,4 +22,7 @@ export default {
 
 <style lang="css">
 @import 'assets/css/main.css';
+.min-height {
+  min-height: 65vh;
+}
 </style>
