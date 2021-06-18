@@ -157,11 +157,39 @@ router.get('/csv', async function (req, res) {
     })
 });
 
+router.get('/encadrant', async function (req, res) {
+    log.i('::encadrant - In')
+    const utilisateurCourant = req.session.user;
+
+    const requete =`SELECT uti.uti_id AS id, uti.uti_nom AS nom, uti.uti_prenom AS prenom,uti.uti_mail AS mail,
+        uti.uti_validated, stu.stu_libelle
+        from utilisateur uti
+        join statut_utilisateur stu on stu.stu_id = uti.stu_id
+        where stu.stu_id = 1 
+        AND uti.uti_validated = true 
+        AND uti.rol_id in (3,4)
+        order by 3,4 asc`;
+    
+    pgPool.query(requete, (err, result) => {
+        if (err) {
+            log.w('::encadrant - Erreur lors de la requête.', { requete, erreur: err.stack});
+            return res.status(400).json('erreur lors de la récupération des encadrants');
+        }
+        else {
+            const encadrants = result.rows;
+            log.i('::encadrant - Done')
+            res.json({ encadrants });
+        }
+    })
+});
+
 router.get('/:id', async function (req, res) {
     const id = req.params.id;
     log.i('::get - In', { id })
-    const requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, pro.rol_libelle 
-        from utilisateur uti 
+    const utilisateurCourant = req.session.user
+    if ( utilisateurCourant.rol_id == 1) {
+        // si on est admin, on affiche l'utilisateur
+        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, rol.rol_libelle from utilisateur uti 
         join profil pro on pro.rol_id = uti.rol_id
         where uti_id=${id} order by uti_id asc`;
 
@@ -181,7 +209,8 @@ router.get('/:id', async function (req, res) {
             res.json({ user: formatUser(user) });
         }
     })
-});
+
+}});
 
 router.get('/', async function (req, res) {
     log.i('::list - In')
@@ -203,10 +232,10 @@ router.get('/', async function (req, res) {
         // Sauf les Admin créés sur structure
         requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,pro.rol_libelle, to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
         from utilisateur uti 
-        inner join demande_aaq dem on dem.dem_uti_formateur_id = ${utilisateurCourant.uti_id} and uti.uti_id = dem_uti_demandeur_id
-        join profil pro on pro.rol_id = uti.rol_id
-        order by uti_id asc`;
-        
+        join uti_str ust on ust.uti_id = uti.uti_id
+        join structure str on str.str_id = ust.str_id 
+        join profil pro on pro.rol_id = uti.rol_id and pro.rol_id <> 1
+        where uti.str_id=${utilisateurCourant.str_id} order by uti_id asc  `;
     }
     log.d('::list - requete',{ requete })
     pgPool.query(requete, (err, result) => {

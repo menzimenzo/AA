@@ -302,8 +302,8 @@ export default {
       }),
       this.$store.dispatch("get_interventions"),*/
     ]);
-
     this.loading = false;
+    
   }
 };
 </script>

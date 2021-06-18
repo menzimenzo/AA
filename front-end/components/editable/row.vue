@@ -150,7 +150,7 @@ export default {
     methods: {
         remove(e) {
             e && e.stopImmediatePropagation && e.stopImmediatePropagation()
-            this.$emit('remove', this.item)
+            this.$emit('remove', {index: this.index, item: this.item })
         },
         edit(e) {
             e && e.stopImmediatePropagation && e.stopImmediatePropagation()

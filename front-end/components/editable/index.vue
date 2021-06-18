@@ -49,7 +49,7 @@
                             @remove="confirmRemove">
                             <template v-for="column in columns">
                                 <template v-if="fieldType(column.path) === '__slot'" :slot="fieldPath(column.path)">
-                                    <slot :name="fieldPath(column.path)" :data="item" :onEdit="false" />
+                                    <slot :name="fieldPath(column.path)" :data="{item,index: i}" :onEdit="false" />
                                 </template>
                             </template>
                         </reading-row>
@@ -340,21 +340,25 @@ export default {
                 return this.removableComputed 
             }
         },
-        confirmRemove(item) {
-            this.$modal.show('dialog', {
+        confirmRemove( {item, index} ) {
+            /*this.$modal.show('dialog', {
                 title: this.confirmRemoveTitle,
                 text: this.confirmRemoveText,
                 buttons: [
                     {
                         title: '<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>&nbsp; Oui, supprimer cet élément',
-                        handler: () => {
-                            this.$emit('remove', item)
-                            this.$modal.hide('dialog')
+                        handler: () => {*/
+                            //console.log(index)
+                            //console.log(index)
+                            const globalIndex = (this.paginationEntries * (this.selectedPage - 1)) + index
+                            this.$emit('remove', {item,index: globalIndex})
+                            //this.$emit('remove', {item})
+                            /*this.$modal.hide('dialog')
                         }
                     },
                     { title: '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>&nbsp; Annuler' }
                 ]
-            })
+            })*/
         },
         clean() {
             this.editingIndex = null

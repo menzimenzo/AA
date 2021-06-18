@@ -3,38 +3,24 @@ const router = express.Router();
 const pgPool = require('../pgpool').getPool();
 const stringify = require('csv-stringify')
 const myPdf = require('../utils/pdf')
+const { getIntervention } = require('../controllers');
+const { getUtilisateursFromIntervention } = require('../controllers');
+const { getEnfantsFromIntervention } = require('../controllers/');
+const { postUtilisateursForIntervention } = require('../controllers/');
+const { postEnfantsForIntervention } = require('../controllers/');
+const { deleteEnfantsFromIntervention } = require('../controllers/');
+const { deleteUtilisateursFromIntervention } = require('../controllers/');
+
+const { formatIntervention } = require('../utils/utils')
+
+//const formatIntervention = require('../utils/utils')
 var moment = require('moment');
 moment().format();
 
-const logger = require('../utils/logger')
+const logger = require('../utils/logger');
+
+
 const log = logger(module.filename)
-
-const formatIntervention = intervention => {
-    var result = {
-        id: intervention.int_id,
-        utiId: intervention.uti_id,
-        nbEnfants: intervention.int_nombreenfant,
-        strId: intervention.str_id,
-        pisId: intervention.pis_id,
-        piscine: {
-            nom: intervention.pis_nom,
-            id: intervention.pis_id,
-            adresse: intervention.pis_adresse,
-            cp :intervention.cp,
-            type: intervention.typ_id,
-            x: intervention.pis_x,
-            y: intervention.pis_y
-        },
-        strNom: intervention.str_libellecourt,
-        //nbNouveauxEnfants: intervention.int_nombreenfant,
-        dateIntervention: new Date(intervention.int_dateintervention),
-        dateCreation: new Date(intervention.int_datecreation),
-        dateMaj: intervention.int_datemaj
-    }
-
-    return result
-}
-
 
 router.get('/delete/:id', async function (req, res) {
     const intervention = req.body.intervention;
@@ -63,8 +49,8 @@ router.get('/delete/:id', async function (req, res) {
 
 router.get('/csv/:utilisateurId', async function (req, res) {
 
-   // Modification de la récupération de l'utilisateur courant 
-    if(!req.session.user){
+    // Modification de la récupération de l'utilisateur courant 
+    if (!req.session.user) {
         return res.sendStatus(403)
     }
     const id = req.params.id
@@ -78,7 +64,7 @@ router.get('/csv/:utilisateurId', async function (req, res) {
     var whereClause = ""
     /* Pour un profil Intervenant on exporte que ces interventions */
     // Modification des profils.
-    if ( user.pro_id == 4 || user.pro_id == 3 ) {
+    if (user.pro_id == 4 || user.pro_id == 3) {
         whereClause += ` and utilisateur.uti_id=${utilisateurId} `
     }
     /* Pour un profil Partenaire, on exporte les interventions de sa structure*/
@@ -107,7 +93,6 @@ router.get('/csv/:utilisateurId', async function (req, res) {
                 newIntervention.codeinsee = intervention.int_com_codeinsee
                 newIntervention.dep_num = intervention.int_dep_num
                 newIntervention.reg_num = intervention.int_reg_num
-                newIntervention.dateIntervention = newIntervention.dateIntervention.toLocaleDateString(),
                     newIntervention.dateCreation = newIntervention.dateCreation.toISOString(),
                     newIntervention.dateMaj = newIntervention.dateMaj.toISOString()
                 delete newIntervention.structureCode;
@@ -143,41 +128,15 @@ router.get('/csv/:utilisateurId', async function (req, res) {
 
 router.get('/:id', async function (req, res) {
     log.i('::get - In')
-    if (!req.session.user) {
-        log.w('::get - User manquant.')
-        return res.sendStatus(403)
-    }
     const id = req.params.id
     const user = req.session.user
-    const utilisateurId = user.uti_id
-
-    // Where condition is here for security reasons.
-    var whereClause = ""
-    if (user.rol_id == 3 ||  user.rol_id == 4) {
-        whereClause += ` and uti_id=${utilisateurId} `
+    const params = {
+        id: id,
+        user: user
     }
-
-    const requete = `SELECT int.*,pis.*, str.str_libellecourt from intervention int \
-    LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-    LEFT JOIN structure str on str.str_id = int.str_id \
-    where int.int_id=${id} ${whereClause} order by int_id asc`;
-    log.d('::get - récuperation via la requête.', { requete })
-
-    pgPool.query(requete, (err, result) => {
-        if (err) {
-            log.w('::get - Erreur survenue lors de la récupération.', err.stack);
-            return res.status(400).json('erreur lors de la récupération de l\'intervention');
-        }
-        else {
-            const intervention = result.rows && result.rows.length && result.rows[0];
-            if (!intervention) {
-                log.w('::get - Intervention inexistante.')
-                return res.status(400).json({ message: 'Intervention inexistante' });
-            }
-            log.i('::get - Done')
-            res.json({ intervention: formatIntervention(intervention) });
-        }
-    })
+    inter = await getIntervention(params)
+    console.log(inter[0])
+    return res.status('200').json({ intervention: inter[0] })
 });
 
 router.get('/', async function (req, res) {
@@ -190,147 +149,155 @@ router.get('/', async function (req, res) {
     const user = req.session.user
     const utilisateurId = user.uti_id
     var whereClause = ""
-    // Utilisateur est partenaire => intervention de la structure
-    //if(user.pro_id == 2){
-    //whereClause += `LEFT JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id where utilisateur.str_id=${user.str_id} `
-    //  whereClause += `LEFT JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id  `
-    // Utilisateur est intervenant => ses interventions
-    //} 
+
+
     if (user.rol_id == 3 || user.rol_id == 4) {
-        whereClause += `LEFT JOIN utilisateur uti ON int.uti_id = uti.uti_id  \
+        whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
+         LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-         LEFT JOIN structure str on str.str_id = int.str_id
+         LEFT JOIN structure str on str.str_id = int.str_id \
+         LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
          where uti.uti_id=${utilisateurId}`
         // Utilisateur Administrateur : 
     } else {
         // whereClause += `LEFT JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id LEFT JOIN structure ON structure.str_id = utilisateur.str_id `
         // Laurent : Pour le moment on met la même chose pour les admin pour éviter que ça plante.
-        whereClause += `LEFT JOIN utilisateur uti ON int.uti_id = uti.uti_id  \
+        whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
+        LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-         LEFT JOIN structure str on str.str_id = int.str_id
+         LEFT JOIN structure str on str.str_id = int.str_id \
+         LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
          where uti.uti_id=${utilisateurId}`
     }
 
-    const requete = `SELECT int.*, pis.*, str.str_libellecourt from intervention int ${whereClause} order by int.int_dateintervention desc`;
-    log.d('::list - récuperation via la requête.', { requete })
+    const requete = `SELECT int.*, pis.*, str.*,com.com_libelle from intervention int ${whereClause} order by int.int_datefinintervention desc`;
+    log.d('::list - récuperation via la requête.', { requete });
 
-    pgPool.query(requete, (err, result) => {
-        if (err) {
-            log.w('::list - Erreur survenue lors de la récupération.', err.stack);
-            return res.status(400).json('erreur lors de la récupération des interventions');
-        }
-        else {
-            log.i('::list - Done')
-            const interventions = result.rows.map(formatIntervention);
+    (async () => {
+        try {
+            let result = await pgPool.query(requete)
+            let interventions = result.rows.map(formatIntervention);
+
+            for (const [key, intervention] of Object.entries(interventions)) {
+                await Promise.all([getUtilisateursFromIntervention(intervention.id), getEnfantsFromIntervention(intervention.id)]).then(values => {
+                    interventions[key].utilisateur = values[0];
+                    interventions[key].enfant = values[1];
+                })
+            }
             res.json({ interventions });
         }
-    })
+        catch (err) {
+            throw err
+        }
+    })().catch(err => {
+        log.w('::list - Erreur survenue lors de la récupération', err.stack)
+        return res.status(400).json('erreur lors de la récupération des interventions')
+    }
+    )
+
 });
+
 
 router.put('/:id', async function (req, res) {
     const intervention = req.body.intervention
-
+    const user = req.session.user
     const id = req.params.id
     log.i('::update - In', { id })
+    let { strId, nbEnfants, piscine, dateDebutIntervention,dateFinIntervention,utilisateur,enfant,nbSession,cai,classe } = intervention
 
-    let { nbEnfants, commune, dateIntervention,
-        commentaire, cp, utilisateurId, siteintervention,
-        nbmoinssix, nbsixhuit, nbneufdix, nbplusdix } = intervention
-    /*
-        if (nbGarcons == '') { nbGarcons = null }
-        if (nbFilles == '') { nbFilles = null }
-        if (nbmoinssix == '') { nbmoinssix = null }
-        if (nbsixhuit == '') { nbsixhuit = null }
-        if (nbneufdix == '') { nbneufdix = null }
-        if (nbplusdix == '') { nbplusdix = null }
-    */
     //insert dans la table intervention
     const requete = `UPDATE intervention 
-        SET cai_id = $1,
-        blo_id = $2,
-        int_com_codeinsee = $3,
-        int_com_codepostal = $4,
-        int_com_libelle = $5,
-        int_nombreenfant = $6,
-        int_dateintervention = $7,
-        int_datemaj = now(),
-        int_commentaire = $8,
-        int_dep_num = $9,
-        int_reg_num = $10,
-        int_siteintervention = $11
+        SET str_id= $1,
+        int_nombreenfant= $2,
+        pis_id = $3,
+        int_datedebutintervention = $4,
+        int_datefinintervention = $5,
+        int_nbsession = $6,
+        int_cai =$7,
+        int_age = $8,
+        int_datemaj = now()
         WHERE int_id = ${id}
         RETURNING *
         ;`
 
     log.d('::update - requete', { requete })
-    pgPool.query(requete, [cai,
-        blocId,
-        commune.cpi_codeinsee,
-        cp,
-        commune.com_libellemaj,
+    pgPool.query(requete, [strId,
         nbEnfants,
-        dateIntervention,
-        commentaire,
-        commune.dep_num,
-        commune.reg_num,
-        siteintervention], (err, result) => {
-            if (err) {
-                log.w('::update - erreur lors de la récupération', { requete, erreur: err.stack })
-                return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
-            }
-            else {
-                log.i('::update - Done')
-                // generation du pdf (synchrone)
-                if (blocId == 3) {
-                    myPdf.generate(id, nbEnfants, dateIntervention)
-                }
-                return res.status(200).json({ intervention: result.rows.map(formatIntervention)[0] });
-
-            }
-        })
-})
-
-router.post('/', function (req, res) {
-    log.i('::post - In')
-    const intervention = req.body.intervention
-    console.log(intervention)
-
-    //insert dans la table intervention
-    const requete = `insert into intervention 
-                    (pis_id,str_id,uti_id, int_nombreenfant,int_dateintervention,int_datecreation,int_datemaj) 
-                    values($1,$2,$3,$4,$5,$6,$7 ) RETURNING *`;
-
-    log.d('::post - requete', { requete });
-    pgPool.query(requete, [intervention.piscine.id, intervention.strId, intervention.maitreNageurId, intervention.nbEnfants,
-    intervention.dateIntervention, new Date().toISOString(), new Date().toISOString()], (err, result) => {
+        piscine.id,
+        dateDebutIntervention,
+        dateFinIntervention,
+        nbSession,
+        cai,
+        classe
+    ], async (err, result) => {
         if (err) {
-            log.w('::post - Erreur lors de la requête.', err.stack);
+            log.w('::update - erreur lors de la sauvegarde', { requete, erreur: err.stack })
             return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
         }
         else {
-            log.i('::post - Done', { rows: result.rows })
+            log.i('::update - Done')
             // generation du pdf (synchrone)
-            //if (blocId == 3) {
-            //  myPdf.generate(result.rows.map(formatIntervention)[0].id,nbEnfants,dateIntervention);
-            //}
 
-            // requete de selection pour que l'objet retourné par le POST soit au même format que le GET
-            const requete2 = `SELECT int.*, pis.*, str.str_libellecourt from intervention int \
-                            LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-                            LEFT JOIN structure str on str.str_id = int.str_id
-                            where int.int_id=${result.rows[0].int_id}`;
+            // suppression des données utilisateurs et enfants
+            await Promise.all([deleteUtilisateursFromIntervention([id]),deleteEnfantsFromIntervention([id])]).then(async () => {
+                
+                // Ajout des données utilsiateurs et enfants
+                await Promise.all([postUtilisateursForIntervention([utilisateur,id]),postEnfantsForIntervention([enfant,id])]).then(async () => {
+                
+                    const user = req.session.user
+                    const params = {
+                        id: result.rows[0].int_id,
+                        user: user
+                    }
+                    let inter = await getIntervention(params)
+                    log.i('::post - Done')
+                    return res.status(200).json({ intervention: inter[0] })
+                })
 
-            log.d('::get - requete', { requete2 });
-            pgPool.query(requete2, [], (err2, result2) => {
-                if (err2) {
-                    log.w('::select - Erreur lors de la requête.', err2.stack);
-                    return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
-                }
-                else {
-                    log.i('::select - Done', { rows: result2.rows })
-                    return res.status(200).json({ intervention: result2.rows.map(formatIntervention)[0] });
-                }
             })
+        }
+    })
+})
+
+router.post('/', async function (req, res) {
+    log.i('::post - In')
+    const intervention = req.body.intervention
+    if ( ! intervention.classe) { intervention.classe = null}
+
+    const requete = `insert into intervention 
+                    (pis_id,str_id,int_nombreenfant,int_datedebutintervention,int_datefinintervention,int_nbsession, int_cai, int_age,int_datecreation,int_datemaj) 
+                    values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10 ) RETURNING int_id AS int_id`;
+
+    //console.log(requete)
+    await pgPool.query(requete, [intervention.piscine.id,
+    intervention.strId,
+    intervention.nbEnfants,
+    intervention.dateDebutIntervention,
+    intervention.dateFinIntervention,
+    intervention.nbSession,
+    intervention.cai,
+    intervention.classe,
+    new Date().toISOString(),
+    new Date().toISOString()], async (err, result) => {
+        if (err) {
+            log.w('::post - erreur lors de l\'insertion dans la table des interventions', { requete, erreur: err.stack })
+            return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
+        }
+        else {
+            log.d('::post - insert dans intervention Done');
+            let int_id = result.rows[0].int_id;
+            await Promise.all([postUtilisateursForIntervention([intervention.utilisateur, int_id]),postEnfantsForIntervention([intervention.enfant, int_id])]).then(async () => {
+                
+                const user = req.session.user
+                const params = {
+                    id: result.rows[0].int_id,
+                    user: user
+                }
+                let inter = await getIntervention(params)
+                log.i('::post - Done')
+                return res.status(200).json({ intervention: inter[0] })
+            })
+            
         }
     })
 })

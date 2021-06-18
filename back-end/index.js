@@ -52,6 +52,7 @@ const listecommune  = require('./routes/listecommune');
 const listedepartement  = require('./routes/listedepartement');
 const listepci  = require('./routes/listepci');
 const piscine  = require('./routes/piscine');
+const enfant  = require('./routes/enfant');
 const attestations  = require('./routes/attestations');
 const structures    = require('./routes/structures');
 const pdf           = require('./routes/pdf');
@@ -61,12 +62,14 @@ const batch         = require('./routes/batch');
 const parametres         = require('./routes/parametres');
 const exp         = require('./routes/export');
 const demandeaaq         = require('./routes/demandeaaq');
+const siren     = require('./routes/siren');
+const ecole     = require('./routes/ecole');
 
 // Route vers la page de connexion
 app.use(config.URL_PREFIX + '/connexion', connexion);
 
 //app.use(config.URL_PREFIX + '/interventions', interventions);
-app.use(config.URL_PREFIX + '/pageenconstruction', interventions);
+app.use(config.URL_PREFIX + '/interventions', interventions);
 
 
 app.use(config.URL_PREFIX + '/listecommune', listecommune);
@@ -77,11 +80,17 @@ app.use(config.URL_PREFIX + '/listepci', listepci);
 
 app.use(config.URL_PREFIX + '/piscine', piscine);
 
+app.use(config.URL_PREFIX + '/enfant', enfant);
+
 app.use(config.URL_PREFIX + '/attestations', attestations);
 
 app.use(config.URL_PREFIX + '/structures', structures);
 
+app.use(config.URL_PREFIX + '/ecole', ecole);
+
 app.use(config.URL_PREFIX + '/documents', documents);
+
+app.use(config.URL_PREFIX + '/siren', siren);
 
 app.use(config.URL_PREFIX + '/pdf', pdf);
 

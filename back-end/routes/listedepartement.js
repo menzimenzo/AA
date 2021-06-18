@@ -20,8 +20,8 @@ router.get('/',
                     return res.statusCode(400).json({ message: 'erreur sur la requete de listedepartement' });
                 }
                 else {
-                    const departements = result.rows;
-                    return res.status(200).json({ departements });
+                    const departement = result.rows;
+                    return res.status(200).json({ departement });
                 }
             });
     });

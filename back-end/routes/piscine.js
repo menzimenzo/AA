@@ -17,11 +17,10 @@ router.get('/',
         var v_codepostal;
         v_codepostal = req.query.codepostal;
         // Recherche des communes correspondant au codepostal
-        pgPool.query(`select pis.pis_id AS id, pis.pis_nom AS nom, pis.pis_x AS x, pis.pis_y AS y, typ.typ_libelle AS type, pis.pis_cp AS cp, \
-         pis.pis_adr AS adresse
-                        from piscine pis  
-                        inner join type_piscine typ on typ.typ_id = pis.typ_id
-                    where pis.pis_cp = $1`,
+        pgPool.query(`select pis.pis_id AS id, pis.pis_nom AS nom, pis.pis_x AS x, pis.pis_y AS y, cpi.cpi_codepostal AS cp, \
+         pis.pis_adr AS adresse from piscine pis  
+                        inner join codepostal_insee cpi on cpi.cpi_codeinsee = pis.cpi_codeinsee
+                    where cpi.cpi_codepostal = $1 `,
             [$1 = v_codepostal],
             (err, result) => {
                 if (err) {
@@ -35,15 +34,15 @@ router.get('/',
             });
     });
 
-router.get('/:id', async function (req, res) {
+
+router.get('/user/:id', async function (req, res) {
     const uti_id = req.params.id
     // Recherche des piscines appartenant au utilisateur
-    pgPool.query(`select pis.pis_id AS id, pis.pis_nom AS nom, pis.pis_x AS x, pis.pis_y AS y, typ.typ_libelle AS type, pis.pis_cp AS cp, \
-         pis.pis_adr AS adresse
-                        from piscine pis  
-                        inner join type_piscine typ on typ.typ_id = pis.typ_id
+    pgPool.query(`select pis.pis_id AS id, pis.pis_nom AS nom, pis.pis_x AS x, pis.pis_y AS y,pis.pis_adr AS adresse, com.com_libelle AS cp
+                     from piscine pis  
                         inner join uti_pis upi on upi.pis_id = pis.pis_id
-                    where upi.uti_id = $1`,
+                        inner join commune com on com.cpi_codeinsee = pis.cpi_codeinsee
+                    where upi.uti_id = $1 `,
         [$1 = uti_id],
         (err, result) => {
             if (err) {
@@ -57,6 +56,26 @@ router.get('/:id', async function (req, res) {
         });
 });
 
+router.get('/:id', async function (req, res) {
+    const id = req.params.id
+    // Recherche des piscines appartenant au utilisateur
+    pgPool.query(`select pis.pis_id AS id, pis.pis_nom AS nom, pis.pis_x AS x, pis.pis_y AS y,pis.pis_adr AS adresse, com.com_libelle AS cp
+                     from piscine pis  
+                        inner join commune com on com.cpi_codeinsee = pis.cpi_codeinsee
+                    where pis.pis_id = $1 `,
+        [$1 = id],
+        (err, result) => {
+            if (err) {
+                console.log(err);
+                return res.status(400).json({ message: 'erreur sur la requete de récupération de la piscine ' + id });
+            }
+            else {
+                const maPiscine = result.rows[0];
+                return res.status(200).json({ maPiscine });
+            }
+        });
+});
+
 router.post('/', function (req, res) {
     const maPiscine = req.body.maPiscine
     //insert dans la table uti_pis
@@ -64,15 +83,32 @@ router.post('/', function (req, res) {
                         (uti_id,pis_id) 
                         values($1,$2 ) RETURNING *`;
 
+
     log.d('::post - requete', { requete });
-    pgPool.query(requete, [maPiscine.utilisateurId, maPiscine.id], (err, result) => {
+    pgPool.query(requete, [maPiscine.utilisateurId,maPiscine.id], (err, result) => {
         if (err) {
             log.w('::post - Erreur lors de la requête.', err.stack);
             return res.status(400).json('erreur lors de la sauvegarde de la piscine favorite');
         }
         else {
             log.i('::post - Done', { rows: result.rows })
-            return res.status(200).json({ maPiscine: result.rows[0] });
+            pgPool.query(`select pis.pis_id AS id, pis.pis_nom AS nom, pis.pis_x AS x, pis.pis_y AS y, cpi.cpi_codepostal AS cp, \
+         pis.pis_adr AS adresse
+                        from piscine pis  
+                        join codepostal_insee cpi on cpi.cpi_codeinsee = pis.cpi_codeinsee
+                    where pis.pis_id = $1 `,
+                [$1 = maPiscine.id],  (err, resu) => {
+                if(err) {
+                    console.log(err);
+                    return res.status(400).json({ message: 'erreur sur la requete de récupération des piscines de l\'utilsateur' + uti_id });
+                }
+            else {
+                    console.log(resu.rows[0])
+                    const newPiscine = resu.rows[0];
+                    return res.status(200).json({ maPiscine: newPiscine });
+                }
+            });
+            //return res.status(200).json({ maPiscine: result.rows[0] });
         }
     })
 });

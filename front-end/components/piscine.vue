@@ -30,13 +30,13 @@
     </b-form-group>
     &nbsp;
     <div v-if="selectedPiscine">
-      Adressee : {{ this.selectedPiscine.adresse }}
+      Adresse : {{ this.selectedPiscine.adresse }}
     </div>
     <b-row> </b-row>
     <b-row> </b-row>
     <b-row>
       <p class="modal-btns">
-        <b-button v-on:click="$modal.hide('editPiscine')">Annuler</b-button>
+        <b-button v-on:click="cancel">Annuler</b-button>
         <b-button variant="success" v-on:click="addPiscine">Ajouter</b-button>
       </p>
     </b-row>
@@ -44,9 +44,20 @@
 </template>
 <script>
 import Vue from "vue";
-import { mapState } from "vuex";
 
 export default {
+  props: {
+    intervention: {
+      type: Object,
+      default: () => {
+        return {};
+      },
+    },
+    dansInt: {
+      type: Boolean,
+      default: false,
+    }
+  },
   data() {
     return {
       cp: null,
@@ -86,15 +97,26 @@ export default {
     },
     addPiscine: function () {
       if (this.selectedPiscine) {
+        
         return this.$store
           .dispatch("post_maPiscine", this.selectedPiscine)
-          .then((message) => {
+          .then((piscine) => {
+            this.$store.dispatch("get_mesPiscines");
+            this.$store.dispatch("get_maPiscine",this.selectedPiscine.id);
             this.$toast.success(
               `${this.selectedPiscine.nom} ajoutée aux piscines favorites`,
               []
             );
-            this.$store.dispatch("get_mesPiscines");
-            this.$modal.hide("editPiscine");
+
+            if (this.dansInt) {
+              console.log('juste avant')
+              console.log(this.$store.state.maPiscine)
+              this.intervention.piscine = this.$store.state.maPiscine
+              this.$modal.hide("editPiscine");
+            } else {
+              console.log('dans else')
+              this.$modal.hide("newPiscine");
+            }
           })
           .catch((error) => {
             console.error(
@@ -106,10 +128,21 @@ export default {
               []
             );
             this.$store.dispatch("get_mesPiscines");
-            this.$modal.hide("editPiscine");
+            if (this.dansInt) {
+              this.$modal.hide("newPiscine");
+            } else {
+              this.$modal.hide("editPiscine");
+            }
           });
       } else {
         this.$toast.error(`veuillez sélectionner une piscine`, []);
+      }
+    },
+    cancel: function () {
+      if (this.dansInt) {
+        this.$modal.hide("editPiscine");
+      } else {
+        this.$modal.hide("newPiscine");
       }
     },
   },
