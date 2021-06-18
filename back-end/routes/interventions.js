@@ -64,7 +64,7 @@ router.get('/', async function (req, res) {
         log.i('::list - Done')
         return res.status(200).json({ interventions })
     } else {
-        return res.status(400).json('Aucune intervention trouvée.')
+        return res.status(200).json('Aucune intervention trouvée.')
     }
 });
 

@@ -109,7 +109,7 @@
         </b-col>
       </div>
     </b-row>
-    <div v-if="formIntervention.piscine">
+    <div v-if="formIntervention.piscine.nom" >
       Adresse : {{ formIntervention.piscine.adresse }} <br />
       Commune: {{ formIntervention.piscine.cp }} 
       
@@ -376,8 +376,6 @@ var loadFormIntervention = function (intervention) {
   let dateFinIntervention = moment(intervention.dateFinIntervention);
   formIntervention.dateFinIntervention =
     dateFinIntervention.format("YYYY-MM-DD");
-  console.info("apres loadFrom");
-  console.info(formIntervention);
   return formIntervention;
 };
 

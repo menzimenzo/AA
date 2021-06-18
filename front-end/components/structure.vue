@@ -536,7 +536,7 @@ export default {
             error
           );
           this.$toast.error(
-            `${this.selectedStructure.nom} n'a pas pu être ajoutée aux piscines favorites`,
+            `${this.selectedStructure.nom} n'a pas pu être ajoutée aux structures favorites`,
             []
           );
           this.$modal.hide("editStructure");
