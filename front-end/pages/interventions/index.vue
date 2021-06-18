@@ -213,18 +213,7 @@
           </b-collapse>
         </b-card>
         <!--  ACCORDEON -- MES STRUCTURES -->
-        <!-- ECOLE : ?
-             CLUB  :SIREN
-             ASSOCIATION / LIGUE : SIREN
-             COLLECTIVITES : communes, EPCI, CD => code postal ou liste département
-             AUTRES : ?
-             Etablissement Public (CREPS) : ?
-
-             --> 
-             
-
-
-        <b-card no-body class="mb-3">
+          <b-card no-body class="mb-3">
           <b-card-header header-tag="header" class="p-1" role="tab">
             <b-form-row>
               <b-col>
@@ -576,9 +565,12 @@ export default {
       this.loading = true;
       console.log(structure)
       const url = process.env.API_URL + "/structures/delete";
-      console.log(url)
+      const param = {
+        structureId: structure.id,
+        userId : this.$store.state.utilisateurCourant.id
+      }
       return this.$axios
-        .$post(url, { structure })
+        .$post(url, param)
         .then((response) => {
           this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id)
           this.loading = false;
