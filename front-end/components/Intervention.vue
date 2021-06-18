@@ -109,7 +109,7 @@
         </b-col>
       </div>
     </b-row>
-    <div v-if="formIntervention.piscine">
+    <div v-if="formIntervention.piscine.nom" >
       Adresse : {{ formIntervention.piscine.adresse }} <br />
       Commune: {{ formIntervention.piscine.cp }} 
       

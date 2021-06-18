@@ -107,7 +107,6 @@ export default {
               `${this.selectedPiscine.nom} ajoutée aux piscines favorites`,
               []
             );
-
             if (this.dansInt) {
               this.intervention.piscine = this.$store.state.maPiscine
               this.$modal.hide("editPiscine");

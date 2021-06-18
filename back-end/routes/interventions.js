@@ -55,29 +55,25 @@ router.get('/', async function (req, res) {
     const requete = `SELECT int.*, pis.*, str.*,com.com_libelle from intervention int ${whereClause} order by int.int_datefinintervention desc`;
     log.d('::list - récuperation via la requête.', { requete });
 
-    (async () => {
-        try {
-            let result = await pgPool.query(requete)
-            let interventions = result.rows.map(formatIntervention);
-
-            for (const [key, intervention] of Object.entries(interventions)) {
-                await Promise.all([getUtilisateursFromIntervention(intervention.id), getEnfantsFromIntervention(intervention.id)]).then(values => {
-                    interventions[key].utilisateur = values[0];
-                    interventions[key].enfant = values[1];
-                })
-            }
-            res.json({ interventions });
-        }
-        catch (err) {
-            throw err
-        }
-    })().catch(err => {
-        log.w('::list - Erreur survenue lors de la récupération', err.stack)
-        return res.status(400).json('erreur lors de la récupération des interventions')
+    const result = await pgPool.query(requete)
+    let interventions = result.rows.map(formatIntervention);
+    if(interventions) {
+        log.d('::list - interventions trouvées.')
+        interventions.map(intervention => {
+            return Promise.all([getUtilisateursFromIntervention(intervention.id), getEnfantsFromIntervention(intervention.id)]).then(values => {
+                intervention.utilisateur = values[0];
+                intervention.enfant = values[1];
+            }).catch(error => {
+                log.w('::list - error on getting enfants and utilisateurs', error)
+                return res.status(400).json('Une erreur est survenue lors de la récupérations des enfants et des utilisateurs pour la liste des interventions.')
+            })
+        })
+        log.i('::list - Done')
+        return res.status(200).json({ interventions })
+    } else {
+        return res.status(200).json('Aucune intervention trouvée.')
     }
-    )
-
-});
+})
 
 router.get('/csv/:utilisateurId', async function (req, res) {
     // Modification de la récupération de l'utilisateur courant 
