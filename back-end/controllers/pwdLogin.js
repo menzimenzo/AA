@@ -1,6 +1,6 @@
 const pgPool = require('../pgpool').getPool()
 const crypto = require('crypto');
-const {formatUtilisateur} = require('../utils/utils')
+const { formatUtilisateur } = require('../utils/utils')
 
 const logger = require('../utils/logger')
 const log = logger(module.filename)

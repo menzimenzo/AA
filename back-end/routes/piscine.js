@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pgPool = require('../pgpool').getPool();
+
 const logger = require('../utils/logger')
 const log = logger(module.filename)
 
@@ -67,10 +68,11 @@ router.get('/:id', async function (req, res) {
                 return res.status(200).json({ maPiscine });
             }
         });
-});
+})
 
 router.post('/', function (req, res) {
-    const maPiscine = req.body.maPiscine
+    const { maPiscine } = req.body
+    log.i('::posts - In', { maPiscine })
     //insert dans la table uti_pis
     const requete = `insert into uti_pis 
                         (uti_id,pis_id) 
@@ -104,14 +106,12 @@ router.post('/', function (req, res) {
             //return res.status(200).json({ maPiscine: result.rows[0] });
         }
     })
-});
+})
 
 router.post('/delete/', async function (req, res) {
+    log.i('::delete - In')
     const maPiscine = req.body.piscine
-    const requete = `DELETE FROM  uti_pis 
-            WHERE uti_id = $1 and pis_id = $2
-            RETURNING *
-            ;`;
+    const requete = `DELETE FROM  uti_pis WHERE uti_id = $1 and pis_id = $2 RETURNING *;`;
 
     pgPool.query(requete, [maPiscine.uti_id, maPiscine.id], (err, result) => {
         if (err) {

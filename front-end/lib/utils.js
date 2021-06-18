@@ -13,3 +13,32 @@ export const parseErrorMessage = error => {
 }
 
 export const formatEmail = email => email && email.trim().toLowerCase()
+
+export const loadFormUser = function (utilisateur) {
+  let formUser = Object.assign(
+        {
+          nom: "",
+          prenom: "",
+          mail: "",
+          naissance: "",
+          profil: "",
+          profilId: "",
+          structure: "",
+          structureLocale: "",
+          statut: "",
+          validated: "",
+          eaps:"",
+          publicontact: "",
+          mailcontact: "",
+          sitewebcontact: "",
+          adrcontact: "",
+          compadrcontact: "",
+          cpi_codeinsee: "",
+          cp: "",
+          telephonecontact: ""
+
+        },
+        utilisateur
+      )
+  return formUser;
+};

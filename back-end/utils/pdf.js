@@ -1,6 +1,5 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
-const path = require('path');
 const config = require('../config');
 
 function generate(id,nbenfants,dateintervention) {
@@ -18,7 +17,6 @@ function generate(id,nbenfants,dateintervention) {
 
     // Pipe its output somewhere, like to a file or HTTP response
     // See below for browser usage
-    //doc.pipe(fs.createWriteStream("../tmp/" + idformate + ".pdf"));
     doc.pipe(fs.createWriteStream(`${config.pathAttestation}${idformate}.pdf`));    
 
     var indexpage;

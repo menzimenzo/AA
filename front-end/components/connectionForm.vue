@@ -55,7 +55,7 @@
             </nuxt-link>
             <br>
           </b-col>
-          <b-col cols="4" v-if="!hasToConfirmMail&&this.fc">           
+          <b-col cols="4" v-if="!hasToConfirmMail&&fc">           
             <nuxt-link :to="{
               name:'register',
               params:{ FCauthentified: true }
@@ -76,7 +76,6 @@ export default {
       return {
           mail: '',
           password: '',
-          fc: false
       }
   },
   props: {
@@ -86,29 +85,16 @@ export default {
     hasToConfirmMail: {
       type: Boolean,
       default: false
+    },
+    fc: {
+      type: Boolean,
+      default: false
     }
   },
   mounted() {
     if(this.hasToConfirmMail) {
       this.mail = this.$store.state.utilisateurCourant.mail
     }
-    const url = process.env.API_URL + '/parametres/fcactif'
-    console.info(url);
-    this.$axios.$get(url)
-    .then(response => {
-      if (response) 
-      {
-        console.log("France Connect Actif" + response)
-        this.fc = true
-      }
-      else
-      {
-        console.log("France Connect Inactif")
-        this.fc = false
-      }
-    }).catch(err => {
-      console.log(err)
-    })
   },
   methods: {
     submit: function() {

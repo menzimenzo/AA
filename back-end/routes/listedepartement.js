@@ -7,7 +7,7 @@ const log = logger(module.filename)
 
 router.get('/', function (req, res) {
         log.i('::listdepartement - In')
-        pgPool.query(`select dep_num, dep_libelle from departement`,
+        pgPool.query(`SELECT dep_num, dep_libelle FROM departement`,
             (err, result) => {
                 if (err) {
                     log.w('::listdepartement - Erreur', err)

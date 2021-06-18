@@ -5,7 +5,6 @@
  */
 
 var config = require('../config')
-var moment = require('moment');
 
 
 module.exports = {
@@ -14,18 +13,15 @@ module.exports = {
   getAuthorizationUrl: () => `${config.franceConnect.FC_URL}${config.franceConnect.AUTHORIZATION_FC_PATH}?`
     + `response_type=code&client_id=${config.franceConnect.CLIENT_ID}&redirect_uri=${config.franceConnect.FS_URL}`
     + `${config.franceConnect.CALLBACK_FS_PATH}&scope=${config.franceConnect.SCOPES}&state=customState11&nonce=customNonce11`
-
-
   /**
    * Format the url 's that is used in a redirect call to France Connect logout API endpoint
    * @returns {string}
-   */
-  , getLogoutUrl: req => `${config.franceConnect.FC_URL}${config.franceConnect.LOGOUT_FC_PATH}?id_token_hint=`
+   */, 
+  getLogoutUrl : req => `${config.franceConnect.FC_URL}${config.franceConnect.LOGOUT_FC_PATH}?id_token_hint=`
     + `${req.session.idToken}&state=customState11&post_logout_redirect_uri=${config.franceConnect.FS_URL}`
-    + `${config.franceConnect.LOGOUT_FS_PATH}`
-
-  , formatUtilisateur: (utilisateur, toClient = true) => {
-    if (toClient) {
+    + `${config.franceConnect.LOGOUT_FS_PATH}`,
+  formatUtilisateur : (utilisateur, toClient = true) => {
+    if(toClient){
       return {
             id: utilisateur.uti_id,
             authId: utilisateur.uti_authid,
@@ -69,12 +65,10 @@ module.exports = {
         uti_telephonecontact: utilisateur.telephonecontact
       }
     }
-  }
-  , formatEmail: mail => mail && mail.trim().toLowerCase()
-  , formatIntervention: (intervention) => {
-    console.log('avant')
-    console.log(intervention)
-    const result = {
+  },
+  formatEmail: mail => mail && mail.trim().toLowerCase(),
+  formatIntervention : intervention => {
+    return {
       id: intervention.int_id,
       nbEnfants: intervention.int_nombreenfant,
       piscine: {
@@ -104,11 +98,8 @@ module.exports = {
       dateCreation: new Date(intervention.int_datecreation),
       dateMaj: intervention.int_datemaj
     }
-    console.log('apres')
-    console.log(result)
-    return result
   },
-  logTrace: (batch, codeerreur, startTime) => {
+  logTrace : (batch, codeerreur, startTime) => {
     var execTime = new Date() - startTime;
     var fichierSupervision = config.PATH_SUPERVISION_BATCH;
     var checkLog;
@@ -127,13 +118,89 @@ module.exports = {
   },
   formatDate: () => { // Renvoi la date et heure actuelle formatée AAAAMMJJHHMM
     const now = new Date();
-    var jour = now.getDate().toString().padStart(2, "0");
-    var mois = now.getMonth().toString().padStart(2, "0");
-    var annee = now.getFullYear();
-    var heure = now.getHours().toString().padStart(2, "0");
-    var minute = now.getMinutes().toString().padStart(2, "0");
-    var dateTimeFormate = annee + mois + jour + heure + minute;
+    let jour = now.getDate().toString().padStart(2, "0");
+    let mois = now.getMonth().toString().padStart(2, "0");
+    let annee = now.getFullYear();
+    let heure = now.getHours().toString().padStart(2, "0");
+    let minute = now.getMinutes().toString().padStart(2, "0");
+    let dateTimeFormate = annee + mois + jour + heure + minute;
     return dateTimeFormate;
+  },
+  formatDemandeAAQ: (demandeaaq, toClient = true) => {
+    if(toClient) {
+      return {
+          id: demandeaaq.dem_id,
+          formateurid: demandeaaq.dem_uti_formateur_id,
+          demandeurid: demandeaaq.dem_uti_demandeur_id,
+          tockendemandeaccord: demandeaaq.dem_tockendemandeaccord,
+          tockendemanderefus: demandeaaq.dem_tockendemanderefus,
+          datedemande: demandeaaq.dem_datedemande,
+          daterelance: demandeaaq.dem_daterelance,
+          nbrelance: demandeaaq.dem_nbrelance,
+          dateaccord: demandeaaq.dem_dateaccord,
+          daterefus: demandeaaq.dem_daterefus,
+          motifrefus: demandeaaq.dem_motifrefus,
+          dmsid: demandeaaq.dem_dms_id
+      }
+    } else {
+      return {
+          dem_id: demandeaaq.id,
+          dem_uti_formateur_id : demandeaaq.formateurid,
+          dem_uti_demandeur_id : demandeaaq.demandeurid,
+          dem_tockendemandeaccord : demandeaaq.tockendemandeaccord,
+          dem_tockendemanderefus : demandeaaq.tockendemanderefus,
+          dem_datedemande : demandeaaq.datedemande,
+          dem_daterelance : demandeaaq.daterelance,
+          dem_nbrelance : demandeaaq.nbrelance,
+          dem_dateaccord : demandeaaq.dateaccord,
+          dem_daterefus : demandeaaq.daterefus,
+          dem_motifrefus : demandeaaq.motifrefus,
+          dem_dms_id : demandeaaq.dmsid
+      }
+    }
+  },
+  formatUser: user => {
+    return {
+        id: user.uti_id,
+        role: user.rol_id,
+        statut: user.stu_id,
+        validated: user.uti_validated,
+        mail: user.uti_mail,
+        nom: user.uti_nom,
+        prenom: user.uti_prenom,
+        eaps: user.uti_eaps,
+        rolLibelle:user.rol_libelle,
+        inscription: user.inscription,
+        publicontact: user.uti_publicontact,
+        mailcontact: user.uti_mailcontact,            
+        sitewebcontact: user.uti_sitewebcontact,
+        adrcontact: user.uti_adrcontact,
+        compadrcontact: user.uti_compadrcontact,
+        cpi_codeinsee: user.uti_com_codeinseecontact,
+        cp: user.uti_com_cp_contact,
+        telephonecontact: user.uti_telephonecontact,
+        datedemandeaaq: user.datedemandeaaq
+    }
+  },
+  formatUserCSV: user => {
+    return {
+        id: user.uti_id,
+        role: user.rol_id,
+        statut: user.stu_id,
+        validated: user.uti_validated,
+        mail: user.uti_mail,
+        nom: user.uti_nom,
+        prenom: user.uti_prenom,
+        rolLibelle:user.rol_libelle,
+        inscription: user.inscription,
+        publicontact: user.uti_publicontact,
+        mailcontact: user.uti_mailcontact,            
+        sitewebcontact: user.uti_sitewebcontact,
+        adrcontact: user.uti_adrcontact,
+        compadrcontact: user.uti_compadrcontact,
+        cpi_codeinsee: user.uti_com_codeinseecontact,
+        cp: user.uti_com_cp_contact,
+        telephonecontact: user.uti_telephonecontact 
+    }
   }
-
 }

@@ -6,29 +6,27 @@
         <b-card no-body class="mb-3">
           <b-card-header header-tag="header" class="p-1" role="tab">
             <b-form-row>
-              <b-col>
-                <!-- IMAGE RAYEE BANNER INTERVENTION -->
-                <b-img
-                  fluid
-                  :src="require('assets/banner_ray_blue.png')"
-                  blank-color="rgba(0,0,0,0.5)"
-                />
-                <b-btn
-                  class="accordionBtn"
-                  block
-                  href="#"
-                  v-b-toggle.accordion1
-                  variant="Dark link"
-                >
-                  <h4>
-                    <i class="material-icons accordion-chevron"
-                      >chevron_right</i
-                    >
-                    <i class="material-icons ml-2 mr-2">people</i>
-                    Liste des Intervenants de ma structure
-                  </h4>
-                </b-btn>
-              </b-col>
+              <!-- IMAGE RAYEE BANNER INTERVENTION -->
+              <b-img
+                fluid
+                :src="require('assets/banner_ray_blue.png')"
+                blank-color="rgba(0,0,0,0.5)"
+              />
+              <b-btn
+                class="accordionBtn"
+                block
+                href="#"
+                v-b-toggle.accordion1
+                variant="Dark link"
+              >
+                <h4>
+                  <i class="material-icons accordion-chevron"
+                    >chevron_right</i
+                  >
+                  <i class="material-icons ml-2 mr-2">people</i>
+                  Liste des Intervenants de ma structure
+                </h4>
+              </b-btn>
             </b-form-row>
           </b-card-header>
           <b-collapse id="accordion1" accordion="my-accordion" role="tabpanel">

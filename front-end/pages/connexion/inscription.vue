@@ -1,14 +1,14 @@
 <template>
   <section class="container">
-    <b-container class="interventions">
+    <b-container class="inscription_validation">
       <b-row>
-        <b-col cols="6" offset="3" >
+        <b-col cols="8" offset="2" >
             <div class="text-center mb-3">
               <h1>
                 Validation de l'inscription
               </h1>
             </div>
-            <user-infos :user="user" :check-legal="true" :submit-txt="'Je valide mon compte'" @submit="confirmRegistration"/>
+            <user-infos :user="user" :submit-txt="'Je valide mon compte'" @submit="confirmRegistration" :cancelable="false"/>
         </b-col>
       </b-row>
       <modal name="confirmIdentityModal" height="auto" width="900px" :scrollabe="true">
@@ -20,6 +20,9 @@
 
 <script>
 import { mapState } from 'vuex'
+import logger from '~/plugins/logger'
+const log = logger('pages:connexion/inscription')
+
 export default {
   components: {
     connectionForm: () => import('~/components/connectionForm.vue'),
@@ -33,6 +36,7 @@ export default {
   methods: {
     // Validation de l'inscription
     confirmRegistration(){
+      log.i('confirmRegistration - In')
       const url = process.env.API_URL + '/connexion/verify'
       const body = JSON.parse(JSON.stringify(this.user))
       if (this.user.email) {
@@ -40,12 +44,11 @@ export default {
       }
       return this.$axios.$post(url, body)
         .then(async response => {
+          log.i('confirmRegistration - done', { response })          
           if (response.existingUser) {
-            this.authId = response.existingUser.authId
             this.$modal.show('confirmIdentityModal')
             return 
           }
-
           if (response.nonAuthorizedUser){
             this.$toast.error(response.nonAuthorizedUser)
             return
@@ -59,25 +62,25 @@ export default {
             return this.$router.push('/accueil')
            }
         }).catch(error => {
-          console.log(error)
+          log.w('confirmRegistration - Error', { error })
           this.$toast.error(error)
         })
     },
     confirmUserInfos(connexionInfos) {
+      log.i('confirmUserInfos - In', { connectionInfos })
       const url = process.env.API_URL + '/connexion/confirm-profil-infos'
       const user = this.user
       user['password'] = connexionInfos.password
       return this.$axios.$put(url, {user})
         .then(async user => {
+          log.i('confirmUserInfos - Done', { user })
           await this.$store.dispatch('set_utilisateur', user)
           // Route pour les Maîtres nagueurs MN
-          //this.$router.push('/interventions')
-          console.log("route accueil inscription 2")
           this.$router.push('/accueil')
-
           this.$toast.success(`Bienvenue ${user.prenom}`)
           this.$toast.info(`Vous pouvez maintenant vous connecter via France Connect et via mot de passe!`)
         }).catch(error => {
+          log.w('confirmUserInfos - Error', { error })          
           const err = error.response.data.message || error.message
           this.$toast.error(err)
         })
@@ -86,7 +89,3 @@ export default {
   }
 };
 </script>
-
-<style>
-
-</style>

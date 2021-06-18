@@ -6,9 +6,9 @@ var moment = require('moment');
 const { response } = require('express');
 moment().format();
 
+const token = 'a4d3c264-430d-34bd-bd7e-48bbb817328d'
 
 router.get('/siret/:id', async function (req, res) {
-  const token = '95adc4a1-a572-39b1-9303-243934c424f2'
   const now = moment(new Date()).format('YYYY-MM-DD')
   const idsiret = req.params.id
   console.log('recherche SIRET :' + idsiret)
@@ -58,7 +58,6 @@ router.get('/siret/:id', async function (req, res) {
 })
 
 router.get('/siren/:id', async function (req, res) {
-  const token = '95adc4a1-a572-39b1-9303-243934c424f2'
   const now = moment(new Date()).format('YYYY-MM-DD')
   const siren = req.params.id
   console.log('recherche SIREN :' + siren)

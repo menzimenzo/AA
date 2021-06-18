@@ -52,7 +52,6 @@ export default {
             ) {
                 return !this.errors.has(ref);
             }
-
             return null;
         },
         forgot_password() {

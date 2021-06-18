@@ -36,7 +36,4 @@ export default {
   bottom: 10px;
   right: 10px;
 }
-.interventionTitle {
-  color: #252195;
-}
 </style>

@@ -4,73 +4,20 @@ const stringify = require('csv-stringify')
 const pgPool = require('../pgpool').getPool();
 var moment = require('moment');
 moment().format();
-
+const { formatUser } = require('../utils/utils')
 const logger = require('../utils/logger')
 const log = logger(module.filename)
-
-const formatUser = user => {
-
-    return {
-        id: user.uti_id,
-        role: user.rol_id,
-        statut: user.stu_id,
-        validated: user.uti_validated,
-        mail: user.uti_mail,
-        nom: user.uti_nom,
-        prenom: user.uti_prenom,
-        eaps: user.uti_eaps,
-        rolLibelle:user.rol_libelle,
-        inscription: user.inscription,
-        publicontact: user.uti_publicontact,
-        mailcontact: user.uti_mailcontact,            
-        sitewebcontact: user.uti_sitewebcontact,
-        adrcontact: user.uti_adrcontact,
-        compadrcontact: user.uti_compadrcontact,
-        cpi_codeinsee: user.uti_com_codeinseecontact,
-        cp: user.uti_com_cp_contact,
-        telephonecontact: user.uti_telephonecontact,
-        datedemandeaaq: user.datedemandeaaq
-    }
-}
-
-
-const formatUserCSV = user => {
-
-    return {
-        id: user.uti_id,
-        role: user.rol_id,
-        statut: user.stu_id,
-        validated: user.uti_validated,
-        mail: user.uti_mail,
-        nom: user.uti_nom,
-        prenom: user.uti_prenom,
-        rolLibelle:user.rol_libelle,
-        inscription: user.inscription,
-        publicontact: user.uti_publicontact,
-        mailcontact: user.uti_mailcontact,            
-        sitewebcontact: user.uti_sitewebcontact,
-        adrcontact: user.uti_adrcontact,
-        compadrcontact: user.uti_compadrcontact,
-        cpi_codeinsee: user.uti_com_codeinseecontact,
-        cp: user.uti_com_cp_contact,
-        telephonecontact: user.uti_telephonecontact 
-    }
-}
-
-
 
 // Récupération de la liste des formateurs filtré par rôle
 // Essenciellement utilisé pour lister la liste des formateurs
 router.get('/liste/:roleid', async function (req, res) {
-    log.i('::list-roleid - In')
-    var roleid = req.params.roleid
-    //log.d('::list-roleid - roleid : ',{ req.roleid})
-
+    const { roleid } = req.params
+    log.i('::list-roleid - In', { roleid })
     // si on est admin, on affiche tous les utilisateurs
-    requete = `SELECT uti.*
-    from utilisateur uti 
-    where rol_id = ${roleid}
-    order by uti_nom, uti_prenom asc`;
+    const requete = `SELECT uti.*
+        FROM utilisateur uti 
+        WHERE rol_id = ${roleid}
+        ORDER BY uti_nom, uti_prenom asc`;
 
     log.d('::list-roleid - requete',{ requete })
     pgPool.query(requete, (err, result) => {
@@ -81,19 +28,19 @@ router.get('/liste/:roleid', async function (req, res) {
         else {
             log.i('::list-roleid - Done')
             const users = result.rows.map(formatUser);
-            res.json({ users });
+            return res.json({ users });
         }
     })
-});
+})
 
 /* route d'extraction de la liste d'utilisateurs pour le CSV */
 /* Pas d'argument, on utilise la structure de l'utilisateur en session */
 router.get('/csv', async function (req, res) {
     log.i('::csv - In')
     const utilisateurCourant = req.session.user;
-    var requete = "";
+    let requete = "";
 
-    log.d('::csv - Profil de l\'utilisateur : ' + req.session.user.rol_id);
+    log.d('::csv - Profil de l\'utilisateur : ' + utilisateurCourant.rol_id);
     // Je suis utilisateur "Administrateur" ==> Export de la liste des tous les utilisateurs
     if ( utilisateurCourant.rol_id == 1 ) {
         requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, lower(uti_mail) as Courriel,  
@@ -107,7 +54,7 @@ router.get('/csv', async function (req, res) {
         order by 3,4 asc`;
     } 
     // Je suis utilisateur "Formateur" ==> Export de la liste des maitres nageurs qui m'ont fait la demande
-    if ( utilisateurCourant.rol_id == 3 ) {
+    else if ( utilisateurCourant.rol_id == 3 ) {
         requete =`SELECT  uti.uti_id As Identifiant , uti.uti_prenom as Prénom, uti_nom As Nom,  rol_libelle as Role, lower(uti_mail) as Courriel,  
         to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
 
@@ -154,7 +101,7 @@ router.get('/csv', async function (req, res) {
             })            
         }
     })
-});
+})
 
 router.get('/encadrant', async function (req, res) {
     log.i('::encadrant - In')
@@ -183,14 +130,12 @@ router.get('/encadrant', async function (req, res) {
 });
 
 router.get('/:id', async function (req, res) {
-    const id = req.params.id;
+    const { id } = req.params
     log.i('::get - In', { id })
-    const utilisateurCourant = req.session.user
-    if ( utilisateurCourant.rol_id == 1) {
-        // si on est admin, on affiche l'utilisateur
-        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, rol.rol_libelle from utilisateur uti 
-        join profil pro on pro.rol_id = uti.rol_id
-        where uti_id=${id} order by uti_id asc`;
+    const requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') AS inscription, pro.rol_libelle 
+        FROM utilisateur uti 
+        JOIN profil pro on pro.rol_id = uti.rol_id
+        WHERE uti_id=${id} ORDER BY uti_id asc`;
 
     log.d('::get - select un USER, requête = '+requete)
     pgPool.query(requete, (err, result) => {
@@ -208,12 +153,12 @@ router.get('/:id', async function (req, res) {
             res.json({ user: formatUser(user) });
         }
     })
-
-}});
+});
 
 router.get('/', async function (req, res) {
     log.i('::list - In')
     const utilisateurCourant = req.session.user
+    let requete = "";
     
     if ( utilisateurCourant.rol_id == 1) {
         // si on est admin, on affiche tous les utilisateurs
@@ -224,8 +169,7 @@ router.get('/', async function (req, res) {
         join profil pro on pro.rol_id = uti.rol_id
         order by uti_id asc`;
     }
-    else 
-    {
+    else {
         // si on est formateur, on affiche seulements les utilisateurs qui on une demande en cours
         // Sauf les Admin créés sur structure
         requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,pro.rol_libelle, to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
@@ -247,15 +191,34 @@ router.get('/', async function (req, res) {
             res.json({ users });
         }
     })
-});
+})
 
 router.put('/:id', async function (req, res) {
     const user = req.body.utilisateurSelectionne
     const id = req.params.id
     log.i('::update - In', { id })
     let { nom, prenom, mail, role, validated,structure, structureLocale, statut } = user
+    console.log(user)
+    // const requete = `UPDATE utilisateur SET  
+    // uti_mail = lower($1), 
+    // uti_nom = $2, 
+    // uti_prenom = $3, 
+    // uti_validated = true, 
+    // uti_eaps = $4, 
+    // uti_publicontact = $5, 
+    // uti_mailcontact = lower($7), 
+    // uti_sitewebcontact = $8, 
+    // uti_adrcontact = $9, 
+    // uti_compadrcontact = $10, 
+    // uti_telephonecontact = $11,  
+    // uti_com_codeinseecontact = $12, 
+    // uti_com_cp_contact = $13 
+    // WHERE uti_id = $6
+    // RETURNING *
+    // ;`
+    // pgPool.query(requete,[profil.mail, profil.nom, profil.prenom, profil.eaps,Boolean(profil.publicontact), profil.id, profil.mailcontact,profil.sitewebcontact,profil.adrcontact, profil.compadrcontact,profil.telephonecontact , profil.cpi_codeinsee, profil.cp], (err, result) => {
 
-    //insert dans la table utilisateur
+    //Update dans la table utilisateur
     const requete = `UPDATE utilisateur 
     SET uti_nom = $1,
     uti_prenom = $2,
@@ -266,19 +229,6 @@ router.put('/:id', async function (req, res) {
     WHERE uti_id = ${id}
     RETURNING *
     ;`
-    /*
-    const requete = `UPDATE utilisateur 
-        SET uti_nom = $1,
-        uti_prenom = $2,
-        uti_mail = lower($3),
-        uti_validated = $4,
-        rol_id = $5,
-        str_id = $6,
-        uti_structurelocale = $7,
-        stu_id = $8
-        WHERE uti_id = ${id}
-        RETURNING *
-        ;`    */
     pgPool.query(requete,[nom,
         prenom,
         mail,

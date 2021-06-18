@@ -1,4 +1,3 @@
-
 <template id="modal">
  <div class="modal">
 	<div class="modal-window">

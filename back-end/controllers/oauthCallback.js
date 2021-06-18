@@ -56,7 +56,7 @@ module.exports = async (req, res, next) => {
 
     if(!userInfo.email){userInfo.email = ''}
 
-    var utilisateur, url,nom
+    let utilisateur, url,nom
     await pgPool.query('SELECT * from utilisateur where uti_tockenfranceconnect = $1', [$1 = userInfo.sub],
       async (err, result) => {
           if(err){
