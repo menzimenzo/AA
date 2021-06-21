@@ -8,17 +8,17 @@
       </b-col>
       <b-col   class="col-8 col-md-4" >
         <b-row >
-          <p class="aa-bouton-connexion"  v-if="this.b_MN" @click="SeLoguer('MN')">▷ Je suis maître nageur<sup>(1)</sup><br>Je m’identifie et renseigne mes données<br><br></p>
+          <p class="aa-bouton-connexion"  @click="SeLoguer(1)">▷ Je suis maître nageur<sup>(1)</sup><br>Je m’identifie et renseigne mes données<br><br></p>
         </b-row>
         <b-row >
-          <p class="aa-bouton-connexion" v-if="this.b_AS" @click="SeLoguer('AS')">▷ J'appartiens à une structure actrice du dispositif AAQ<br><br></p>
+          <p class="aa-bouton-connexion" @click="SeLoguer(2)">▷ J'appartiens à une structure actrice du dispositif AAQ<br><br></p>
         </b-row>
       </b-col>
     </b-row>
-    <div v-if="b_MN^b_AS">
+    <div v-if="connexionType">
       <b-row>
         <b-col cols="8" offset-md="2">
-          <connectionForm @submit="login"/>
+          <connectionForm @submit="login" :connexionType="this.connexionType"/>
         </b-col>
       </b-row>
       <b-row class="text-center" v-if="this.fc">
@@ -69,7 +69,8 @@ export default {
       b_MN: true,
       // Booleen agent de structure
       // V1 : On ne permet pas l'affichage du bouton Partenaire
-      b_AS: false,
+      b_AS: true,
+      connexionType: null,
       fc: false
     };
   },
@@ -123,14 +124,7 @@ export default {
     },
     // Fonction permettant d'afficher dynamiquement la partie Login
     SeLoguer: function(e) {
-      // V1 : On ne permet pas de basculer d'un bouton à l'autre
-      return
-      // Return à supprimer pour faire fonctionne le switch des boutons
-      if (e === "AS")  {
-        //this.b_MN = !this.b_MN
-        this.$toast.info("Ce profil n'est pas encore accessible.")
-        }
-      if (e === "MN")  {this.b_AS = !this.b_AS;}
+        this.connexionType = e
     }
 
   },

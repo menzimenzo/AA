@@ -86,7 +86,7 @@ export default {
             password: this.password,
             confirm: this.confirmation
           }
-          return this.$store.dispatch('register', { user })
+          return this.$store.dispatch('register', { user, connexionType: this.$route.params.connexionType})
         } else {
           this.$toast.error('Veuillez vérifier la validité des champs.')
         }
@@ -105,7 +105,7 @@ export default {
 
       return null;
     },
-  },
+  }
 }
 </script>
 

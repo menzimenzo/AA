@@ -22,7 +22,7 @@ module.exports = async function (req, res) {
     }
 
     var whereClause = ""
-    if (user.role == 3 || user.role == 4) {
+    if (user.rol_id == 3 || user.rol_id == 4) {
         // les formateurs ou maitre nageur AAQ ne voient que leurs interventions
         whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
          LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
@@ -31,17 +31,18 @@ module.exports = async function (req, res) {
          LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
          where uti.uti_id=${user.uti_id} and int.int_id=${id}`
     } else {
-        // Laurent : Pour le moment on met la même chose pour les admin pour éviter que ça plante.
-        whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
-        LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
-         LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-         LEFT JOIN structure str on str.str_id = int.str_id \
-         LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
-         where uti.uti_id=${user.uti_id} and int.int_id=${id}`
+        if (user.rol_id == 2 ) {
+            // role = 2 => partenaire. On affiche une intervention en fonction de la structure  
+            whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
+            LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
+            LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
+            LEFT JOIN structure str on str.str_id = int.str_id \
+            LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
+            where str.str_id=${user.structureId} and int.int_id=${id}`
+        }
     }
 
     const requete = `SELECT int.*, pis.*,str.*,com.* from intervention int 
-    join structure stru on stru.str_id = int.str_id
     ${whereClause}`;
     log.d('::select from intervention - récuperation via la requête.', { requete });
 

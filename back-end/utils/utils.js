@@ -44,7 +44,8 @@ module.exports = {
             compadrcontact: utilisateur.uti_compadrcontact,
             cpi_codeinsee: utilisateur.uti_com_codeinseecontact,
             cp: utilisateur.uti_com_cp_contact,
-            telephonecontact: utilisateur.uti_telephonecontact
+            telephonecontact: utilisateur.uti_telephonecontact,
+            structureId: utilisateur.str_id
       }
     } else {
       return {
@@ -66,14 +67,13 @@ module.exports = {
         uti_compadrcontact: utilisateur.compadrcontact,
         uti_com_cp_contact: utilisateur.cp,
         uti_com_codeinseecontact: utilisateur.cpi_codeinsee,
-        uti_telephonecontact: utilisateur.telephonecontact
+        uti_telephonecontact: utilisateur.telephonecontact,
+        str_id: utilisateur.structureId
       }
     }
   }
   , formatEmail: mail => mail && mail.trim().toLowerCase()
   , formatIntervention: (intervention) => {
-    console.log('avant')
-    console.log(intervention)
     const result = {
       id: intervention.int_id,
       nbEnfants: intervention.int_nombreenfant,
@@ -104,8 +104,6 @@ module.exports = {
       dateCreation: new Date(intervention.int_datecreation),
       dateMaj: intervention.int_datemaj
     }
-    console.log('apres')
-    console.log(result)
     return result
   },
   logTrace: (batch, codeerreur, startTime) => {

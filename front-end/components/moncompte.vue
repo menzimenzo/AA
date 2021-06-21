@@ -74,7 +74,7 @@
           id="eapsInputGroup"
           label-for="eapsInput"
           required
-          v-if="user.profilId!=1"
+          v-if="user.profilId> 2"
           >
           <b-form-input
             id="eapsInput"
@@ -98,7 +98,7 @@
 
       <!--<div v-if="user.publicontact==true">-->
         <!--v-validate="{url: {require_protocol: true }}" -->
-      <div>
+      <div v-if="user.profilId > 2">
         <b-form >
           <b-form-group label="Site Web de contact :">
             <b-form-input
@@ -198,8 +198,6 @@
               </b-form-select>
               <b-form-invalid-feedback id="lstcommuneFeedback">Une commune doit être sélectionnée avec un code postal valide.</b-form-invalid-feedback>
           </b-form-group>
-
-          
         </b-form>
 
       <b-form>
@@ -215,6 +213,9 @@
           </b-form-checkbox-group>
         </b-form-group>
       </b-form>
+      </div>
+      <div v-else>
+      
       </div>
       <b-form>
         <b-form-group>
@@ -253,12 +254,7 @@
   </div>
   
 </template>
-  <!--(errors.any()==false  || accordHonneur==false)
-  
-          :disabled="
-        errors.any()==true
-        "
-  -->
+
 
 <script>
 import { mapState } from "vuex";

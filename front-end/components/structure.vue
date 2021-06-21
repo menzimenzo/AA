@@ -199,8 +199,6 @@
               ecole.nom +
               " - " +
               ecole.adresse +
-              " - " +
-              ecole.adresse +
               " " +
               ecole.cp +
               " " +
@@ -217,7 +215,7 @@
       <b-form-input v-model="etab.adresse" type="text"></b-form-input>
     </div>
 
-    <b-row>
+    <b-row >
       <p class="modal-btns">
         <b-button v-on:click="cancel">Annuler</b-button>
         <b-button variant="success" v-on:click="addStructure">Ajouter</b-button>

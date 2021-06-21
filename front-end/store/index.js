@@ -208,7 +208,6 @@ export const actions = {
   },
   async post_intervention({ commit, state }, intervention) {
     const url = process.env.API_URL + "/interventions";
-    console.log('dans store :'+url)
     intervention.utilisateurId = state.utilisateurCourant.id
     return await this.$axios.$post(url, { intervention }).then(({ intervention }) => {
       log.i("actions::post_intervention - In", { intervention });  
@@ -391,11 +390,12 @@ export const actions = {
   register({ commit }, params) {
     params.user.mail = formatEmail(params.user.mail)
     const { mail, password, confirm } = params.user
+    const connexionType = params.connexionType
     log.i('actions::register - In', mail, password, confirm)
     let user = null
     let path = null
 
-    return this.$axios.$post(`${process.env.API_URL}/connexion/create-account-pwd`, { password, mail, confirm })
+    return this.$axios.$post(`${process.env.API_URL}/connexion/create-account-pwd`, { password, mail, confirm, connexionType })
       .then(apiRes => {
         user = apiRes.user
         if(apiRes && apiRes.confirmInscription) {

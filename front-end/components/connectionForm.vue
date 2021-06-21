@@ -1,5 +1,7 @@
 <template>
     <b-card class="mb-3">
+      <h5  v-if="connexionType===1">Connexion en tant que Maître-Nageur></h5>
+      <h5  v-if="connexionType===2">Connexion en tant que partenaire</h5>
       <b-card-text style="color:#35495e;">{{information}}</b-card-text>
       <b-form>
         <b-form-group id="emailInputGroup" label="Courriel :" label-for="emailInput" required>
@@ -50,7 +52,10 @@
             </nuxt-link>
           </b-col>
           <b-col cols="4" v-if="!hasToConfirmMail"> 
-            <nuxt-link to="/register">
+            <nuxt-link :to="{
+              name: 'register',
+              params: {connexionType: this.connexionType}
+              }">
                 Créer un compte
             </nuxt-link>
             <br>
@@ -86,6 +91,10 @@ export default {
     hasToConfirmMail: {
       type: Boolean,
       default: false
+    },
+    connexionType: {
+      type: Number,
+      default: null,
     }
   },
   mounted() {
