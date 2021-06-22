@@ -71,7 +71,7 @@
           </b-form-select>
         </b-col>
         <b-col cols="2">
-          <b-btn
+          <b-btn v-if="this.$store.state.utilisateurCourant.profilId != 2"
             @click="addStructure()"
             class="btn btn-primary btn-lg btn-block"
           >
@@ -376,8 +376,6 @@ var loadFormIntervention = function (intervention) {
   let dateFinIntervention = moment(intervention.dateFinIntervention);
   formIntervention.dateFinIntervention =
     dateFinIntervention.format("YYYY-MM-DD");
-  console.info("apres loadFrom");
-  console.info(formIntervention);
   return formIntervention;
 };
 

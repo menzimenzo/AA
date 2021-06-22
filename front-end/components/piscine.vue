@@ -109,12 +109,10 @@ export default {
             );
 
             if (this.dansInt) {
-              console.log('juste avant')
               console.log(this.$store.state.maPiscine)
               this.intervention.piscine = this.$store.state.maPiscine
               this.$modal.hide("editPiscine");
             } else {
-              console.log('dans else')
               this.$modal.hide("newPiscine");
             }
           })
