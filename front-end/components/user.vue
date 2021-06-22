@@ -64,8 +64,34 @@
             :options="listeprofil"
           />
         </div>
-
-
+        <!-- Si le profil est Admin alors le changement de profil de en Instructeur
+          oblige de renseigner la structure dont il dépend
+          même si ma structure de référence est "Indépendant"
+        -->
+        <b-form-group 
+          v-if="renseignerstructureref()"
+          label="Structure de dépendance"
+          label-for="lststructureref" 
+          require
+          >
+            <b-form-select 
+              class="liste-deroulante"
+              v-model="formUser.structurerefid"
+              name="lststructureref"
+              aria-describedby="lststructurerefFeedback">
+            
+              <option :value="null">-- Choix de la structure de référence --</option>
+              <option
+                v-for="structureref in listestructureref"
+                :key="structureref.id"
+                :value="structureref.id"
+              >{{ structureref.libellecourt }}</option>
+            </b-form-select>
+          </b-form-group>   
+          <!-- Si c'est un profil Structure ref,
+              le changement de profil MN en MN AAQ entraine
+              l'obligation de rentrer le formateur qui a assurer la formation
+          -->
           <b-form-group 
             v-if="renseignerinstructeur()"
             label="* Instructeur ayant assuré la formation :"
@@ -89,21 +115,6 @@
               </b-form-select>
               <b-form-invalid-feedback id="lstinstructeurFeedback">Un instructeur doit être sélectionné.</b-form-invalid-feedback>
           </b-form-group>
-        <div v-if="isAdmin()">
-          <div class="mb-3 mt-3">
-            Statut utilisateur :
-            <b-form-select v-model="formUser.statut" :options="liststatus" />
-          </div>
-          <div class="mb-3 mt-3">
-            <b-form-checkbox
-              switch
-              v-model="formUser.validated"
-              name="check-button"
-            >
-              Utilisateur validé <b></b>
-            </b-form-checkbox>
-          </div>
-        </div>
       </b-col>
       <b-col cols="4">
 
@@ -133,7 +144,7 @@
                 key="email-input"
                 aria-describedby="emailcontactFeedback"
                 placeholder="Courriel contact"
-              />
+              />de saisir une structure de référence
               
             </b-form-group>
             <b-form-group
@@ -155,6 +166,25 @@
             </b-form-group>
           </b-form >
         </div>
+
+    
+        <div v-if="isAdmin()">
+          <hr/>
+          <div class="mb-3 mt-3">
+            Statut utilisateur :
+            <b-form-select v-model="formUser.statut" :options="liststatus" />
+          </div>
+          <div class="mb-3 mt-3">
+            <b-form-checkbox
+              switch
+              v-model="formUser.validated"
+              name="check-button"
+            >
+              Utilisateur validé <b></b>
+            </b-form-checkbox>
+          </div>
+        </div>
+
       </b-col>
       <b-col cols="4">
         <div>
@@ -166,7 +196,7 @@
                 :disabled=!isAdmin()
               />
             </b-form-group>
-            <b-form-group label="Complément d'adresse de  contact :">
+            <b-form-group label="Complément d'adresse de contact:">
               <b-form-input
                 type="text"
                 v-model="formUser.compadrcontact"
@@ -253,8 +283,8 @@ var loadFormUser = function (utilisateur) {
           compadrcontact: "",
           cpi_codeinsee: "",
           cp: "",
-          telephonecontact: ""
-
+          telephonecontact: "",
+          structurerefid:""
         },
         utilisateur
       )
@@ -306,9 +336,18 @@ export default {
             nom: null,
             prenom: null,
             mail: null
-          },
-        ],
-        instructeurid: null,
+        },
+      ],
+      instructeurid: null,
+            listestructureref: [
+        {
+          text: "Veuillez sélectionner une structure de référence",
+          value: null,
+          id: null,
+          libellecourt: null,
+          courriel: null
+        },
+      ],
 
     };
   },
@@ -339,12 +378,12 @@ export default {
       if(this.formUser.role =="4") {
         if(this.$store.state.utilisateurCourant.profilId=="6" || this.$store.state.utilisateurCourant.profilId=="3") {
           const url = process.env.API_URL + "/demandeaaq?demandeurid=" + this.formUser.id
-          console.info(url);
+          console.debug(url);
           this.$axios
             .$get(url)
             .then( response => {
               if(response && response.demandeaaq) {
-                console.log("Une demande en cours: " + response.demandeaaq.dem_id)
+                console.debug("Une demande en cours: " + response.demandeaaq.dem_id)
                 var demandeaaq = response.demandeaaq
                 const url = process.env.API_URL + '/demandeaaq/accord'
 
@@ -357,7 +396,7 @@ export default {
                   .then(async demandeaaq => {
                     // Route pour les Maîtres nagueurs MN
                     //this.$router.push('/interventions')
-                    console.log("Mise à jour de la demande AAQ")
+                    console.debug("Mise à jour de la demande AAQ")
                   }).catch(error => {
                     const err = error.response.data.message || error.message
                     this.$toast.error(err)
@@ -366,7 +405,7 @@ export default {
               }
               else
               {
-                console.log("Aucune demande en cours")
+                console.debug("Aucune demande en cours")
               }
             })
             .catch(error => {
@@ -380,18 +419,29 @@ export default {
 
       if(this.$store.state.utilisateurCourant.profilId=="6" && this.formUser.role =="4") {
         if (!this.instructeurid) {
+          this.erreurformulaire.push("Nom de l'instructeur obligatoire");
           formOK = false;
         }
       }
+      // Si on est Admin et que l'on change le profil de l'utilisateur pour le
+      // passer en Instructeur AAQ, alors on oblige la saisie de la structure
+      // de rattachement
+      if(this.formUser.role =="3" && (this.$store.state.utilisateurCourant.profilId=="1")) {
+        if(!this.formUser.structurerefid) {
+          this.erreurformulaire.push("Structure de dépendance obligatoire");
+          formOK = false;        
+        }
+      }
+
+      // 
 
       if (!formOK) {
         console.info("Formulaire invalide", this.erreurformulaire);
+        // Affichage de l'erreur formulaire
+        this.$toast.error(this.erreurformulaire)
         return;
       }
-      // Mise à jour de du formateur associé à la demande 
-      if (this.instructeurid) {
 
-      }
       return this.$store
         .dispatch("put_user", this.formUser)
         .then((message) => {
@@ -418,9 +468,20 @@ export default {
         return false;
       }
    },
+   // Recherche s'il faut faire apparaitre le fait saisir l'instructure
+   // qui a assuré la formation AAQ 
     renseignerinstructeur: function(){
       console.log(this.formUser.role)
       if(this.$store.state.utilisateurCourant.profilId=="6" && this.formUser.role =="4") {
+        return true;
+      } else {
+        return false;
+      }
+   },
+   // Recherche s'il faut faire apparaitre le fait de saisir une structure de référence
+   renseignerstructureref: function(){
+      console.log(this.formUser.role)
+      if(this.$store.state.utilisateurCourant.profilId=="1" && this.formUser.role =="3") {
         return true;
       } else {
         return false;
@@ -475,7 +536,26 @@ export default {
           });
       }
     },
-  },
+    recherchestructureref: function() 
+    {
+      console.info("Recherche des structures de référence");
+      // Lance la recherche sur la liste des formateurs 
+      const url = process.env.API_URL + "/structureref/liste/"
+      console.info(url);
+      return this.$axios
+        .$get(url)
+        .then(response => {
+          this.listestructureref = response.structureref;
+          console.info("recherche structureref : this.listestructureref " + this.listestructureref );
+        })
+        .catch(error => {
+          console.error(
+            "Une erreur est survenue lors de la récupération des structures de référence",
+            error
+          );
+        });
+      },   
+    },
  watch: {
     "cp"() {
       console.info("Saisie CP");
@@ -493,9 +573,15 @@ export default {
   computed: { ...mapState(["structures", "utilisateurCourant"]) 
   },
   async mounted() {
-    await this.$store.dispatch("get_structures");
+
+
+  //await this.$store.dispatch("get_structures");
     await this.$store.dispatch("get_users");
+    console.log("StructureRef : " + this.formUser.structurerefid)
+
     await this.rechercheinstructeurs();
+    // Chargement de la liste des structures de référence
+    await this.recherchestructureref()  
 
     this.loading = false;
     // Si ce n'est pas l'admin alors il ne peut pas mettre
@@ -503,6 +589,7 @@ export default {
     if (!this.isAdmin())
     {
       var elementsSupprimes = this.listeprofil.splice(0, 2);
+
     }
     this.role = this.formUser.role;
     if(this.formUser.cp)
@@ -542,5 +629,12 @@ this.listeprofil.pop()
 }
 .interventionTitle {
   color: #252195;
+}
+
+.hr {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 </style>

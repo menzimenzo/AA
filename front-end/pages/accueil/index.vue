@@ -162,7 +162,27 @@ export default {
           );
         });
       },
-  recherchestructureref: function() 
+    rechercheformateur: function() 
+    {
+      console.info("Recherche des formateurs");
+      // Lance la recherche sur la liste des formateurs 
+      const url = process.env.API_URL + "/user/liste/3"
+      console.info(url);
+      return this.$axios
+        .$get(url)
+        .then(response => {
+          this.listeformateur = response.users;
+          console.info("rechercheformateur : this.listeformateur " + this.listeformateur );
+        })
+        .catch(error => {
+          console.error(
+            "Une erreur est survenue lors de la récupération des formateurs",
+            error
+          );
+        });
+      },      
+
+    recherchestructureref: function() 
     {
       console.info("Recherche des structures de référence");
       // Lance la recherche sur la liste des formateurs 

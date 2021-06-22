@@ -29,7 +29,8 @@ const formatUser = user => {
         cpi_codeinsee: user.uti_com_codeinseecontact,
         cp: user.uti_com_cp_contact,
         telephonecontact: user.uti_telephonecontact,
-        datedemandeaaq: user.datedemandeaaq
+        datedemandeaaq: user.datedemandeaaq,
+        structurerefid: user.structurerefid
     }
 }
 
@@ -53,7 +54,8 @@ const formatUserCSV = user => {
         compadrcontact: user.uti_compadrcontact,
         cpi_codeinsee: user.uti_com_codeinseecontact,
         cp: user.uti_com_cp_contact,
-        telephonecontact: user.uti_telephonecontact 
+        telephonecontact: user.uti_telephonecontact,
+        structurerefid: user.sre_id
     }
 }
 
@@ -65,8 +67,8 @@ router.get('/liste/:roleid', async function (req, res) {
     log.i('::list-roleid - In')
     var roleid = req.params.roleid
     const utilisateurCourant = req.session.user;
-    console.log("RoleId : "+roleid)
-    console.log("RoleId utilisateur courant : "+utilisateurCourant.rol_id)
+    log.d("RoleId : "+roleid)
+    log.d("RoleId utilisateur courant : "+utilisateurCourant.rol_id)
     //log.d('::list-roleid - roleid : ',{ req.roleid})
 
     if (utilisateurCourant.rol_id == 1 || utilisateurCourant.rol_id == 5) {
@@ -81,7 +83,7 @@ router.get('/liste/:roleid', async function (req, res) {
         // Pour le rol_id = 3 cela correspond à tous les instructeurs de la structure
         requete = `SELECT uti.*
         from utilisateur uti 
-        inner join uti_sre uts on uts.uti_id = uti.uti_id 
+        inner join uti_sre uts on uts.uti_id = uti.uti_id and uts.uts_actif = true
             and uts.sre_id in (select utisre.sre_id from uti_sre utisre where utisre.uti_id = ${utilisateurCourant.uti_id}) 
         where uti.rol_id = ${roleid}
         order by uti_nom, uti_prenom asc`;
@@ -213,11 +215,12 @@ router.get('/:id', async function (req, res) {
     const id = req.params.id;
     log.i('::get - In', { id })
     const utilisateurCourant = req.session.user
-    if ( utilisateurCourant.rol_id == 1) {
+    if ( utilisateurCourant.rol_id == 1 || utilisateurCourant.rol_id == 3) {
         // si on est admin, on affiche l'utilisateur
-        requete = `SELECT uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, rol.rol_libelle from utilisateur uti 
+        requete = `SELECT uti.*,uti_sre.sre_id structurerefid,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, rol.rol_libelle from utilisateur uti 
         join profil rol on rol.rol_id = uti.rol_id
-        where uti_id=${id} order by uti_id asc`;
+        left join uti_sre on uti_sre.uti_id = uti.uti_id and uti_sre.uts_actif = true
+        where uti.uti_id=${id} order by uti.uti_id asc`;
 
     log.d('::get - select un USER, requête = '+requete)
     pgPool.query(requete, (err, result) => {
@@ -251,7 +254,7 @@ router.get('/', async function (req, res) {
         join profil pro on pro.rol_id = uti.rol_id
         order by uti_id asc`;
     }
-    // Je suis utilisateur "Formateur" ==> Export de la liste des maitres nageurs qui m'ont fait la demande
+    // Je suis utilisateur "gestionnaire de struture de référence" ==> on affiche les demandes de ma structure
     else if ( utilisateurCourant.rol_id == 6) 
     {
             requete =`SELECT  uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,pro.rol_libelle, to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
@@ -290,44 +293,96 @@ router.put('/:id', async function (req, res) {
     const user = req.body.utilisateurSelectionne
     const id = req.params.id
     log.i('::update - In', { id })
-    let { nom, prenom, mail, role, validated,structure, structureLocale, statut } = user
+    let { nom, prenom, mail, role, validated, statut,eaps,publicontact,mailcontact,sitewebcontact,adrcontact,compadrcontact,cpi_codeinsee,cp,telephonecontact,structurerefid } = user
 
-    //insert dans la table utilisateur
+
+
+
+    if (role==3) {
+
+        const requeteStructure = `SELECT sre_id, uts_actif FROM uti_sre WHERE uti_id = ${id} and sre_id = ${structurerefid}`
+        log.d(requeteStructure)
+        const userQuery = await pgPool.query(requeteStructure).catch(err => {
+            log.w(err)
+            throw err
+        })
+        if(userQuery.rowCount == 0) {
+            const requeteCreUtiStr = `INSERT INTO uti_sre (uti_id,sre_id,uts_actif) VALUES (${id}, ${structurerefid}, true) RETURNING *`
+
+            // Aucune structure ne correspond à celle demandée
+            log.d('Aucune structure correspondante pour cet utilisateur on créé le lien.')
+            log.d(requeteCreUtiStr)
+            const { rows } =  pgPool.query(requeteCreUtiStr).catch(err => {
+                console.log(err)
+                throw err
+              })
+
+        }
+
+        // On passe à inactif toutes les structures autres que celle sélectionnée
+        // On passe à actif la structure sélectionnée
+        const requeteMajUtiStr = `UPDATE uti_sre SET uts_actif = (sre_id=${structurerefid}) WHERE uti_id = ${id} RETURNING *`
+        // Aucune structure ne correspond à celle demandée
+        log.d(requeteMajUtiStr)
+
+        const { rows } = await pgPool.query(requeteMajUtiStr).catch(err => {
+            console.log(err)
+            throw err
+        })
+       
+    }
+
+
+
+
+
+    // Mise à jour de l'utilisateur
     const requete = `UPDATE utilisateur 
     SET uti_nom = $1,
     uti_prenom = $2,
     uti_mail = lower($3),
     uti_validated = $4,
     rol_id = $5,
-    stu_id = $6
+    stu_id = $6,
+    uti_eaps= $7,
+    uti_publicontact = $8,
+    uti_mailcontact = $9,
+    uti_sitewebcontact = $10,
+    uti_adrcontact = $11,
+    uti_compadrcontact = $12,
+    uti_com_codeinseecontact = $13,
+    uti_com_cp_contact = $14,
+    uti_telephonecontact = $15
     WHERE uti_id = ${id}
     RETURNING *
     ;`
-    /*
-    const requete = `UPDATE utilisateur 
-        SET uti_nom = $1,
-        uti_prenom = $2,
-        uti_mail = lower($3),
-        uti_validated = $4,
-        rol_id = $5,
-        str_id = $6,
-        uti_structurelocale = $7,
-        stu_id = $8
-        WHERE uti_id = ${id}
-        RETURNING *
-        ;`    */
     pgPool.query(requete,[nom,
         prenom,
         mail,
         validated,
         role,
-        statut], (err, result) => {
+        statut,
+        eaps,
+        publicontact,
+        mailcontact,
+        sitewebcontact,
+        adrcontact,
+        compadrcontact,
+        cpi_codeinsee,
+        cp,
+        telephonecontact], (err, result) => {
         if (err) {
             log.w('::update - erreur lors de l\'update', {requete, erreur: err.stack});
             return res.status(400).json('erreur lors de la sauvegarde de l\'utilisateur');
         }
         else {
             log.i('::update - Done')
+            // Si c'est un rôle Instructeur qui est mise à jour alors
+            // On vérifie si c'est la même structure de référence
+            // Si c'est la Même : RAS
+            // Si elle est différente alors, il faut la remplacer.
+            
+
             return res.status(200).json({ user: formatUser(result.rows[0])});
         }
     })
