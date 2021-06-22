@@ -135,7 +135,6 @@ router.get('/:id', async function (req, res) {
         user: user
     }
     inter = await getIntervention(params)
-    console.log(inter[0])
     return res.status('200').json({ intervention: inter[0] })
 });
 
@@ -160,14 +159,22 @@ router.get('/', async function (req, res) {
          where uti.uti_id=${utilisateurId}`
         // Utilisateur Administrateur : 
     } else {
-        // whereClause += `LEFT JOIN utilisateur ON intervention.uti_id = utilisateur.uti_id LEFT JOIN structure ON structure.str_id = utilisateur.str_id `
-        // Laurent : Pour le moment on met la même chose pour les admin pour éviter que ça plante.
+        if (user.rol_id == 2) {
+            whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
+            LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
+             LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
+             LEFT JOIN structure str on str.str_id = int.str_id \
+             LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
+             where str.str_id=${user.structureId}`
+        }
+        else {
         whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
         LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
          LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
          LEFT JOIN structure str on str.str_id = int.str_id \
          LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
-         where uti.uti_id=${utilisateurId}`
+         `
+        }
     }
 
     const requete = `SELECT int.*, pis.*, str.*,com.com_libelle from intervention int ${whereClause} order by int.int_datefinintervention desc`;
@@ -184,6 +191,8 @@ router.get('/', async function (req, res) {
                     interventions[key].enfant = values[1];
                 })
             }
+            console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+            console.log(interventions)
             res.json({ interventions });
         }
         catch (err) {
@@ -290,7 +299,7 @@ router.post('/', async function (req, res) {
                 
                 const user = req.session.user
                 const params = {
-                    id: result.rows[0].int_id,
+                    id: int_id,
                     user: user
                 }
                 let inter = await getIntervention(params)

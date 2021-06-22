@@ -8,7 +8,7 @@ moment().format();
 
 
 router.get('/siret/:id', async function (req, res) {
-  const token = '95adc4a1-a572-39b1-9303-243934c424f2'
+  const token = 'c721b7db-7b99-38f4-9261-2e982049df91'
   const now = moment(new Date()).format('YYYY-MM-DD')
   const idsiret = req.params.id
   console.log('recherche SIRET :' + idsiret)
@@ -58,7 +58,7 @@ router.get('/siret/:id', async function (req, res) {
 })
 
 router.get('/siren/:id', async function (req, res) {
-  const token = '95adc4a1-a572-39b1-9303-243934c424f2'
+  const token = 'c721b7db-7b99-38f4-9261-2e982049df91'
   const now = moment(new Date()).format('YYYY-MM-DD')
   const siren = req.params.id
   console.log('recherche SIREN :' + siren)

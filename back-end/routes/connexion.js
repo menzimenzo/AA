@@ -85,8 +85,8 @@ router.post('/verify', async (req,res) => {
     } 
 
     // Pour un maitre nageur, vérifier si le numéro EAPS est présent dans la table ref_eaps
-    // Exception pour l'admin
-    if (user.rol_id != 1)
+    // Exception pour l'admin, le partenaire
+    if (user.rol_id != 1 && user.rol_id != 2 )
     {
         if (user.eaps != '') {
             log.d('::verify - Recherche numéro EAPS') 
@@ -193,7 +193,7 @@ router.put('/confirm-profil-infos', async (req,res) => {
 
 router.post('/create-account-pwd', async (req, res) => {
     log.i('::create-account-pwd - In')
-    const { password , mail, confirm } = req.body
+    const { password , mail, confirm, connexionType } = req.body
     if(!password || !mail || !confirm) {
         throw new Error("Un paramètre manque pour effectuer l'inscription.")
     }
@@ -201,6 +201,7 @@ router.post('/create-account-pwd', async (req, res) => {
     const crypted = await crypto.createHash('md5').update(password).digest('hex')
     let bddRes
     let confirmInscription
+    let profil
     // Vérifier si l'email est déjà utilisé en base.
     const mailExistenceQuery = await pgPool.query(`SELECT uti_id, lower(uti_mail) uti_mail, uti_tockenfranceconnect FROM utilisateur WHERE lower(uti_mail)=lower('${formatedMail}')`).catch(err => {
         log.w(err)
@@ -234,11 +235,17 @@ router.post('/create-account-pwd', async (req, res) => {
         }
     } else {
         log.d('::create-account-pwd - Nouveau user, authentifié via password, à ajouter en base')
+        if (connexionType == 2) {
+            profil = 2
+        }
+        else {
+            profil = 5
+        }
         confirmInscription = true    
         bddRes = await pgPool.query(
             'INSERT INTO utilisateur(rol_id, stu_id, uti_mail, uti_validated, uti_pwd)\
             VALUES($1, $2, lower($3), $4, $5) RETURNING *'
-            , [5, 1, formatedMail, false, crypted ]
+            , [profil, 1, formatedMail, false, crypted ]
           ).catch(err => {
             log.w(err)
             throw err
