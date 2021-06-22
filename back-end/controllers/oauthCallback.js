@@ -152,6 +152,11 @@ module.exports = async (req, res, next) => {
             } else if(utilisateur.rol_id == 4) {
               // MaitreNageurAAQ
               url = "/intervention"
+              //url = "/interventions"
+              url = "/pageenconstruction"
+            } else if (utilisateur.rol_id == 6) {
+              // Structure de référence 
+              url = "/structureref"
             } else {
               // MaitreNageur
               console.log("Route accueil oauthallBack")

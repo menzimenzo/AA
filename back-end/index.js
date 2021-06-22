@@ -64,6 +64,7 @@ const exp         = require('./routes/export');
 const demandeaaq         = require('./routes/demandeaaq');
 const siren     = require('./routes/siren');
 const ecole     = require('./routes/ecole');
+const structureref         = require('./routes/structureref');
 
 // Route vers la page de connexion
 app.use(config.URL_PREFIX + '/connexion', connexion);
@@ -98,6 +99,7 @@ app.use(config.URL_PREFIX + '/user', user);
 
 app.use(config.URL_PREFIX + '/demandeaaq', demandeaaq);
 
+app.use(config.URL_PREFIX + '/structureref', structureref);
 
 app.get(config.URL_PREFIX + '', function (req, res) {
     res.send('Bienvenue sur le backend d Aisance Aquatique');

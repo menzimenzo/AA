@@ -66,7 +66,7 @@
                 :defaultSortField="{ key: 'nom', order: 'asc' }"
               >
                 <template slot-scope="props" slot="actions">
-                  <b-btn @click="editUser(props.data.id)" size="sm" class="mr-1" variant="primary">
+                  <b-btn @click="editUser(props.data.item.id)" size="sm" class="mr-1" variant="primary">
                     <i class="material-icons">edit</i>
                   </b-btn>
                 </template>

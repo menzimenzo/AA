@@ -107,6 +107,9 @@ export default {
             if (this.$store.state.utilisateurCourant.profilId == 3) {
               return this.$router.push('/formateur')
             }
+            if (this.$store.state.utilisateurCourant.profilId == 6) {
+              return this.$router.push('/structureref')
+            }
             if (this.$store.state.utilisateurCourant.profilId == 4) {
               return this.$router.push('/interventions')
             } else
