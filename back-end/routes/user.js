@@ -67,16 +67,33 @@ router.get('/liste/:roleid', async function (req, res) {
     log.i('::list-roleid - In')
     var roleid = req.params.roleid
     const utilisateurCourant = req.session.user;
+    
     log.d("RoleId : "+roleid)
     log.d("RoleId utilisateur courant : "+utilisateurCourant.rol_id)
     //log.d('::list-roleid - roleid : ',{ req.roleid})
 
-    if (utilisateurCourant.rol_id == 1 || utilisateurCourant.rol_id == 5) {
+    if (utilisateurCourant.rol_id == 1) {
         // si on est admin, on affiche tous les utilisateurs
         requete = `SELECT uti.*
         from utilisateur uti 
         where rol_id = ${roleid}
         order by uti_nom, uti_prenom asc`;
+    }
+    else if (utilisateurCourant.rol_id == 5) {
+        // On recherche les instructeurs
+        // Ceux qui qui sont "Indépendant" ou faisant partie d'une structure qui ne gère pas en central les demandes AAQ
+        if (roleid == 3) {
+
+            // si on est admin, on affiche tous les utilisateurs
+            requete = `SELECT uti.*
+            from utilisateur uti 
+            inner join uti_sre uts on uts.uti_id = uti.uti_id 
+                and uts.uts_actif = true
+            inner join structure_ref sre on sre.sre_id = uts.sre_id and sre_traitementcentral = false
+            where rol_id = ${roleid}
+            order by uti_nom, uti_prenom asc`;        
+        }
+        // Pour le else du rôle, ça ne devrait pas arriver
     }
     else if (utilisateurCourant.rol_id == 6) {
         // On est utilisateur de structure de référence alors on renvoie tous les utilisateurs de la structure de référence

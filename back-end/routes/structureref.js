@@ -25,13 +25,25 @@ const formatStructureRef = structureref => {
 // Essenciellement utilisé pour lister la liste des formateurs
 router.get('/liste/', async function (req, res) {
     log.i('::list - In')
-    //log.d('::list-roleid - roleid : ',{ req.roleid})
 
-    // si on est admin, on affiche tous les utilisateurs
-    requete = `SELECT sre.*
-    from structure_ref sre
-    where sre.sre_actif = true
-    order by sre.sre_libellecourt asc`;
+    const utilisateurCourant = req.session.user;
+    log.d("RoleId utilisateur courant : "+utilisateurCourant.rol_id)
+
+    // si on est admin, on affiche toutes les structures
+    if (utilisateurCourant.rol_id == 1) {
+        requete = `SELECT sre.*
+        from structure_ref sre
+        where sre.sre_actif = true
+        order by sre.sre_libellecourt asc`;
+    } else
+    {
+        // Si on est MN : On affiche que les structures qui valident les demandes en central
+        requete = `SELECT sre.*
+        from structure_ref sre
+        where sre.sre_actif = true
+            and sre_traitementcentral = true
+        order by sre.sre_libellecourt asc`;
+    }
 
     log.d('::list - requete',{ requete })
     pgPool.query(requete, (err, result) => {

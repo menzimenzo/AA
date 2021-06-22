@@ -13,6 +13,7 @@ create table STRUCTURE_REF (
    SRE_LIBELLECOURT     VARCHAR(100)         null,
    SRE_LIBELLE          VARCHAR(150)         not null,
    SRE_COURRIEL         VARCHAR(50)          null,
+   SRE_TRAITEMENTCENTRAL BOOLEAN             not null default false ,
    SRE_ACTIF            BOOLEAN              not null,
    constraint PK_STRUCTURE_REF primary key (SRE_ID)
 );
@@ -53,7 +54,9 @@ where rol_id = 3 and uti_id not in (select uti_id from uti_sre));
 
 
 -- Création de la structure de référence ICARE
-insert into structure_ref (sre_libellecourt, sre_libelle,sre_courriel,sre_actif) values ('Indépendant','Instructeur indépendant','',false);
-insert into structure_ref (sre_libellecourt, sre_libelle,sre_courriel,sre_actif) values ('ICARE','Institut Coopératif de l''Apprentissage, de la Recherche et de l’Enseignement','aaq@icare.fr',true);
+insert into structure_ref (sre_libellecourt, sre_libelle,sre_courriel,SRE_TRAITEMENTCENTRAL,sre_actif) values ('Indépendant','Instructeur indépendant','',false,true);
+insert into structure_ref (sre_libellecourt, sre_libelle,sre_courriel,SRE_TRAITEMENTCENTRAL,sre_actif) values ('ICARE','Institut Coopératif de l''Apprentissage, de la Recherche et de l’Enseignement','aaq@icare.fr',true,true);
+insert into structure_ref (sre_libellecourt, sre_libelle,sre_courriel,SRE_TRAITEMENTCENTRAL,sre_actif) values ('FFSS','Fédération Française de Sauvetage et de Secourisme','',false,true);
+insert into structure_ref (sre_libellecourt, sre_libelle,sre_courriel,SRE_TRAITEMENTCENTRAL,sre_actif) values ('FFN','Fédération Française de Natation','',false,true);
 update utilisateur set rol_id = 3 where uti_id = 20;
 insert into UTI_SRE (UTI_ID,SRE_ID) values (20,1);
