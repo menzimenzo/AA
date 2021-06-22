@@ -100,16 +100,15 @@ export default {
         
         return this.$store
           .dispatch("post_maPiscine", this.selectedPiscine)
-          .then((piscine) => {
-            this.$store.dispatch("get_mesPiscines");
-            this.$store.dispatch("get_maPiscine",this.selectedPiscine.id);
+          .then(async (piscine) => {
+            await this.$store.dispatch("get_mesPiscines");
+            await this.$store.dispatch("get_maPiscine",this.selectedPiscine.id);
             this.$toast.success(
               `${this.selectedPiscine.nom} ajoutée aux piscines favorites`,
               []
             );
 
             if (this.dansInt) {
-              console.log(this.$store.state.maPiscine)
               this.intervention.piscine = this.$store.state.maPiscine
               this.$modal.hide("editPiscine");
             } else {
