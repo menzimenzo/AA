@@ -50,7 +50,7 @@
             v-model="role"
             :options="listeprofil"/>
         </b-form-group>
-        <b-form-group v-if="renseignerstructureref"
+        <b-form-group v-if="renseignerstructureref()"
           label="Structure de dépendance"
           label-for="lststructureref" 
           required>
@@ -72,7 +72,7 @@
             l'obligation de rentrer le formateur qui a assurer la formation
         -->
         <b-form-group 
-          v-if="renseignerinstructeur"
+          v-if="renseignerinstructeur()"
           label="* Instructeur ayant assuré la formation :"
           label-for="lstinstructeur" 
           required>
@@ -214,9 +214,10 @@ export default {
       role: null,
       listeprofil: [
         { text: "Administrateur", value: "1" },
-        { text: "Formateur AAQ", value: "3" },
+        { text: "Instructeur AAQ", value: "3" },
         { text: "Maître Nageur AAQ", value: "4" },
         { text: "Maître Nageur", value: "5" },
+        { text: "Structure de référence", value: "6" },
       ],
       liststatus: [
         { text: "Actif", value: "1" },
@@ -233,7 +234,7 @@ export default {
       ],
       listeinstructeur: [
           {
-            text: "Veuillez sélectionner un formateur",
+            text: "Veuillez sélectionner un instructeur",
             value: null,
             id: null,
             nom: null,
@@ -317,7 +318,7 @@ export default {
             });
         }
       }
-
+  
       if(this.$store.state.utilisateurCourant.profilId=="6" && this.formUser.role =="4") {
         if (!this.instructeurid) {
           this.erreurformulaire.push("Nom de l'instructeur obligatoire");
@@ -327,7 +328,7 @@ export default {
       // Si on est Admin et que l'on change le profil de l'utilisateur pour le
       // passer en Instructeur AAQ, alors on oblige la saisie de la structure
       // de rattachement
-      if(this.formUser.role =="3" && (this.$store.state.utilisateurCourant.profilId=="1")) {
+      if((this.formUser.role =="3" || this.formUser.role =="6") && (this.$store.state.utilisateurCourant.profilId=="1")) {
         if(!this.formUser.structurerefid) {
           this.erreurformulaire.push("Structure de dépendance obligatoire");
           formOK = false;        
@@ -383,7 +384,7 @@ export default {
     },
     // Recherche s'il faut faire apparaitre le fait de saisir une structure de référence
     renseignerstructureref() {
-      return this.utilisateurCourant.profilId=="1" && this.formUser.role =="3"
+      return this.utilisateurCourant.profilId=="1" && (this.formUser.role =="3" || this.formUser.role =="6")
     }, 
     rechercheinstructeurs() {
       log.i('rechercheinstructeurs - In')
@@ -439,7 +440,12 @@ export default {
     await this.recherchestructureref() 
     this.role = this.formUser.role;
     if (!this.isAdmin()) {
+      // On supprimes les possibilités de profils si on n'est pas Admin
+      // On retire les deux premiers éléments en position 0
       this.listeprofil.splice(0, 2);
+      // On retire un élément en position 2
+      this.listeprofil.splice(2, 1);
+      // Il doit rester MN et MN AAQ 
     }
     if(this.formUser.cp) {
       // Recopie du CP dans le champ code postal

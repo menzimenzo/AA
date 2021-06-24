@@ -44,7 +44,7 @@ router.get('/liste/:roleid', async function (req, res) {
         requete = `SELECT uti.*
         from utilisateur uti 
         inner join uti_sre uts on uts.uti_id = uti.uti_id and uts.uts_actif = true
-            and uts.sre_id in (select utisre.sre_id from uti_sre utisre where utisre.uti_id = ${utilisateurCourant.uti_id}) 
+            and uts.sre_id in (select utisre.sre_id from uti_sre utisre where utisre.uti_id = ${utilisateurCourant.uti_id} and utisre.uts_actif = true) 
         where uti.rol_id = ${roleid}
         order by uti_nom, uti_prenom asc`;
     }
@@ -100,7 +100,7 @@ router.get('/csv', async function (req, res) {
         from utilisateur  uti
         inner join profil rol on rol.rol_id = uti.rol_id 
         inner join demande_aaq dem on dem.dem_uti_demandeur_id = uti.uti_id 
-                                and dem.dem_sre_id in (select utisre.sre_id from uti_sre where uti_id = ${utilisateurCourant.uti_id}) 
+                                and dem.dem_sre_id in (select utisre.sre_id from uti_sre utisre where uti_id = ${utilisateurCourant.uti_id} and utisre.uts_actif = true) 
         left join commune com on cpi_codeinsee = uti.uti_com_codeinseecontact
         order by 3,4 asc`;
     } 
@@ -174,7 +174,7 @@ router.get('/:id', async function (req, res) {
     const { id } = req.params
     log.i('::get - In', { id })
     const utilisateurCourant = req.session.user
-    if ( utilisateurCourant.rol_id == 1 || utilisateurCourant.rol_id == 3) {
+    if ( utilisateurCourant.rol_id == 1 || utilisateurCourant.rol_id == 3 || utilisateurCourant.rol_id == 6) {
         // si on est admin, on affiche l'utilisateur
         requete = `SELECT uti.*,uti_sre.sre_id structurerefid,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription, rol.rol_libelle from utilisateur uti 
         join profil rol on rol.rol_id = uti.rol_id
@@ -220,7 +220,7 @@ router.get('/', async function (req, res) {
         requete =`SELECT  uti.*,replace(replace(uti.uti_validated::text,'true','Validée'),'false','Non validée') as inscription,pro.rol_libelle, to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq
         from utilisateur  uti
         inner join demande_aaq dem on dem.dem_uti_demandeur_id = uti.uti_id 
-                                and dem.dem_sre_id in (select utisre.sre_id from uti_sre utisre where utisre.uti_id = ${utilisateurCourant.uti_id}) 
+                                and dem.dem_sre_id in (select utisre.sre_id from uti_sre utisre where utisre.uti_id = ${utilisateurCourant.uti_id} and utisre.uts_actif = true) 
         inner join profil pro on pro.rol_id = uti.rol_id
                                 order by 3,4 asc`;
     } 
@@ -253,7 +253,7 @@ router.put('/:id', async function (req, res) {
     const id = req.params.id
     log.i('::update - In', { id })
     let { nom, prenom, mail, role, validated, statut,eaps,publicontact,mailcontact,sitewebcontact,adrcontact,compadrcontact,cpi_codeinsee,cp,telephonecontact,structurerefid } = user
-    if (role==3) {
+    if (role==3 || role==6) {
 
         const requeteStructure = `SELECT sre_id, uts_actif FROM uti_sre WHERE uti_id = ${id} and sre_id = ${structurerefid}`
         log.d(requeteStructure)

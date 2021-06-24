@@ -244,6 +244,9 @@ BEGIN
       update utilisateur set rol_id = 3 where uti_id = 20;
       insert into UTI_SRE (UTI_ID,SRE_ID) values (20,1);
 
+      -- Modification du libellé formateur en instructeur
+      update profil set rol_libelle='IntructeurAAQ' where rol_id = 3;
+
       -- Création des piscines
       insert into piscine(PIS_DATAES,PIS_NOM,PIS_X,PIS_Y,PIS_ADR,cpi_codeinsee,pis_datemaj) values('I010040001',UPPER('Centre nautique Laure Manaudou'),5.34428000,45.96155000,'Avenue de Mering','1004',now());
       insert into piscine(PIS_DATAES,PIS_NOM,PIS_X,PIS_Y,PIS_ADR,cpi_codeinsee,pis_datemaj) values('I010320002',UPPER('Camp Militaire'),5.13416000,45.84805000,' 68 RA d''Afrique La Valbonne ','1032',now());
