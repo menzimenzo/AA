@@ -156,7 +156,7 @@ export default {
     this.loading = false;
   },
   methods: {
-    getUser: function(id) {
+    editUser: function(id) {
       log.i('getUser - In')
       return this.$store.dispatch("get_user", id)
         .then(() => {
