@@ -21,7 +21,7 @@
         <b-row class="mt-3" v-if="totalEnfants && totalEnfants > 0">
             <b-col cols="12">
                 <div class="statCard text-center highlightCard">
-                    <p>{{ totalEnfants }} enfants ont pu évolué grâce à vous!</p>
+                    <p>{{ totalEnfants }} enfants ont pu évoluer grâce à vous!</p>
                 </div>
             </b-col>
         </b-row>

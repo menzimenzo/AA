@@ -520,7 +520,7 @@ export default {
     },
   },
   mounted() {
-    this.$store.dispatch("get_structures");
+    //this.$store.dispatch("get_structures");
     if (this.user.profilId < 3) {
       this.getDepartements();
     }
