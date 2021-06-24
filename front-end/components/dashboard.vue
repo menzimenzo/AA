@@ -9,12 +9,12 @@
             </b-col>
             <b-col cols="4">
                 <div class="statCard">
-                    <p>Vous êtes intervenus dans {{ totalPiscines }} piscines</p>
+                    <p>Vous êtes intervenu dans {{ totalPiscines }} piscines</p>
                 </div>
             </b-col>
             <b-col cols="4">
                 <div class="statCard">
-                    <p>Vous êtes intervenus pour {{ totalStructures }} structures</p>
+                    <p>Vous êtes intervenu pour {{ totalStructures }} structures</p>
                 </div>
             </b-col>
         </b-row>

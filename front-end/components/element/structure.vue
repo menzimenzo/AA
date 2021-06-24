@@ -475,11 +475,7 @@ export default {
           break;
       }
       
-      return this.$store
-        .dispatch("post_structure", [
-          structure,
-          this.$store.state.utilisateurCourant.id,
-        ])
+      return this.$store.dispatch("post_structure", [structure, this.$store.state.utilisateurCourant.id])
         .then((structure) => {
           this.$store.dispatch(
             "get_structureByUser",
@@ -504,7 +500,7 @@ export default {
             error
           );
           this.$toast.error(
-            `${this.selectedStructure.nom} n'a pas pu être ajoutée aux structures favorites`,
+            error,
             []
           );
           this.$modal.hide("editStructure");

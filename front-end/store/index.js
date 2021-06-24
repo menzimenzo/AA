@@ -271,7 +271,8 @@ export const actions = {
       return structure
       })
       .catch(error => {
-        log.w("actions::post_structure - erreur", { error }) 
+        log.w("actions::post_structure - erreur", { error })
+        throw new Error(error.response.data)
       })
   },
   get_documents({ commit }) {

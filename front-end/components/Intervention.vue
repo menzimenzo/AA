@@ -272,7 +272,7 @@ import moment from "moment";
 import logger from '~/plugins/logger'
 const log = logger('components:intervention')
 
-const loadFormIntervention = function (intervention) {
+const loadFormIntervention = function (intervention,user) {
   log.i("loadFormIntervention - In");
   const formIntervention = JSON.parse(
     JSON.stringify(
@@ -297,6 +297,10 @@ const loadFormIntervention = function (intervention) {
   formIntervention.dateDebutIntervention = dateDebutIntervention.format("YYYY-MM-DD");
   const dateFinIntervention = moment(intervention.dateFinIntervention);
   formIntervention.dateFinIntervention = dateFinIntervention.format("YYYY-MM-DD");
+  if (!formIntervention.id) {
+    formIntervention.utilisateur.push(user)
+  }
+  
   return formIntervention;
 };
 
@@ -318,7 +322,7 @@ export default {
   },
   data() {
     return {
-      formIntervention: loadFormIntervention(this.intervention),
+      formIntervention: loadFormIntervention(this.intervention,this.$store.state.utilisateurCourant),
       erreurformulaire: [],
       index: null,
       niveauInitial: null,
@@ -373,7 +377,7 @@ export default {
           title: "niveau initial",
           type: "select",
           options: [
-            { lib: "Débutant", value: 0 },
+            { lib: "Débutant", value: "0" },
             { lib: "Palier 1", value: "1" },
             { lib: "Palier 2", value: "2" },
             { lib: "Palier 3 ", value: "3" },
@@ -386,7 +390,7 @@ export default {
           title: "niveau final atteint",
           type: "select",
           options: [
-            { lib: "Débutant", value: 0 },
+            { lib: "Débutant", value:"0" },
             { lib: "Palier 1", value: "1" },
             { lib: "Palier 2", value: "2" },
             { lib: "Palier 3 ", value: "3" },
@@ -396,7 +400,7 @@ export default {
         },
       ],
       listeniveau: [
-        { lib: "Débutant", value: 0 },
+        { lib: "Débutant", value: "0" },
         { lib: "Palier 1", value: "1" },
         { lib: "Palier 2", value: "2" },
         { lib: "Palier 3 ", value: "3" },
@@ -422,14 +426,14 @@ export default {
   },
   watch: {
     intervention(intervention) {
-      Vue.set(this, "formIntervention", loadFormIntervention(intervention));
+      Vue.set(this, "formIntervention", loadFormIntervention(intervention,this.$store.state.utilisateurCourant));
     },
     "formIntervention.nbEnfants": debounce(function() {
         log.i("Watch - In - formIntervention.nbEnfants")
-        if (this.formIntervention.id) {
+        /*if (this.formIntervention.id) {
           return
-        }
-        if(this.formIntervention.nbEnfants !=="" && (!this.niveauInitial || !this.niveauFinal)) {
+        }*/
+        if(!this.formIntervention.id && this.formIntervention.nbEnfants !=="" && (!this.niveauInitial || !this.niveauFinal)) {
           return this.$toast.error('Veuillez d\'abord sélectionner les niveaux liés à cette intervention. Vous pourrez les changer par la suite.')
         }
 
@@ -509,6 +513,7 @@ export default {
         this.formIntervention.nbEnfants = "";
         if ((this.utilisateurCourant.profilId == 3 || this.utilisateurCourant.profilId == 4) && !this.interventionCourrante.id) {
           log.d('resetForm - resetting users.')
+          this.formIntervention.utilisateur = []
           return this.formIntervention.utilisateur.push(this.utilisateurCourant)
         }
       });
@@ -586,7 +591,7 @@ export default {
           var interventionLabel = serverIntervention.id ? "#" + serverIntervention.id : "";
           log.i('checkForm - Done')
           this.$toast.success(`Intervention ${interventionLabel} enregistrée`)
-          return this.resetform();
+          //return this.resetform();
         })
         .catch((error) => {
           log.w("Une erreur est survenue lors de la sauvegarde de l'intervention", error);

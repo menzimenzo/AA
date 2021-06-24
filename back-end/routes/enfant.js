@@ -46,7 +46,7 @@ router.get('/:id', async function (req, res) {
         log.w('::récuperation de l\'enfant - erreur', error)
         return res.status(400).json({message: error.message}); 
     })
-    if (enfant && enfant.length > 0) {
+    if (enfant ) {
         log.i('::get - Done', { id })   
         return res.status(200).json({ enfant})
     }
