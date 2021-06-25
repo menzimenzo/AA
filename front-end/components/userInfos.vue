@@ -5,7 +5,8 @@
         id="emailInputGroup"
         label="Courriel :"
         label-for="emailInput"
-        required >
+        required
+      >
         <b-form-input
           id="emailInput"
           type="email"
@@ -18,13 +19,17 @@
           :state="validateState('mail')"
           :disabled="!isUserRegisteredViaFC"
         />
-        <b-form-invalid-feedback id="emailFeedback">Le courriel est obligatoire et doit être valide.</b-form-invalid-feedback>
+        <b-form-invalid-feedback id="emailFeedback"
+          >Le courriel est obligatoire et doit être
+          valide.</b-form-invalid-feedback
+        >
       </b-form-group>
-      <b-form-group 
+      <b-form-group
         label="Prénom :"
         id="prenomInputGroup"
         label-for="prenomInput"
-        required >
+        required
+      >
         <b-form-input
           id="prenomInput"
           type="text"
@@ -37,47 +42,55 @@
           :disabled="isUserRegisteredViaFC"
           :state="validateState('prenom')"
         />
-        <b-form-invalid-feedback id="prenomFeedback">Le prénom est obligatoire.</b-form-invalid-feedback>
+        <b-form-invalid-feedback id="prenomFeedback"
+          >Le prénom est obligatoire.</b-form-invalid-feedback
+        >
       </b-form-group>
-      <b-form-group 
+      <b-form-group
         label="Nom :"
         id="nomInputGroup"
         label-for="nomInput"
         required
-        >
+      >
         <b-form-input
           id="nomInput"
           type="text"
           v-model="user.nom"
           name="nom"
           key="nom-input"
-          v-validate="{ required: true}"
+          v-validate="{ required: true }"
           aria-describedby="nomFeedback"
           placeholder="Nom"
           :disabled="isUserRegisteredViaFC"
           :state="validateState('nom')"
         />
-        <b-form-invalid-feedback id="nomFeedback">Le nom est obligatoire.</b-form-invalid-feedback>
+        <b-form-invalid-feedback id="nomFeedback"
+          >Le nom est obligatoire.</b-form-invalid-feedback
+        >
       </b-form-group>
-      <b-form-group 
-          label="Numéro de carte professionnelle :"
-          id="eapsInputGroup"
-          label-for="eapsInput"
+      <b-form-group
+        label="Numéro de carte professionnelle :"
+        id="eapsInputGroup"
+        label-for="eapsInput"
+        required
+        v-if="user.profilId != 1 && user.profilId != 2"
+      >
+        <b-form-input
+          id="eapsInput"
+          type="text"
           required
-          v-if="user.profilId != 1 && user.profilId != 2">
-          <b-form-input
-            id="eapsInput"
-            type="text"
-            required
-            v-model="user.eaps"
-            name="eaps"
-            key="eaps-input"
-            v-validate="{ required: true, regex: /[0-9]{5}ED[0-9]{4}/ }"
-            :state="validateState('eaps')"
-            aria-describedby="eapsFeedback"
-            placeholder="Numéro de carte professionnelle"
-          />
-           <b-form-invalid-feedback id="eapsFeedback">Le format de la carte professionnelle n'est pas respecté.</b-form-invalid-feedback>
+          v-model="user.eaps"
+          name="eaps"
+          key="eaps-input"
+          v-validate="{ required: true, regex: /[0-9]{5}ED[0-9]{4}/ }"
+          :state="validateState('eaps')"
+          aria-describedby="eapsFeedback"
+          placeholder="Numéro de carte professionnelle"
+        />
+        <b-form-invalid-feedback id="eapsFeedback"
+          >Le format de la carte professionnelle n'est pas
+          respecté.</b-form-invalid-feedback
+        >
       </b-form-group>
     </b-card>
     <b-card class="mb-3">
@@ -195,225 +208,235 @@
         </b-form>
       </div>
       <div v-else>
-        <b-form-group label="Structure">
-          <b-form-select class="liste-deroulante" v-model="selectedStructure">
-            <option :value="null">-- Choix de la Structure --</option>
-            <option
-              v-for="stru in listeStructure"
-              :key="stru.type"
-              :value="stru.type"
-            >
-              {{ stru.nom }}
-            </option>
-          </b-form-select>
-        </b-form-group>
-        &nbsp;
-        <div v-if="selectedStructure == 1">
-          <b-form-group
-            required
-            id="typeCollectivite"
-            label="Type de collectivité territoriale :"
-            label-for="typeCollectiviteSelect"
-          >
-            <b-form-select
-              id="typeCollectiviteSelect"
-              v-model="typeCollectivite"
-            >
+        <div v-if="this.user.validated == false">
+          <b-form-group label="Structure">
+            <b-form-select class="liste-deroulante" v-model="selectedStructure">
+              <option :value="null">-- Choix de la Structure --</option>
               <option
-                v-for="type in listtypecol"
-                :key="type.value"
-                :value="type.value"
+                v-for="stru in listeStructure"
+                :key="stru.type"
+                :value="stru.type"
               >
-                {{ type.text }}
+                {{ stru.nom }}
               </option>
             </b-form-select>
           </b-form-group>
-          <!-- DEPARTEMENT -->
-          <div v-if="typeCollectivite == 2">
+          &nbsp;
+          <div v-if="selectedStructure == 1">
             <b-form-group
-              id="Departement"
-              label="Département :"
               required
-              label-for="departementSelect"
+              id="typeCollectivite"
+              label="Type de collectivité territoriale :"
+              label-for="typeCollectiviteSelect"
             >
               <b-form-select
-                id="departementSelect"
-                v-model="collectivite"
-                name="departement"
+                id="typeCollectiviteSelect"
+                v-model="typeCollectivite"
               >
                 <option
-                  v-for="departement in listdepartement"
-                  :key="departement.dep_num"
-                  :value="departement"
+                  v-for="type in listtypecol"
+                  :key="type.value"
+                  :value="type.value"
                 >
-                  {{ departement.dep_libelle }}
+                  {{ type.text }}
                 </option>
               </b-form-select>
             </b-form-group>
-          </div>
-          <!-- COMMUNE-->
-          <div v-if="typeCollectivite == 1">
-            <b-form-group id="CodePostal" label="Code Postal :" label-for="cp">
-              <b-form-input
-                v-model="cp"
-                name="cp"
-                key="cp"
-                id="cp"
-                type="number"
-                placeholder="CP de la commune"
-              />
-            </b-form-group>
-            <b-form-group
-              id="Commune"
-              label="Commune :"
-              required
-              label-for="communeInput"
-            >
-              <b-form-select
-                name="commune"
-                key="commune"
-                type="text"
-                v-model="collectivite"
-                id="communeSelect"
+            <!-- DEPARTEMENT -->
+            <div v-if="typeCollectivite == 2">
+              <b-form-group
+                id="Departement"
+                label="Département :"
+                required
+                label-for="departementSelect"
               >
-                <option :value="null">-- Choix de la commune --</option>
-                <option
-                  v-for="commune in listecommune"
-                  :key="commune.cpi_codeinsee"
-                  :value="commune"
-                >
-                  {{ commune.com_libellemaj }}
-                </option>
-              </b-form-select>
-            </b-form-group>
-          </div>
-          <!--EPCI -->
-          <div v-if="typeCollectivite == 3">
-            <b-form-group
-              id="CodePostalEpci"
-              label="Code Postal EPCI:"
-              label-for="cpEpci"
-            >
-              <b-form-input
-                v-model="cpEpci"
-                name="cpEpci"
-                key="cpEpci"
-                id="cpEpci"
-                type="number"
-                placeholder="CP d'une des communes de l'EPCI"
-              />
-            </b-form-group>
-            <div v-if="boolEpci == true">
-              <b-form-group id="ECPI" label="EPCI :" label-for="epciInput">
                 <b-form-select
-                  id="epciSelect"
+                  id="departementSelect"
                   v-model="collectivite"
-                  name="epcis"
+                  name="departement"
                 >
                   <option
-                    v-for="epci in listepci"
-                    :key="epci.epci_code"
-                    :value="epci"
+                    v-for="departement in listdepartement"
+                    :key="departement.dep_num"
+                    :value="departement"
                   >
-                    {{ epci.epci_libelle }}
+                    {{ departement.dep_libelle }}
                   </option>
                 </b-form-select>
               </b-form-group>
             </div>
-            <b-form-group v-if="boolEpci == false">
-              Aucun EPCI correspondant</b-form-group
-            >
+            <!-- COMMUNE-->
+            <div v-if="typeCollectivite == 1">
+              <b-form-group
+                id="CodePostal"
+                label="Code Postal :"
+                label-for="cp"
+              >
+                <b-form-input
+                  v-model="cp"
+                  name="cp"
+                  key="cp"
+                  id="cp"
+                  type="number"
+                  placeholder="CP de la commune"
+                />
+              </b-form-group>
+              <b-form-group
+                id="Commune"
+                label="Commune :"
+                required
+                label-for="communeInput"
+              >
+                <b-form-select
+                  name="commune"
+                  key="commune"
+                  type="text"
+                  v-model="collectivite"
+                  id="communeSelect"
+                >
+                  <option :value="null">-- Choix de la commune --</option>
+                  <option
+                    v-for="commune in listecommune"
+                    :key="commune.cpi_codeinsee"
+                    :value="commune"
+                  >
+                    {{ commune.com_libellemaj }}
+                  </option>
+                </b-form-select>
+              </b-form-group>
+            </div>
+            <!--EPCI -->
+            <div v-if="typeCollectivite == 3">
+              <b-form-group
+                id="CodePostalEpci"
+                label="Code Postal EPCI:"
+                label-for="cpEpci"
+              >
+                <b-form-input
+                  v-model="cpEpci"
+                  name="cpEpci"
+                  key="cpEpci"
+                  id="cpEpci"
+                  type="number"
+                  placeholder="CP d'une des communes de l'EPCI"
+                />
+              </b-form-group>
+              <div v-if="boolEpci == true">
+                <b-form-group id="ECPI" label="EPCI :" label-for="epciInput">
+                  <b-form-select
+                    id="epciSelect"
+                    v-model="collectivite"
+                    name="epcis"
+                  >
+                    <option
+                      v-for="epci in listepci"
+                      :key="epci.epci_code"
+                      :value="epci"
+                    >
+                      {{ epci.epci_libelle }}
+                    </option>
+                  </b-form-select>
+                </b-form-group>
+              </div>
+              <b-form-group v-if="boolEpci == false">
+                Aucun EPCI correspondant</b-form-group
+              >
+            </div>
           </div>
-        </div>
-        <div class="mb-3 mt-3" v-if="selectedStructure == 2">
-          <b-col>
-            Numéro SIREN ou SIRET :
-            <b-form-input
-              aria-describedby="inputFormatterHelp"
-              v-model="siret"
-              type="text"
-            ></b-form-input>
-          </b-col>
-          <b-col>
-            <p class="modal-btns">
-              <b-button variant="success" v-on:click="recherchesiret"
-                >Rechercher</b-button
+          <div class="mb-3 mt-3" v-if="selectedStructure == 2">
+            <b-col>
+              Numéro SIREN ou SIRET :
+              <b-form-input
+                aria-describedby="inputFormatterHelp"
+                v-model="siret"
+                type="text"
+              ></b-form-input>
+            </b-col>
+            <b-col>
+              <p class="modal-btns">
+                <b-button variant="success" v-on:click="recherchesiret"
+                  >Rechercher</b-button
+                >
+              </p>
+            </b-col>
+          </div>
+          <div v-if="boolSiren && selectedStructure == 2">
+            <b-form-group id="etab" label="Liste des établissements :">
+              <b-form-select
+                name="etab"
+                key="etab"
+                type="text"
+                v-model="etab"
+                id="etabSelect"
               >
-            </p>
-          </b-col>
-        </div>
-        <div v-if="boolSiren && selectedStructure == 2">
-          <b-form-group id="etab" label="Liste des établissements :">
-            <b-form-select
-              name="etab"
-              key="etab"
-              type="text"
-              v-model="etab"
-              id="etabSelect"
-            >
-              <option v-for="etab in listeEtab" :key="etab.siret" :value="etab">
-                {{ etab.siret + " - " + etab.nom + " - " + etab.adresse }}
-              </option>
-            </b-form-select>
-          </b-form-group>
-        </div>
-        <div class="mb-3 mt-3" v-if="boolSiret && selectedStructure == 2">
-          nom :
-          <b-form-input v-model="etab.nom" type="text"></b-form-input>
-          adresse :
-          <b-form-input v-model="etab.adresse" type="text"></b-form-input>
-        </div>
-        <div class="mb-3 mt-3" v-if="selectedStructure == 3">
-          <b-col>
-            Numéro UAI ou code postal :
-            <b-form-input
-              aria-describedby="inputFormatterHelp"
-              v-model="uai"
-              type="text"
-            ></b-form-input>
-          </b-col>
-          <b-col>
-            <p class="modal-btns">
-              <b-button variant="success" v-on:click="rechercheEcole"
-                >Rechercher</b-button
+                <option
+                  v-for="etab in listeEtab"
+                  :key="etab.siret"
+                  :value="etab"
+                >
+                  {{ etab.siret + " - " + etab.nom + " - " + etab.adresse }}
+                </option>
+              </b-form-select>
+            </b-form-group>
+          </div>
+          <div class="mb-3 mt-3" v-if="boolSiret && selectedStructure == 2">
+            nom :
+            <b-form-input v-model="etab.nom" type="text"></b-form-input>
+            adresse :
+            <b-form-input v-model="etab.adresse" type="text"></b-form-input>
+          </div>
+          <div class="mb-3 mt-3" v-if="selectedStructure == 3">
+            <b-col>
+              Numéro UAI ou code postal :
+              <b-form-input
+                aria-describedby="inputFormatterHelp"
+                v-model="uai"
+                type="text"
+              ></b-form-input>
+            </b-col>
+            <b-col>
+              <p class="modal-btns">
+                <b-button variant="success" v-on:click="rechercheEcole"
+                  >Rechercher</b-button
+                >
+              </p>
+            </b-col>
+          </div>
+          <div v-if="boolEcoleCP && selectedStructure == 3">
+            <b-form-group id="etab" label="Liste des établissements :">
+              <b-form-select
+                name="ecoles"
+                key="ecoles"
+                type="text"
+                v-model="etab"
+                id="ecoleSelect"
               >
-            </p>
-          </b-col>
-        </div>
-        <div v-if="boolEcoleCP && selectedStructure == 3">
-          <b-form-group id="etab" label="Liste des établissements :">
-            <b-form-select
-              name="ecoles"
-              key="ecoles"
-              type="text"
-              v-model="etab"
-              id="ecoleSelect"
-            >
-              <option
-                v-for="ecole in listeEtab"
-                :key="ecole.uai"
-                :value="ecole"
-              >
-                {{
-                  ecole.nom +
-                  " - " +
-                  ecole.adresse +
-                  " - " +
-                  ecole.adresse +
-                  " " +
-                  ecole.cp +
-                  " " +
-                  ecole.libelleCommune
-                }}
-              </option>
-            </b-form-select>
-          </b-form-group>
-        </div>
-        <div class="mb-3 mt-3" v-if="boolUAI && selectedStructure == 3">
-          nom :
-          <b-form-input v-model="etab.nom" type="text"></b-form-input>
-          adresse :
-          <b-form-input v-model="etab.adresse" type="text"></b-form-input>
+                <option
+                  v-for="ecole in listeEtab"
+                  :key="ecole.uai"
+                  :value="ecole"
+                >
+                  {{
+                    ecole.nom +
+                    " - " +
+                    ecole.adresse +
+                    " - " +
+                    ecole.adresse +
+                    " " +
+                    ecole.cp +
+                    " " +
+                    ecole.libelleCommune
+                  }}
+                </option>
+              </b-form-select>
+            </b-form-group>
+          </div>
+          <div class="mb-3 mt-3" v-if="boolUAI && selectedStructure == 3">
+            nom :
+            <b-form-input v-model="etab.nom" type="text"></b-form-input>
+            adresse :
+            <b-form-input v-model="etab.adresse" type="text"></b-form-input>
+          </div>
         </div>
       </div>
 
@@ -445,15 +468,15 @@
 </template>
 
 <script>
-import { mapState } from "vuex"
-import rechercheCommune from '~/lib/mixins/rechercheCommune'
+import { mapState } from "vuex";
+import rechercheCommune from "~/lib/mixins/rechercheCommune";
 
-import logger from '~/plugins/logger'
-const log = logger('components:userInfos')
+import logger from "~/plugins/logger";
+const log = logger("components:userInfos");
 
 export default {
   mixins: [rechercheCommune],
-  props: ["submitTxt", "user", "cancelable" ],
+  props: ["submitTxt", "user", "cancelable"],
   data() {
     return {
       cp: null,
@@ -542,19 +565,20 @@ export default {
       return Boolean(this.user && this.user.tokenFc);
     },
     listeStructures() {
-      log.i("listeStructures - In")
+      log.i("listeStructures - In");
       var liste = this.structures;
       if (this.mail && this.mail.indexOf(".gouv.fr") != -1) {
-        log.i("listeStructures - Done")
+        log.i("listeStructures - Done");
         return liste;
       } else {
-        log.d("listeStructures - Autre collectivité")
+        log.d("listeStructures - Autre collectivité");
         if (!this.user.typeCollectivite) {
           liste = this.structures.filter((str) => {
-            const isMatch = (String(str.str_libellecourt) != "DS") &&
-              (String(str.str_libellecourt) != "DEP") &&
-              (String(str.str_libellecourt) != "EPCI") &&
-              (String(str.str_libellecourt) != "COM");
+            const isMatch =
+              String(str.str_libellecourt) != "DS" &&
+              String(str.str_libellecourt) != "DEP" &&
+              String(str.str_libellecourt) != "EPCI" &&
+              String(str.str_libellecourt) != "COM";
             return isMatch;
           });
         }
@@ -564,26 +588,28 @@ export default {
   },
   methods: {
     submit: function () {
-      log.i('submit - In')
+      log.i("submit - In");
       this.$validator.validateAll().then((isValid) => {
-        if (!this.accordHonneur) { 
-          log.w('submit - Honor issue')
+        if (!this.accordHonneur) {
+          log.w("submit - Honor issue");
           this.user.cpi_codeinsee = null;
-          return this.$toast.error("Veuillez certifier sur l'honneur l'exactitude des informations déclarées.");
+          return this.$toast.error(
+            "Veuillez certifier sur l'honneur l'exactitude des informations déclarées."
+          );
         }
-        if (!isValid) { 
-          log.w('submit - Not valid form')
+        if (!isValid) {
+          log.w("submit - Not valid form");
           return this.$toast.error("Veuillez vérifier la validité des champs.");
         }
         if (this.user.profilId != 1 && this.user.profilId != 2) {
-          log.d('submit - Starting to submit') 
+          log.d("submit - Starting to submit");
           this.$store.dispatch("set_state_element", {
             key: "utilisateurCourant",
             value: this.user,
           });
           return this.$emit("submit");
         } else {
-          log.d('submit - Profil ID not 1 or 2')
+          log.d("submit - Profil ID not 1 or 2");
           let structure = {
             id: null,
             code: null,
@@ -599,8 +625,7 @@ export default {
               structure.soustype = this.typeCollectivite;
               switch (structure.soustype) {
                 case 1:
-                  structure.nom =
-                    "Commune - " + this.collectivite.com_libelle;
+                  structure.nom = "Commune - " + this.collectivite.com_libelle;
                   structure.code = this.collectivite.cpi_codeinsee;
                   structure.commune = this.collectivite.cpi_codeinsee;
                   break;
@@ -610,8 +635,7 @@ export default {
                   structure.code = this.collectivite.dep_num;
                   break;
                 case 3:
-                  structure.nom =
-                    "EPCI - " + this.collectivite.epci_libelle;
+                  structure.nom = "EPCI - " + this.collectivite.epci_libelle;
                   structure.code = this.collectivite.epci_code;
                   break;
               }
@@ -636,17 +660,24 @@ export default {
               structure.soustype = this.etab.type_libe;
               break;
           }
-          return this.$store.dispatch("post_structure", [
+          return this.$store
+            .dispatch("post_structure", [
               structure,
               this.$store.state.utilisateurCourant.id,
             ])
             .then(() => {
-              this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id);
-              this.$store.dispatch("set_state_element", { key: "utilisateurCourant", value: this.user });
+              this.$store.dispatch(
+                "get_structureByUser",
+                this.$store.state.utilisateurCourant.id
+              );
+              this.$store.dispatch("set_state_element", {
+                key: "utilisateurCourant",
+                value: this.user,
+              });
               return this.$emit("submit");
             });
         }
-      }) 
+      });
     },
     validateState(ref) {
       if (!this.veeFields) {
@@ -794,6 +825,9 @@ export default {
         value: this.user,
       });
     },
-  }
+  },
+  mounted() {
+    console.log(this.user);
+  },
 };
 </script>
