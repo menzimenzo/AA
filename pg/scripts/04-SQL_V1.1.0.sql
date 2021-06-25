@@ -205,6 +205,12 @@ BEGIN
       alter table PISCINE ALTER COLUMN pis_nom TYPE VARCHAR(120);
       alter table PISCINE ALTER COLUMN pis_adr TYPE VARCHAR(120);
       DROP table IF EXISTS TYPE_PISCINE;
+      
+      /*==============================================================*/
+      /* Table : MAJ INTERVENTION                                     */
+      /*==============================================================*/
+      alter table INTERVENTION ADD COLUMN INT_ISSUBVENTIONNEE BOOLEAN not null ;
+
 
       -- Déploiement du Schéma effectué
       call AAQ_VersionDeployee('1.1.0','schema');

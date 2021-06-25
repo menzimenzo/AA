@@ -12,7 +12,9 @@
     </b-row>
     <b-row>
       <b-col cols="12">
-        <p class="mb-3">Liste des intervenants présents durant l'intervention :</p>
+        <p class="mb-3">
+          Liste des intervenants présents durant l'intervention :
+        </p>
         <editable
           :columns="headersEncadrants"
           :data="formIntervention.utilisateur"
@@ -27,63 +29,73 @@
               @click="deleteMN(props.data.item)"
               size="sm"
               class="mr-1"
-              variant="primary">
+              variant="primary"
+            >
               <i class="material-icons">delete</i>
             </b-btn>
           </template>
         </editable>
         <b-btn
           @click="editIntervenant(null)"
-          class="btn btn-primary btn-lg btn-block">
+          class="btn btn-primary btn-lg btn-block"
+        >
           <i class="material-icons">add</i>
         </b-btn>
       </b-col>
     </b-row>
     <b-row>
-        <b-col cols="6">
-          <p>Structure pour laquelle j'interviens * :</p>
-          <b-form-select
-            class="liste-deroulante"
-            v-model="formIntervention.structure">
-            <option :value="null">-- Choix de la structure --</option>
-            <option
-              v-for="structure in structures"
-              :key="structure.id"
-              :value="structure">
-              {{ structure.nom }}
-            </option>
-          </b-form-select>
-          <b-btn v-if="utilisateurCourant.profilId != 2"
-            @click="addStructure()"
-            class="btn btn-primary ml-3">
-            <i class="material-icons">add</i>
-          </b-btn>
-        </b-col>
-        <b-col cols="6">
-          <p>Lieu d'intervention * :</p>
-          <b-form-select
-            class="liste-deroulante"
-            v-model="formIntervention.piscine">
-            <option :value="null">-- Choix de la Piscine --</option>
-            <option
-              v-for="piscine in mesPiscines"
-              :key="piscine.id"
-              :value="piscine"
-            >
-              {{ piscine.nom }}
-            </option>
-          </b-form-select>
-          <b-btn @click="addPiscine()" class="btn btn-primary ml-3">
-            <i class="material-icons">add</i>
-          </b-btn>
-        </b-col>
+      <b-col cols="6">
+        <p>Structure pour laquelle j'interviens * :</p>
+        <b-form-select
+          class="liste-deroulante"
+          v-model="formIntervention.structure"
+        >
+          <option :value="null">-- Choix de la structure --</option>
+          <option
+            v-for="structure in structures"
+            :key="structure.id"
+            :value="structure"
+          >
+            {{ structure.nom }}
+          </option>
+        </b-form-select>
+        <b-btn
+          v-if="utilisateurCourant.profilId != 2"
+          @click="addStructure()"
+          class="btn btn-primary ml-3"
+        >
+          <i class="material-icons">add</i>
+        </b-btn>
+      </b-col>
+      <b-col cols="6">
+        <p>Lieu d'intervention * :</p>
+        <b-form-select
+          class="liste-deroulante"
+          v-model="formIntervention.piscine"
+        >
+          <option :value="null">-- Choix de la Piscine --</option>
+          <option
+            v-for="piscine in mesPiscines"
+            :key="piscine.id"
+            :value="piscine"
+          >
+            {{ piscine.nom }}
+          </option>
+        </b-form-select>
+        <b-btn @click="addPiscine()" class="btn btn-primary ml-3">
+          <i class="material-icons">add</i>
+        </b-btn>
+      </b-col>
     </b-row>
     <b-row v-if="formIntervention.piscine.nom" class="mt-2">
       <b-col cols="6">
-        <span></span>      
+        <span></span>
       </b-col>
       <b-col cols="6">
-        <span>Adresse : {{ formIntervention.piscine.adresse }} {{ formIntervention.piscine.cp }}</span>
+        <span
+          >Adresse : {{ formIntervention.piscine.adresse }}
+          {{ formIntervention.piscine.cp }}</span
+        >
       </b-col>
     </b-row>
     <b-row>
@@ -98,7 +110,8 @@
           maxlength="10"
           v-model="formIntervention.dateDebutIntervention"
           type="date"
-          class="text-date input-width" />
+          class="text-date input-width"
+        />
       </b-col>
       <b-col cols="4">
         <span>&nbsp; Au :&nbsp;</span>
@@ -106,7 +119,8 @@
           maxlength="10"
           v-model="formIntervention.dateFinIntervention"
           type="date"
-          class="text-date input-width"/>
+          class="text-date input-width"
+        />
       </b-col>
       <b-col cols="4">
         <span>&nbsp;Nombre de séances en piscine :&nbsp;</span>
@@ -114,20 +128,45 @@
           maxlength="2"
           v-model="formIntervention.nbSession"
           type="number"
-          class="text-date input-width"/>
+          class="text-date input-width"
+        />
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols="12">
+        <p>Subvention ANS</p>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols="2">
+         <b-form-checkbox
+                    switch
+                    v-model="formIntervention.isSubventionnee"
+                    ></b-form-checkbox>
+      </b-col>
+      <b-col cols="10">
+       <span>Cette intervention s'inscrit dans le cadre d'un programme subventionné par l'ANS soit :<br>
+           - Pour une classe bleue ou un stage bleu<br>
+           - Pour la formation d’intervenants en Aisance Aquatique</span>
       </b-col>
     </b-row>
     <b-row>
       <b-col cols="3">
-        <p> Cadre d'intervention &nbsp;<i class="material-icons" :id="randomId" style="cursor: pointer">info</i>:
-        <b-popover :target="randomId" triggers="hover focus">
-          <b>Péri-scolaire</b> : concerne les activités organisées durant les
-          jours d’école ainsi que le mercredi, qu’il y ait ou non école le
-          matin.
-          <br />
-          <b>Extra-scolaire</b> : concerne les accueils organisés les samedis
-          sans école, les dimanches et pendant les congés scolaires.
-        </b-popover>
+        <p>
+          Cadre d'intervention &nbsp;<i
+            class="material-icons"
+            :id="randomId"
+            style="cursor: pointer"
+            >info</i
+          >:
+          <b-popover :target="randomId" triggers="hover focus">
+            <b>Péri-scolaire</b> : concerne les activités organisées durant les
+            jours d’école ainsi que le mercredi, qu’il y ait ou non école le
+            matin.
+            <br />
+            <b>Extra-scolaire</b> : concerne les accueils organisés les samedis
+            sans école, les dimanches et pendant les congés scolaires.
+          </b-popover>
         </p>
       </b-col>
       <b-col cols="9">
@@ -144,12 +183,14 @@
         <span>Classe concernée * :</span>
         <b-form-select
           class="liste-deroulante"
-          v-model="formIntervention.classe">
+          v-model="formIntervention.classe"
+        >
           <option :value="null">-- Choix de la classe --</option>
           <option
             v-for="classe in listeclasse"
             :key="classe.text"
-            :value="classe.value">
+            :value="classe.value"
+          >
             {{ classe.text }}
           </option>
         </b-form-select>
@@ -162,7 +203,8 @@
           <option
             v-for="classe in listeniveau"
             :key="classe.value"
-            :value="classe.value">
+            :value="classe.value"
+          >
             {{ classe.lib }}
           </option>
         </b-form-select>
@@ -173,7 +215,8 @@
           <option
             v-for="classe in listeniveau"
             :key="classe.value"
-            :value="classe.value">
+            :value="classe.value"
+          >
             {{ classe.lib }}
           </option>
         </b-form-select>
@@ -184,7 +227,8 @@
           v-model="formIntervention.nbEnfants"
           type="number"
           min="0"
-          class="input-width"/>
+          class="input-width"
+        />
       </b-col>
     </b-row>
     <div v-if="hasEnfantsDeclared">
@@ -205,13 +249,15 @@
             :edit-by-line="true"
             tableMaxHeight="none"
             @update="updateEnfant"
-            @remove="removeEnfant">
+            @remove="removeEnfant"
+          >
             <template slot-scope="props" slot="actions">
               <b-btn
                 @click="searchEnfant(props.data)"
                 size="sm"
                 class="mr-1"
-                variant="primary">
+                variant="primary"
+              >
                 <i class="material-icons">search</i>
               </b-btn>
             </template>
@@ -220,7 +266,11 @@
       </b-row>
     </div>
     <b-row id="error" v-if="erreurformulaire.length > 0">
-      <span>{{ erreurformulaire.length == 1 ? 'Veuillez renseigner le champ :' : 'Veuillez renseigner les champs suivants :' }}</span>
+      <span>{{
+        erreurformulaire.length == 1
+          ? "Veuillez renseigner le champ :"
+          : "Veuillez renseigner les champs suivants :"
+      }}</span>
       <ul>
         <li v-for="erreur in erreurformulaire" :key="erreur">
           {{ erreur }}
@@ -244,7 +294,8 @@
       name="editIntervenant"
       height="auto"
       width="1100px"
-      :scrollabe="true">
+      :scrollabe="true"
+    >
       <Intervenant :intervention="formIntervention" />
     </modal>
     <modal name="editPiscine" height="auto" width="1100px" :scrollabe="true">
@@ -265,14 +316,14 @@ import Piscine from "~/components/element/piscine.vue";
 import Structure from "~/components/element/structure.vue";
 import Saisieindex from "~/components/saisieIndex.vue";
 
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 import { mapState } from "vuex";
 import Vue from "vue";
 import moment from "moment";
-import logger from '~/plugins/logger'
-const log = logger('components:intervention')
+import logger from "~/plugins/logger";
+const log = logger("components:intervention");
 
-const loadFormIntervention = function (intervention,user) {
+const loadFormIntervention = function (intervention, user) {
   log.i("loadFormIntervention - In");
   const formIntervention = JSON.parse(
     JSON.stringify(
@@ -286,6 +337,7 @@ const loadFormIntervention = function (intervention,user) {
           cai: "",
           classe: "",
           nbEnfants: "",
+          isSubventionnee: false,
           enfant: [],
           utilisateur: [],
         },
@@ -294,13 +346,15 @@ const loadFormIntervention = function (intervention,user) {
     )
   );
   const dateDebutIntervention = moment(intervention.dateDebutIntervention);
-  formIntervention.dateDebutIntervention = dateDebutIntervention.format("YYYY-MM-DD");
+  formIntervention.dateDebutIntervention =
+    dateDebutIntervention.format("YYYY-MM-DD");
   const dateFinIntervention = moment(intervention.dateFinIntervention);
-  formIntervention.dateFinIntervention = dateFinIntervention.format("YYYY-MM-DD");
+  formIntervention.dateFinIntervention =
+    dateFinIntervention.format("YYYY-MM-DD");
   if (!formIntervention.id) {
-    formIntervention.utilisateur.push(user)
+    formIntervention.utilisateur.push(user);
   }
-  
+
   return formIntervention;
 };
 
@@ -322,7 +376,10 @@ export default {
   },
   data() {
     return {
-      formIntervention: loadFormIntervention(this.intervention,this.$store.state.utilisateurCourant),
+      formIntervention: loadFormIntervention(
+        this.intervention,
+        this.$store.state.utilisateurCourant
+      ),
       erreurformulaire: [],
       index: null,
       niveauInitial: null,
@@ -390,7 +447,7 @@ export default {
           title: "niveau final atteint",
           type: "select",
           options: [
-            { lib: "Débutant", value:"0" },
+            { lib: "Débutant", value: "0" },
             { lib: "Palier 1", value: "1" },
             { lib: "Palier 2", value: "2" },
             { lib: "Palier 3 ", value: "3" },
@@ -418,73 +475,102 @@ export default {
       "piscines",
     ]),
     hasEnfantsDeclared() {
-      return this.intervention.id ? this.intervention.nbEnfants > 0 : this.formIntervention.nbEnfants && this.formIntervention.nbEnfants > 0
+      return this.intervention.id
+        ? this.intervention.nbEnfants > 0
+        : this.formIntervention.nbEnfants &&
+            this.formIntervention.nbEnfants > 0;
     },
     enfants() {
-        return this.$store.state.enfants
-    }
+      return this.$store.state.enfants;
+    },
   },
   watch: {
     intervention(intervention) {
-      Vue.set(this, "formIntervention", loadFormIntervention(intervention,this.$store.state.utilisateurCourant));
+      Vue.set(
+        this,
+        "formIntervention",
+        loadFormIntervention(intervention, this.$store.state.utilisateurCourant)
+      );
     },
-    "formIntervention.nbEnfants": debounce(function() {
-        log.i("Watch - In - formIntervention.nbEnfants")
-        /*if (this.formIntervention.id) {
+    "formIntervention.nbEnfants": debounce(function () {
+      log.i("Watch - In - formIntervention.nbEnfants");
+      /*if (this.formIntervention.id) {
           return
         }*/
-        if(!this.formIntervention.id && this.formIntervention.nbEnfants !=="" && (!this.niveauInitial || !this.niveauFinal)) {
-          return this.$toast.error('Veuillez d\'abord sélectionner les niveaux liés à cette intervention. Vous pourrez les changer par la suite.')
-        }
+      if (
+        !this.formIntervention.id &&
+        this.formIntervention.nbEnfants !== "" &&
+        (!this.niveauInitial || !this.niveauFinal)
+      ) {
+        return this.$toast.error(
+          "Veuillez d'abord sélectionner les niveaux liés à cette intervention. Vous pourrez les changer par la suite."
+        );
+      }
 
-        const reference = parseInt(this.formIntervention.nbEnfants)
-        const enfantsStore = JSON.parse(JSON.stringify(this.enfants))
-        let array = []
-        let enfant = {
-            id: null,
-            prenom: null,
-            niv_ini: this.niveauInitial,
-            niv_fin: this.niveauFinal,
+      const reference = parseInt(this.formIntervention.nbEnfants);
+      const enfantsStore = JSON.parse(JSON.stringify(this.enfants));
+      let array = [];
+      let enfant = {
+        id: null,
+        prenom: null,
+        niv_ini: this.niveauInitial,
+        niv_fin: this.niveauFinal,
+      };
+      if (enfantsStore.length == 0) {
+        for (let i = 0; i < this.formIntervention.nbEnfants; i++) {
+          array.push(enfant);
         }
-        if (enfantsStore.length == 0) {
-          for (let i = 0; i < this.formIntervention.nbEnfants; i++) {
-            array.push(enfant)
-          }
-          this.$store.commit('SET', { key: 'enfants', value: array })
-        } else if (enfantsStore.length !== reference){
-          const isSuperior = enfantsStore.length > reference
+        this.$store.commit("SET", { key: "enfants", value: array });
+      } else if (enfantsStore.length !== reference) {
+        const isSuperior = enfantsStore.length > reference;
 
-          log.d('Watch - formIntervention.nbEnfants', { isSuperior })
-          if(isSuperior) {
-            const nbLgnes = enfantsStore.length - reference
-            let msg = ''
-            nbLgnes == 1 ? msg = "Vous allez effacer la dernière ligne saisie. Êtes vous sûr ?" : msg = "Vous allez effacer les " + nbLgnes + " dernières lignes saisies. Êtes vous sûr ?";
-            if (confirm(msg)) {
-                this.$store.commit("SPLICE_END", { key: 'enfants', number: nbLgnes});
-            }
-          } else {
-            const nbLgnes= reference - enfantsStore.length
-            for (let i = 0; i < nbLgnes; i++) {
-              enfantsStore.push(enfant)
-            }
-            return this.$store.commit('SET', { key: 'enfants', value: enfantsStore })
+        log.d("Watch - formIntervention.nbEnfants", { isSuperior });
+        if (isSuperior) {
+          const nbLgnes = enfantsStore.length - reference;
+          let msg = "";
+          nbLgnes == 1
+            ? (msg =
+                "Vous allez effacer la dernière ligne saisie. Êtes vous sûr ?")
+            : (msg =
+                "Vous allez effacer les " +
+                nbLgnes +
+                " dernières lignes saisies. Êtes vous sûr ?");
+          if (confirm(msg)) {
+            this.$store.commit("SPLICE_END", {
+              key: "enfants",
+              number: nbLgnes,
+            });
           }
+        } else {
+          const nbLgnes = reference - enfantsStore.length;
+          for (let i = 0; i < nbLgnes; i++) {
+            enfantsStore.push(enfant);
+          }
+          return this.$store.commit("SET", {
+            key: "enfants",
+            value: enfantsStore,
+          });
         }
-      }, 500)
+      }
+    }, 500),
   },
   mounted() {
-    return this.resetform()
+    return this.resetform();
   },
   methods: {
     removeEnfant: function (evenement) {
       log.i("removeEnfant - In");
       const index = evenement.index;
-      this.$store.commit("SPLICE", { key: 'enfants', index });
-      return this.formIntervention.nbEnfants = this.enfants.length;
+      this.$store.commit("SPLICE", { key: "enfants", index });
+      return (this.formIntervention.nbEnfants = this.enfants.length);
     },
     updateEnfant: function (evenement) {
       log.i("updateEnfant - In");
-      return this.$store.commit("UPDATE_ARRAY_ELM", { key: 'enfants', index: evenement.index, value: evenement.item});
+      return this.$store.commit("UPDATE_ARRAY_ELM", {
+        key: "enfants",
+        index: evenement.index,
+        value: evenement.item,
+      });
     },
     searchEnfant: function (param) {
       this.index = param.index;
@@ -500,23 +586,35 @@ export default {
       this.$modal.show("editIntervenant");
     },
     deleteMN: function (mn) {
-      log.i('deleteMN - In')
-      const Index = this.formIntervention.utilisateur.findIndex(uti => uti.id == mn.id)
-      log.i('deleteMN - Done')
+      log.i("deleteMN - In");
+      const Index = this.formIntervention.utilisateur.findIndex(
+        (uti) => uti.id == mn.id
+      );
+      log.i("deleteMN - Done");
       return this.formIntervention.utilisateur.splice(Index, 1);
     },
     resetform: function () {
-      log.i('resetform - In')
+      log.i("resetform - In");
       this.erreurformulaire = [];
-      return Promise.all([this.$store.commit("CLEAN", { key: 'interventionCourrante'}),this.$store.commit("CLEAN", { key: 'enfants',isArray:true})]).then(() => {
-        log.i('resetform - Done')
+      return Promise.all([
+        this.$store.commit("CLEAN", { key: "interventionCourrante" }),
+        this.$store.commit("CLEAN", { key: "enfants", isArray: true }),
+      ]).then(() => {
+        log.i("resetform - Done");
         this.formIntervention.nbEnfants = "";
-        this.formIntervention.niv_ini = "";
-        this.formIntervention.niv_fin = "";
-        if ((this.utilisateurCourant.profilId == 3 || this.utilisateurCourant.profilId == 4) && !this.interventionCourrante.id) {
-          log.d('resetForm - resetting users.')
-          this.formIntervention.utilisateur = []
-          return this.formIntervention.utilisateur.push(this.utilisateurCourant)
+        this.niveauInitial = "";
+        this.niveauFinal = "";
+        this.formIntervention.isSubventionnee = false;
+        if (
+          (this.utilisateurCourant.profilId == 3 ||
+            this.utilisateurCourant.profilId == 4) &&
+          !this.interventionCourrante.id
+        ) {
+          log.d("resetForm - resetting users.");
+          this.formIntervention.utilisateur = [];
+          return this.formIntervention.utilisateur.push(
+            this.utilisateurCourant
+          );
         }
       });
     },
@@ -525,7 +623,10 @@ export default {
       this.erreurformulaire = [];
       var formOK = true;
 
-      if (!this.formIntervention.utilisateur || this.formIntervention.utilisateur.length == 0) {
+      if (
+        !this.formIntervention.utilisateur ||
+        this.formIntervention.utilisateur.length == 0
+      ) {
         this.erreurformulaire.push("Les intervenants");
         formOK = false;
       }
@@ -574,12 +675,18 @@ export default {
         classe: this.formIntervention.classe,
         utilisateur: this.formIntervention.utilisateur,
         enfant: this.enfants,
+        isSubventionnee: this.formIntervention.isSubventionnee
       };
 
-      const action = intervention && intervention.id ? "put_intervention" : "post_intervention";
-      log.d('checkForm - action on store', { intervention, action });
-      return this.$store.dispatch(action, intervention).then(serverIntervention => {
-          log.d('checkForm - response from server', serverIntervention)
+      const action =
+        intervention && intervention.id
+          ? "put_intervention"
+          : "post_intervention";
+      log.d("checkForm - action on store", { intervention, action });
+      return this.$store
+        .dispatch(action, intervention)
+        .then((serverIntervention) => {
+          log.d("checkForm - response from server", serverIntervention);
           var action = [];
           if (intervention.blocId == "3") {
             action.push({
@@ -590,14 +697,23 @@ export default {
               class: "toastLink",
             });
           }
-          var interventionLabel = serverIntervention.id ? "#" + serverIntervention.id : "";
-          log.i('checkForm - Done')
-          this.$toast.success(`Intervention ${interventionLabel} enregistrée`)
-          return this.resetform();
+          var interventionLabel = serverIntervention.id
+            ? "#" + serverIntervention.id
+            : "";
+          log.i("checkForm - Done");
+          this.$toast.success(`Intervention ${interventionLabel} enregistrée`);
+          if (!this.formIntervention.id) {
+            return this.resetform();
+          }
         })
         .catch((error) => {
-          log.w("Une erreur est survenue lors de la sauvegarde de l'intervention", error);
-          this.$toast.error(`Erreur lors de la sauvegarde de l'intervention ${interventionLabel}`)
+          log.w(
+            "Une erreur est survenue lors de la sauvegarde de l'intervention",
+            error
+          );
+          this.$toast.error(
+            `Erreur lors de la sauvegarde de l'intervention ${interventionLabel}`
+          );
         });
     },
   },

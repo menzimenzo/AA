@@ -5,7 +5,7 @@ var moment = require('moment');
 moment().format();
 
 router.get('/siret/:id', async function (req, res) {
-  const token = 'c721b7db-7b99-38f4-9261-2e982049df91'
+  const token = '7feea564-6173-3350-8aa6-bee62bd01c7b'
   const now = moment(new Date()).format('YYYY-MM-DD')
   const idsiret = req.params.id
   console.log('recherche SIRET :' + idsiret)
@@ -55,7 +55,7 @@ router.get('/siret/:id', async function (req, res) {
 })
 
 router.get('/siren/:id', async function (req, res) {
-  const token = 'c721b7db-7b99-38f4-9261-2e982049df91'
+  const token = '7feea564-6173-3350-8aa6-bee62bd01c7b'
   const siren = req.params.id
   console.log('recherche SIREN :' + siren)
   try {

@@ -97,6 +97,7 @@ module.exports = {
       cai: intervention.int_cai,
       classe:intervention.int_age,
       nbSession:intervention.int_nbsession,
+      isSubventionnee: intervention.int_isSubventionnee,
       dateDebutIntervention: new Date(intervention.int_datedebutintervention),
       dateFinIntervention: new Date(intervention.int_datefinintervention),
       dateCreation: new Date(intervention.int_datecreation),

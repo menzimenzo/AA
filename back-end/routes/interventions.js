@@ -168,7 +168,7 @@ router.put('/:id', async function (req, res) {
     const intervention = req.body.intervention
     const id = req.params.id
     log.i('::update - In', { id })
-    const { strId, nbEnfants, piscine, dateDebutIntervention,dateFinIntervention,utilisateur,enfant,nbSession,cai,classe } = intervention
+    const { strId, nbEnfants, piscine, dateDebutIntervention,dateFinIntervention,utilisateur,enfant,nbSession,cai,classe,isSubventionnee } = intervention
 
     const requete = `UPDATE intervention 
         SET str_id= $1,
@@ -179,6 +179,7 @@ router.put('/:id', async function (req, res) {
         int_nbsession = $6,
         int_cai =$7,
         int_age = $8,
+        itn_isSubventionnee = $9,
         int_datemaj = now()
         WHERE int_id = ${id}
         RETURNING *;`
@@ -191,7 +192,8 @@ router.put('/:id', async function (req, res) {
         dateFinIntervention,
         nbSession,
         cai,
-        classe
+        classe,
+        isSubventionnee
     ], (err, result) => {
         if (err) {
             log.w('::update - erreur lors de la sauvegarde', { requete, erreur: err.stack })
@@ -226,8 +228,8 @@ router.post('/', function (req, res) {
     if ( ! intervention.classe) { intervention.classe = null}
 
     const requete = `insert into intervention 
-                    (pis_id,str_id,int_nombreenfant,int_datedebutintervention,int_datefinintervention,int_nbsession, int_cai, int_age,int_datecreation,int_datemaj) 
-                    values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10 ) RETURNING int_id AS int_id`;
+                    (pis_id,str_id,int_nombreenfant,int_datedebutintervention,int_datefinintervention,int_nbsession, int_cai, int_age,int_datecreation,int_datemaj,int_issubventionnee) 
+                    values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11 ) RETURNING int_id AS int_id`;
 
     return pgPool.query(requete, [intervention.piscine.id,
     intervention.strId,
@@ -238,7 +240,8 @@ router.post('/', function (req, res) {
     intervention.cai,
     intervention.classe,
     new Date().toISOString(),
-    new Date().toISOString()], (err, result) => {
+    new Date().toISOString(),
+    intervention.isSubventionnee], (err, result) => {
         if (err) {
             log.w('::post - erreur lors de l\'insertion dans la table des interventions', { requete, erreur: err.stack })
             return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
