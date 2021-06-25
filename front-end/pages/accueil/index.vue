@@ -148,7 +148,7 @@ export default {
           return this.$toast.error("Une erreur est survenue lors de la récupération des structures de référence")
         });
     },      
-    chargeDemande: function() {
+    chargedemande: function() {
       const url = process.env.API_URL + "/demandeaaq?demandeurid="+this.utilisateurCourant.id
       log.i('chargeDemande - In', { url })
       return this.$axios.$get(url)

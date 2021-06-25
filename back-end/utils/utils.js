@@ -41,7 +41,8 @@ module.exports = {
             cpi_codeinsee: utilisateur.uti_com_codeinseecontact,
             cp: utilisateur.uti_com_cp_contact,
             telephonecontact: utilisateur.uti_telephonecontact,
-            structureId: utilisateur.str_id
+            structureId: utilisateur.str_id,
+            structurerefid: utilisateur.structurerefid
       }
     } else {
       return {
@@ -64,7 +65,8 @@ module.exports = {
         uti_com_cp_contact: utilisateur.cp,
         uti_com_codeinseecontact: utilisateur.cpi_codeinsee,
         uti_telephonecontact: utilisateur.telephonecontact,
-        str_id: utilisateur.structureId
+        str_id: utilisateur.structureId,
+        sre_id: utilisateur.structurerefid
       }
     }
   },
@@ -181,7 +183,8 @@ module.exports = {
         cpi_codeinsee: user.uti_com_codeinseecontact,
         cp: user.uti_com_cp_contact,
         telephonecontact: user.uti_telephonecontact,
-        datedemandeaaq: user.datedemandeaaq
+        datedemandeaaq: user.datedemandeaaq,
+        structurerefid: user.structurerefid
     }
   },
   formatUserCSV: user => {

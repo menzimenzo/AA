@@ -9,15 +9,19 @@ const logger = require('../utils/logger');
 const log = logger(module.filename)
 
 router.get('/', function (req, res) {
-    const { formateurid, demandeurid } = req.query
-    log.i('::list - In', { formateurid, demandeurid })    
-    if (!formateurid && !demandeurid) {
+    const { formateurid, demandeurid, structurerefid } = req.query
+    log.i('::list - In', { formateurid, demandeurid, structurerefid })    
+    if (!formateurid && !demandeurid && !structurerefid) {
         log.w('::list - ID manquant')    
-        return res.sendStatus(400).json({ message: 'L\'identifiant du formateur et du demandeur sont manquants.' })
+        return res.sendStatus(400).json({ message: 'L\'identifiant du formateur, demandeur ou structureref est manquant.' })
     }
 
     let whereClause = null 
     let id = null
+    if (structurerefid) {
+        id = structurerefid
+        whereClause = 'dem_sre_id='
+    }
     if (demandeurid) {
         id = demandeurid
         whereClause = 'dem_uti_demandeur_id='
@@ -26,9 +30,10 @@ router.get('/', function (req, res) {
         id = formateurid
         whereClause = 'dem_uti_formateur_id='
     }
-    const requete = `SELECT dem.*,to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq,uti.uti_nom, uti.uti_prenom, uti.uti_mail \ 
+    const requete = `SELECT dem.*,to_char(dem.dem_datedemande, 'DD/MM/YYYY') datedemandeaaq,uti.uti_nom, uti.uti_prenom, sre.sre_libellecourt,uti.uti_mail, sre.sre_courriel \ 
     FROM demande_aaq dem \
-    INNER JOIN utilisateur AS uti ON uti.uti_id = dem.dem_uti_formateur_id \
+    LEFT JOIN utilisateur AS uti ON uti.uti_id = dem.dem_uti_formateur_id \
+    LEFT JOIN structure_ref as sre on sre.sre_id = dem.dem_sre_id \         
     where ${whereClause}${id}`
 
     log.i('::list - requête', { requete })    
@@ -50,8 +55,8 @@ router.post('/', function (req, res) {
     const { demandeurId, formateurId, structurerefid } = req.body
 
    // gérération des tocken de refus et d'accord pour l'envoie par mail.
-    let tockenDemandeRefus = null
-    let tockenDemandeAccord = null
+    let tockendemanderefus = null
+    let tockendemandeaccord = null
     const now = new Date()
     const datecreation = now.getFullYear() + "-" + eval(now.getMonth() + 1) + "-" + now.getDate()
     const requete = `INSERT INTO demande_aaq (dem_uti_demandeur_id,dem_uti_formateur_id,dem_sre_id,dem_tockendemandeaccord,dem_tockendemanderefus,dem_datedemande,dem_dms_id) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`;
