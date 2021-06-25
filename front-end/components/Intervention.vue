@@ -80,10 +80,10 @@
     </b-row>
     <b-row v-if="formIntervention.piscine.nom" class="mt-2">
       <b-col cols="6">
-        <span>Commune: {{ formIntervention.piscine.cp }}</span>      
+        <span></span>      
       </b-col>
       <b-col cols="6">
-        <span>Adresse : {{ formIntervention.piscine.adresse }}</span>
+        <span>Adresse : {{ formIntervention.piscine.adresse }} {{ formIntervention.piscine.cp }}</span>
       </b-col>
     </b-row>
     <b-row>
@@ -508,9 +508,11 @@ export default {
     resetform: function () {
       log.i('resetform - In')
       this.erreurformulaire = [];
-      return Promise.all([this.$store.commit("CLEAN", { key: 'interventionCourrante'})]).then(() => {
+      return Promise.all([this.$store.commit("CLEAN", { key: 'interventionCourrante'}),this.$store.commit("CLEAN", { key: 'enfants',isArray:true})]).then(() => {
         log.i('resetform - Done')
         this.formIntervention.nbEnfants = "";
+        this.formIntervention.niv_ini = "";
+        this.formIntervention.niv_fin = "";
         if ((this.utilisateurCourant.profilId == 3 || this.utilisateurCourant.profilId == 4) && !this.interventionCourrante.id) {
           log.d('resetForm - resetting users.')
           this.formIntervention.utilisateur = []
@@ -591,7 +593,7 @@ export default {
           var interventionLabel = serverIntervention.id ? "#" + serverIntervention.id : "";
           log.i('checkForm - Done')
           this.$toast.success(`Intervention ${interventionLabel} enregistrée`)
-          //return this.resetform();
+          return this.resetform();
         })
         .catch((error) => {
           log.w("Une erreur est survenue lors de la sauvegarde de l'intervention", error);
