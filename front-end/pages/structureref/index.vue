@@ -110,6 +110,8 @@ export default {
       nomFilter: "",
       prenomFilter: "",
       inscriptionFilter: "",
+      // Par défaut le filtre est positionné sur Maître Nageur car
+      // cela correspond aux demandes à traiter
       roleFilter:"MaitreNageur",
       datedemandeaaq:"",
       profilFilter: "",
@@ -146,6 +148,7 @@ export default {
             error
           );
         });
+      
     },
     accepterDemande: function(id) {
       console.log("id:"+id)
@@ -223,8 +226,6 @@ export default {
           this.roleFilter != undefined &&
           this.roleFilter != ""
         ) {
-          console.log ("user.rolLibelle : " + user.rolLibelle)
-          console.log ("this.roleFilter : " + this.roleFilter)
             if (user.rolLibelle == this.roleFilter) {
               isMatch = isMatch && true
             //isMatch =
@@ -246,6 +247,7 @@ export default {
             isMatch && user.inscription.indexOf(this.inscriptionFilter) > -1;
         }
         */
+
        console.log(isMatch)
         return isMatch;
       });

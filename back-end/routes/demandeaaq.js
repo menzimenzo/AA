@@ -146,16 +146,85 @@ router.post('/delete/', async function (req, res) {
 router.put('/accord', async (req,res) => {
     const demandeaaq = req.body && req.body.demandeaaq
     const demandeid = demandeaaq && demandeaaq.dem_id
+    const demandeurid = demandeaaq && demandeaaq.dem_uti_demandeur_id
     const formateurid = demandeaaq && demandeaaq.dem_uti_formateur_id
+    const structurerefid = demandeaaq && demandeaaq.dem_sre_id
+    var envoyerMailInstructeur = false
+    var nomInstructeur = null
+    var mailInstructeur = null
+    var nomDemandeur = null
+    var prenomDemandeur = null
+    var mailDemandeur = null
+
     log.i('::accords - In', {demandeaaq , formateurid})
+
+
+    if (structurerefid) {
+        // Si la demande est confirmée, on envoie un mail à l'instructeur si cela a été validé par la structure de référence
+        const requeteFormateur = `SELECT uti_mail, uti_prenom FROM utilisateur WHERE uti_id = ${formateurid}`
+        log.d(requeteFormateur)
+        const userQuery = await pgPool.query(requeteFormateur).catch(erruser => {
+            log.w(erruser)
+            throw erruser
+        })
+        // Trouvé, on envoie le mail à l'instructeur
+        log.i('::accords - Nb utilisateur trouvé : ', userQuery.rowCount)
+        log.i('::accords - userQuery: ', {userQuery})
+        if(userQuery.rowCount == "1") {
+            envoyerMailInstructeur = true
+            nomInstructeur = userQuery.rows[0].uti_prenom
+            mailInstructeur = userQuery.rows[0].uti_mail
+            log.i('::accords - envoyerMailInstructeur : ', envoyerMailInstructeur)
+        }
+    }
+
+    // Si la demande est confirmée, on envoie un mail au demandeur initial pour l'informer que sa demande a été acceptée
+    const requeteDemandeur = `SELECT uti_mail, uti_prenom, uti_nom FROM utilisateur WHERE uti_id = ${demandeurid}`
+    log.d(requeteDemandeur)
+    const userDemQuery = await pgPool.query(requeteDemandeur).catch(errdemandeur => {
+        log.w(errdemandeur)
+        throw errdemandeur
+    })
+    // Trouvé, on envoie le mail à l'instructeur
+    log.i('::accords - Nb utilisateur trouvé : ', userDemQuery.rowCount)
+    log.i('::accords - userQuery: ', {userDemQuery})
+    if(userDemQuery.rowCount == "1") {
+        nomDemandeur = userDemQuery.rows[0].uti_prenom
+        prenomDemandeur = userDemQuery.rows[0].uti_prenom
+        mailDemandeur = userDemQuery.rows[0].uti_mail
+        sendEmail({
+            to: mailDemandeur,
+            subject: 'Aisance Aquatique : Validation de votre demande de profil Aisance Aquatique',
+            body: `<p>Bonjour ${prenomDemandeur},</p><br/>
+                <p>Votre demande d'accès à l'application avec un profil « Maître Nageur Aisance Aquatique » a été validée.<br/><br/>
+                Ce mail vous a été envoyé automatiquement à partir du site  <a href="${config.franceConnect.FS_URL}">Aisance Aquatique.<br/></p>`
+            })        
+    }
+       
     const bddUpdate =  await pgPool.query("UPDATE demande_aaq SET dem_dateaccord = now(), dem_uti_formateur_id = $1, dem_dms_id = 2 \
     WHERE dem_id = $2 RETURNING *", 
-    [formateurid, demandeid]).catch(err => {
+    [formateurid, demandeid])
+    .catch(err => {
         log.w('::accords - Erreur pendant l\'update des infos du demandeaaq', err)
         throw err
     })
     const updatedDemandeaaq = bddUpdate.rows && bddUpdate.rows[0]
-    log.i('::confirm-profil-infos - Done, renvois du user mis à jour', updatedDemandeaaq)
+    log.i('::accords - Done, renvois du user mis à jour', updatedDemandeaaq)
+
+    if (envoyerMailInstructeur) {
+        log.i('::accords - Envoie du mail à  : ', nomInstructeur)
+
+        sendEmail({
+            to: mailInstructeur,
+            subject: 'Aisance Aquatique : Validation par votre structure',
+            body: `<p>Bonjour ${nomInstructeur},</p><br/>
+                <p>La demande de ${prenomDemandeur} ${nomDemandeur} a été validée par votre structure de référence et vous êtes identifié comme l'instructeur ayant dispensé la formation. <br/><br/>
+                Le profil « Maître Nageur Aisance Aquatique » lui a été attribué. Un courriel a été envoyé à l'intéressé.<br/><br/>
+                Ce mail vous a été envoyé automatiquement à partir du site  <a href="${config.franceConnect.FS_URL}">SI Aisance Aquatique.<br/></p>`
+            })
+        log.i('::accords - Mail envoyé  : ')
+
+    }        
     return res.send(updatedDemandeaaq)
 })
 

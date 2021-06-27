@@ -185,7 +185,9 @@ module.exports = {
         cp: user.uti_com_cp_contact,
         telephonecontact: user.uti_telephonecontact,
         datedemandeaaq: user.datedemandeaaq,
-        structurerefid: user.structurerefid
+        structurerefid: user.structurerefid,
+        formateurid: user.formateurid
+
     }
   },
   formatUserCSV: user => {

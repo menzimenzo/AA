@@ -116,7 +116,8 @@ export default {
       ],
       nomFilter: "",
       prenomFilter: "",
-      roleFilter:"Tous",
+      // Par défaut le filtre es positionné sur role "Maitre Nageur" car ce sont ces comptes qui sont à valider par l'instructeur
+      roleFilter:"MaitreNageur",
       listeRole: [
         { text: "Maitre Nageur AAQ", value: "MaitreNageurAAQ" },
         { text: "Maitre Nageur", value: "MaitreNageur" },

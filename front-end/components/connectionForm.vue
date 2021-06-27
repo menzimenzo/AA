@@ -1,6 +1,6 @@
 <template>
     <b-card class="mb-3">
-      <h5  v-if="connexionType===1">Connexion en tant que Maître-Nageur></h5>
+      <h5  v-if="connexionType===1">Connexion en tant que Maître-Nageur</h5>
       <h5  v-if="connexionType===2">Connexion en tant que partenaire</h5>
       <b-card-text style="color:#35495e;">{{information}}</b-card-text>
       <b-form>
