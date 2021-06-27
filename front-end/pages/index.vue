@@ -68,6 +68,7 @@
         </b-row>
       </div>
     </div>
+    <!-- DOUBLON
     <b-row class="text-center" >
       <b-col cols="12">
         <br>
@@ -76,6 +77,7 @@
         </span>          
       </b-col>
     </b-row>
+    -->
   </b-container>
 </template>
 

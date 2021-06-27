@@ -9,6 +9,7 @@
             id="emailInput"
             type="email"
             v-model="mail"
+            v-on:keyup.enter="submit"
             required
             name="mail"
             v-validate="{required: true, email: true}"
@@ -26,6 +27,7 @@
             id="pwdInput"
             type="password"
             v-model="password"
+            v-on:keyup.enter="submit"
             required
             name="password"
             v-validate="{required: true, min:8}"

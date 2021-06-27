@@ -151,9 +151,9 @@ module.exports = async (req, res, next) => {
               url = "/formateur"
             } else if(utilisateur.rol_id == 4) {
               // MaitreNageurAAQ
-              url = "/intervention"
+              url = "/interventions"
               //url = "/interventions"
-              url = "/pageenconstruction"
+              //url = "/pageenconstruction"
             } else if (utilisateur.rol_id == 6) {
               // Structure de référence 
               url = "/structureref"

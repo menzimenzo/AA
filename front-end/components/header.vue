@@ -14,7 +14,7 @@
       <nuxt-link to="/structureref" v-if="utilisateurCourant.profilId == 6">
         <b-button variant="outline-primary" class="settingsBtn"><i class="material-icons" >settings</i> Espace Structures référentes</b-button>
       </nuxt-link>
-      <nuxt-link to="/pageenconstruction" v-if="utilisateurCourant.profilId == 3 || utilisateurCourant.profilId == 4" class="menuLink">
+      <nuxt-link to="/interventions" v-if="utilisateurCourant.profilId == 3 || utilisateurCourant.profilId == 4" class="menuLink">
         <b-img fluid :src="require('assets/ico_nage.png')" blank-color="rgba(0,0,0,0.5)" img-alt="Interventions" />
         Interventions 
       </nuxt-link>
