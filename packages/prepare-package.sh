@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Shell de préparation du package de déploiement pour livraison
+echo "ATTENTION, il faut positionner le CLIENT_ID à vide dans le fichier config.js du backend avant de faire le package"
+echo "Pensez à changer le numéro de version dans les fichiers package.json du frontend ET backend et la version dans le fichier footer.vue fu front-end/components"
 
 cp -r ../front-end ./
 #rm -r ./front-end/node_modules
@@ -14,7 +16,7 @@ cp -r ../mail-server ./
 #rm -r ./mail-server/node_modules
 rm ./mail-server/pm2.integ.json
 
-tar -zcvf aaq-1.0.1.tar.gz  front-end back-end mail-server
+tar -zcvf aaq-1.1.0.tar.gz  front-end back-end mail-server
 
 rm -r ./front-end
 rm -r ./back-end
