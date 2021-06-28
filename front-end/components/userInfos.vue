@@ -165,7 +165,6 @@
             require
           >
             <b-form-select
-              class="liste-deroulante"
               v-model="user.cpi_codeinsee"
               name="lstcommune"
               v-validate="{ required: true, min: 5, max: 5 }"
@@ -210,7 +209,7 @@
       <div v-else>
         <div v-if="this.user.validated == false">
           <b-form-group label="Structure">
-            <b-form-select class="liste-deroulante" v-model="selectedStructure">
+            <b-form-select v-model="selectedStructure">
               <option :value="null">-- Choix de la Structure --</option>
               <option
                 v-for="stru in listeStructure"
@@ -343,22 +342,20 @@
               >
             </div>
           </div>
-          <div class="mb-3 mt-3" v-if="selectedStructure == 2">
-            <b-col>
-              Numéro SIREN ou SIRET :
-              <b-form-input
-                aria-describedby="inputFormatterHelp"
-                v-model="siret"
-                type="text"
-              ></b-form-input>
-            </b-col>
-            <b-col>
-              <p class="modal-btns">
-                <b-button variant="success" v-on:click="recherchesiret"
-                  >Rechercher</b-button
-                >
-              </p>
-            </b-col>
+          <div v-if="selectedStructure == 2">
+            <b-row>
+              <b-col cols="9">
+                <b-form-group label="Numéro SIREN ou SIRET :">
+                  <b-form-input
+                    aria-describedby="inputFormatterHelp"
+                    v-model="siret"
+                    type="text"/>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3">
+                  <b-button variant="success" style="margin-top: 30px;" v-on:click="recherchesiret">Rechercher</b-button>
+              </b-col>
+            </b-row>
           </div>
           <div v-if="boolSiren && selectedStructure == 2">
             <b-form-group id="etab" label="Liste des établissements :">
@@ -385,22 +382,20 @@
             adresse :
             <b-form-input v-model="etab.adresse" type="text"></b-form-input>
           </div>
-          <div class="mb-3 mt-3" v-if="selectedStructure == 3">
-            <b-col>
-              Numéro UAI ou code postal :
-              <b-form-input
-                aria-describedby="inputFormatterHelp"
-                v-model="uai"
-                type="text"
-              ></b-form-input>
-            </b-col>
-            <b-col>
-              <p class="modal-btns">
-                <b-button variant="success" v-on:click="rechercheEcole"
-                  >Rechercher</b-button
-                >
-              </p>
-            </b-col>
+          <div v-if="selectedStructure == 3">
+            <b-row>
+              <b-col cols="9">
+                <b-form-group label="Numéro UAI ou code postal :">
+                  <b-form-input
+                    aria-describedby="inputFormatterHelp"
+                    v-model="uai"
+                    type="text"/>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3">
+                  <b-button variant="success" style="margin-top: 30px;" v-on:click="rechercheEcole">Rechercher</b-button>
+              </b-col>
+            </b-row>
           </div>
           <div v-if="boolEcoleCP && selectedStructure == 3">
             <b-form-group id="etab" label="Liste des établissements :">
@@ -468,7 +463,6 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import rechercheCommune from "~/lib/mixins/rechercheCommune";
 
 import logger from "~/plugins/logger";
@@ -543,13 +537,11 @@ export default {
     },
   },
   mounted() {
-    //this.$store.dispatch("get_structures");
     if (this.user.profilId < 3) {
       this.getDepartements();
     }
   },
   computed: {
-    ...mapState(["structures"]),
     mail: {
       get() {
         return this.$store.state.utilisateurCourant.mail;
@@ -563,28 +555,7 @@ export default {
     },
     isUserRegisteredViaFC() {
       return Boolean(this.user && this.user.tokenFc);
-    },
-    listeStructures() {
-      log.i("listeStructures - In");
-      var liste = this.structures;
-      if (this.mail && this.mail.indexOf(".gouv.fr") != -1) {
-        log.i("listeStructures - Done");
-        return liste;
-      } else {
-        log.d("listeStructures - Autre collectivité");
-        if (!this.user.typeCollectivite) {
-          liste = this.structures.filter((str) => {
-            const isMatch =
-              String(str.str_libellecourt) != "DS" &&
-              String(str.str_libellecourt) != "DEP" &&
-              String(str.str_libellecourt) != "EPCI" &&
-              String(str.str_libellecourt) != "COM";
-            return isMatch;
-          });
-        }
-        return liste;
-      }
-    },
+    }
   },
   methods: {
     submit: function () {
@@ -593,9 +564,7 @@ export default {
         if (!this.accordHonneur) {
           log.w("submit - Honor issue");
           this.user.cpi_codeinsee = null;
-          return this.$toast.error(
-            "Veuillez certifier sur l'honneur l'exactitude des informations déclarées."
-          );
+          return this.$toast.error("Veuillez certifier sur l'honneur l'exactitude des informations déclarées.");
         }
         if (!isValid) {
           log.w("submit - Not valid form");
@@ -610,6 +579,7 @@ export default {
           return this.$emit("submit");
         } else {
           log.d("submit - Profil ID not 1 or 2");
+
           let structure = {
             id: null,
             code: null,
@@ -660,20 +630,13 @@ export default {
               structure.soustype = this.etab.type_libe;
               break;
           }
-          return this.$store
-            .dispatch("post_structure", [
-              structure,
-              this.$store.state.utilisateurCourant.id,
-            ])
+
+          log.d("submit - structure is ready");
+          return this.$store.dispatch("post_structure", [ structure, this.$store.state.utilisateurCourant.id ])
             .then(() => {
-              this.$store.dispatch(
-                "get_structureByUser",
-                this.$store.state.utilisateurCourant.id
-              );
-              this.$store.dispatch("set_state_element", {
-                key: "utilisateurCourant",
-                value: this.user,
-              });
+              this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id)
+              this.$store.dispatch("set_state_element", { key: "utilisateurCourant", value: this.user })
+              log.i("submit - Done");
               return this.$emit("submit");
             });
         }
@@ -693,31 +656,27 @@ export default {
       return null;
     },
     getDepartements: function () {
-      console.info("recupération de la liste des départements");
+      log.i('getDepartements - In')
       const url = process.env.API_URL + "/listedepartement";
-      console.info(url);
-      return this.$axios
-        .$get(url)
-        .then((response) => {
-          this.listdepartement = response.departement;
+      return this.$axios.$get(url)
+        .then(({ departements}) => {
+          log.i('getDepartements - Done')
+          return this.listdepartement = departements
         })
         .catch((error) => {
-          console.error(
-            "Une erreur est survenue lors de la récupération des départements",
-            error
-          );
-        });
+          log.i('getDepartements - Error', error)
+          return this.$toast.error('Une erreur est survenue lors de la récupération des départements')
+        })
     },
     rechercheepci: function () {
+      log.i('rechercheepci - In')
       if (this.cpEpci && this.cpEpci.length === 5) {
         // Le code postal fait bien 5 caractères
-        console.info("Recherche de l'EPCI'");
         const url = process.env.API_URL + "/listepci?codepostal=" + this.cpEpci;
-        console.info(url);
-        return this.$axios
-          .$get(url)
+        return this.$axios.$get(url)
           .then((response) => {
-            if (response.epci.length == 0) {
+            log.i('rechercheepci - Done')
+            if (reponse.epci && response.epci.length == 0) {
               this.boolEpci = false;
             } else {
               this.boolEpci = true;
@@ -725,11 +684,9 @@ export default {
             }
           })
           .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la récupération des EPCI",
-              error
-            );
-          });
+            log.i('rechercheepci - Error', error)
+            return this.$toast.error('Une erreur est survenue lors de la récupération des EPCI')
+          })
       } else {
         // On vide la liste car le code postal a changé
         this.listepci = ["Veuillez saisir un code postal"];
@@ -738,85 +695,70 @@ export default {
       }
     },
     recherchesiret: function () {
+      log.i('recherchesiret - In')
       if (this.siret && this.siret.length === 14) {
+        log.d('recherchesiret - Search on siret')
         this.boolSiren = false;
         const url = process.env.API_URL + "/siren/siret/" + this.siret;
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then((response) => {
-            console.log(response.structure);
+        return this.$axios.$get(url)
+          .then(({ structure }) => {
+            log.i('recherchesiret - siret - Done')
             this.boolSiret = true;
-            this.etab = response.structure;
+            this.etab = structure;
           })
           .catch((error) => {
-            fields;
-            console.error(
-              "Une erreur est survenue lors de la recherche du SIRET",
-              error
-            );
+            log.w('recherchesiret - Error on siret', error)
+            return this.$toast.error('Une erreur est survenue lors de la recherche du SIRET')
           });
       }
       if (this.siret && this.siret.length === 9) {
+        log.d('recherchesiret - Search on siren')
         this.boolSiret = false;
         const url = process.env.API_URL + "/siren/siren/" + this.siret;
-        console.info(url);
-        return this.$axios
-          .$get(url)
+        return this.$axios.$get(url)
           .then((response) => {
+            log.i('recherchesiret - siren - Done')
             this.boolSiren = true;
             this.listeEtab = response.etablissements;
           })
           .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la recherche du SIREN",
-              error
-            );
+            log.w('recherchesiret - Error on siren', error)
+            return this.$toast.error('Une erreur est survenue lors de la recherche du SIREN')
           });
       }
     },
     rechercheEcole: function () {
       if (this.uai && this.uai.length === 5) {
+        log.i('rechercheEcole - CP - In')
         this.boolEcoleCP = true;
-        console.info("Recherche d'école par code postal");
         const url = process.env.API_URL + "/ecole/cp/" + this.uai;
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then((response) => {
-            console.log(response);
+        return this.$axios.$get(url)
+          .then(({ etablissements }) => {
+            log.i('rechercheEcole - CP - Done')
             this.boolEcoleCP = true;
-            this.listeEtab = response.etablissements;
+            this.listeEtab = etablissements;
           })
           .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la recherche de l'école par CP",
-              error
-            );
+            log.w('rechercheEcole - CP - Error', error)
+            return this.$toast.error('Une erreur est survenue lors de la recherche de l\'école par CP')
           });
       }
       if (this.uai && this.uai.length === 8) {
         this.boolUAI = true;
-        console.info("Recherche d'école par UAI'");
+        log.i('rechercheEcole - UAI - In')
         const url = process.env.API_URL + "/ecole/uai/" + this.uai;
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then((response) => {
-            this.etab = response.ecole;
+        return this.$axios.$get(url)
+          .then(({ ecole }) => {
+            log.i('rechercheEcole - UAI - Done')
+            this.etab = ecole;
           })
           .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la recherche d'école par UAI'",
-              error
-            );
+            log.w('rechercheEcole - UAI - Error', error)
+            return this.$toast.error('Une erreur est survenue lors de la recherche de l\'école par UAI')
           });
       }
       if (this.uai && this.uai.length != 8 && this.uai.length != 5) {
-        this.$toast.error(
-          `L'UAI ou code postal saisit n'est pas au bon format'`,
-          []
-        );
+        return this.$toast.error(`L'UAI ou code postal saisit n'est pas au bon format'`)
       }
     },
     emitUser: function () {
@@ -825,9 +767,6 @@ export default {
         value: this.user,
       });
     },
-  },
-  mounted() {
-    console.log(this.user);
-  },
+  }
 };
 </script>

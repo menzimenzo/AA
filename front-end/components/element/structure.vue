@@ -196,6 +196,11 @@
   </b-container>
 </template>
 <script>
+import rechercheCommune from '~/lib/mixins/rechercheCommune'
+
+import logger from '~/plugins/logger'
+const log = logger('components:element:structure')
+
 export default {
   props: {
     intervention: {
@@ -209,6 +214,7 @@ export default {
       default: false,
     }
   },
+  mixins: [rechercheCommune],
   data() {
     return {
       cp: null,
@@ -255,7 +261,7 @@ export default {
   },
   watch: {
     cp() {
-      this.recherchecommune();
+      this.rechercheCommune();
     },
     cpEpci() {
       this.rechercheepci();
@@ -272,55 +278,26 @@ export default {
   },
   methods: {
     getDepartements: function () {
-      console.info("recupération de la liste des départements");
+      log.i('getDepartements - In')
       const url = process.env.API_URL + "/listedepartement";
-      console.info(url);
-      return this.$axios
-        .$get(url)
-        .then((response) => {
-          this.listdepartement = response.departements;
+      return this.$axios.$get(url)
+        .then(({ departements}) => {
+          log.i('getDepartements - Done')
+          return this.listdepartement = departements
         })
         .catch((error) => {
-          console.error(
-            "Une erreur est survenue lors de la récupération des départements",
-            error
-          );
-        });
-    },
-
-    // Get liste des communes correspondant au code postal
-    recherchecommune: function () {
-      if (this.cp && this.cp.length === 5) {
-        // Le code postal fait bien 5 caractères
-        console.info("Recherche de la commune");
-        const url = process.env.API_URL + "/listecommune?codepostal=" + this.cp;
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then((response) => {
-            this.listecommune = response.communes;
-          })
-          .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la récupération des communes",
-              error
-            );
-          });
-      } else {
-        // On vide la liste car le code postal a changé
-        this.listecommune = ["Veuillez saisir un code postal"];
-        return Promise.resolve(null);
-      }
+          log.i('getDepartements - Error', error)
+          return this.$toast.error('Une erreur est survenue lors de la récupération des départements')
+        })
     },
     rechercheepci: function () {
+      log.i('rechercheepci - In')
       if (this.cpEpci && this.cpEpci.length === 5) {
         // Le code postal fait bien 5 caractères
-        console.info("Recherche de l'EPCI'");
         const url = process.env.API_URL + "/listepci?codepostal=" + this.cpEpci;
-        console.info(url);
-        return this.$axios
-          .$get(url)
+        return this.$axios.$get(url)
           .then((response) => {
+            log.i('rechercheepci - Done')
             if (response.epci.length == 0) {
               this.boolEpci = false;
             } else {
@@ -329,11 +306,9 @@ export default {
             }
           })
           .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la récupération des EPCI",
-              error
-            );
-          });
+            log.i('rechercheepci - Error', error)
+            return this.$toast.error('Une erreur est survenue lors de la récupération des EPCI')
+          })
       } else {
         // On vide la liste car le code postal a changé
         this.listepci = ["Veuillez saisir un code postal"];
@@ -341,90 +316,75 @@ export default {
         return Promise.resolve(null);
       }
     },
-
     recherchesiret: function () {
+      log.i('recherchesiret - In')
       if (this.siret && this.siret.length === 14) {
+        log.d('recherchesiret - Search on siret')
         this.boolSiren = false;
         const url = process.env.API_URL + "/siren/siret/" + this.siret;
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then((response) => {
-            console.log(response.structure);
+        return this.$axios.$get(url)
+          .then(({ structure }) => {
+            log.i('recherchesiret - siret - Done')
             this.boolSiret = true;
-            this.etab = response.structure;
+            this.etab = structure;
           })
           .catch((error) => {
-            fields;
-            console.error(
-              "Une erreur est survenue lors de la recherche du SIRET",
-              error
-            );
+            log.w('recherchesiret - Error on siret', error)
+            return this.$toast.error('Une erreur est survenue lors de la recherche du SIRET')
           });
       }
       if (this.siret && this.siret.length === 9) {
+        log.d('recherchesiret - Search on siren')
         this.boolSiret = false;
         const url = process.env.API_URL + "/siren/siren/" + this.siret;
-        console.info(url);
-        return this.$axios
-          .$get(url)
+        return this.$axios.$get(url)
           .then((response) => {
+            log.i('recherchesiret - siren - Done')
             this.boolSiren = true;
             this.listeEtab = response.etablissements;
           })
           .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la recherche du SIREN",
-              error
-            );
+            log.w('recherchesiret - Error on siren', error)
+            return this.$toast.error('Une erreur est survenue lors de la recherche du SIREN')
           });
       }
     },
     rechercheEcole: function () {
       if (this.uai && this.uai.length === 5) {
+        log.i('rechercheEcole - CP - In')
         this.boolEcoleCP = true;
-        console.info("Recherche d'école par code postal");
         const url = process.env.API_URL + "/ecole/cp/" + this.uai;
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then((response) => {
-            console.log(response);
+        return this.$axios.$get(url)
+          .then(({ etablissements }) => {
+            log.i('rechercheEcole - CP - Done')
             this.boolEcoleCP = true;
-            this.listeEtab = response.etablissements;
+            this.listeEtab = etablissements;
           })
           .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la recherche de l'école par CP",
-              error
-            );
+            log.w('rechercheEcole - CP - Error', error)
+            return this.$toast.error('Une erreur est survenue lors de la recherche de l\'école par CP')
           });
       }
       if (this.uai && this.uai.length === 8) {
         this.boolUAI = true;
-        console.info("Recherche d'école par UAI'");
+        log.i('rechercheEcole - UAI - In')
         const url = process.env.API_URL + "/ecole/uai/" + this.uai;
-        console.info(url);
-        return this.$axios
-          .$get(url)
-          .then((response) => {
-            this.etab = response.ecole;
+        return this.$axios.$get(url)
+          .then(({ ecole }) => {
+            log.i('rechercheEcole - UAI - Done')
+            this.etab = ecole;
           })
           .catch((error) => {
-            console.error(
-              "Une erreur est survenue lors de la recherche d'école par UAI'",
-              error
-            );
+            log.w('rechercheEcole - UAI - Error', error)
+            return this.$toast.error('Une erreur est survenue lors de la recherche de l\'école par UAI')
           });
       }
       if (this.uai && this.uai.length != 8 && this.uai.length != 5) {
-        this.$toast.error(
-          `L'UAI ou code postal saisit n'est pas au bon format'`,
-          []
-        );
+        return this.$toast.error(`L'UAI ou code postal saisit n'est pas au bon format'`)
       }
     },
     addStructure: async function () {
+      log.i('addStructure - In')
       let structure = {
         id: null,
         code: null,
@@ -477,33 +437,18 @@ export default {
       
       return this.$store.dispatch("post_structure", [structure, this.$store.state.utilisateurCourant.id])
         .then((structure) => {
-          this.$store.dispatch(
-            "get_structureByUser",
-            this.$store.state.utilisateurCourant.id
-          );
-          this.$toast.success(
-            `${structure.nom} ajoutée aux structures favorites`,
-            []
-          );
+          log.i('addStructure - Done')
+          this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id)
+          this.$toast.success(`${structure.nom} ajoutée aux structures favorites`)
           if (this.dansInt) {
-           this.intervention.structure = structure;
-           this.$modal.hide("editStructure");
+            this.intervention.structure = structure
           }
-          else {
-            this.$modal.hide("newStructure");
-          }
-          
+          this.$modal.hide("editStructure")      
         })
         .catch((error) => {
-          console.error(
-            "Une erreur est survenue lors de l'ajout de la structure",
-            error
-          );
-          this.$toast.error(
-            error,
-            []
-          );
+          log.w('addStructure - Error', error)
           this.$modal.hide("editStructure");
+          return this.$toast.error('Une erreur est survenue lors de l\'ajout de la structure')
         });
     },
     cancel: function () {

@@ -1,95 +1,55 @@
 <template>
-  <b-container class="admin">
+  <b-container fluid class="admin">
     <b-row>
-      <b-col cols="12">
-        <!--  ACCORDEON -- GESTION USER  -->
-        <b-card no-body class="mb-3">
-          <b-card-header header-tag="header" class="p-1" role="tab">
-            <b-form-row>
-              <!-- IMAGE RAYEE BANNER INTERVENTION -->
-              <b-img fluid :src="require('assets/banner_ray_blue.png')" blank-color="rgba(0,0,0,0.5)"/>
-              <b-btn
-                class="accordionBtn"
-                block
-                href="#"
-                v-b-toggle.liste-compte-aaq
-                variant="Dark link"
-              >
-                <h4>
-                  <i class="material-icons accordion-chevron">chevron_right</i>
-                  <i class="material-icons ml-2 mr-2">people</i>
-                  Gestion des comptes utilisateurs
-                </h4>
-              </b-btn>
-            </b-form-row>
-          </b-card-header>
-          <b-collapse id="liste-compte-aaq" accordion="liste-compte-aaq" role="tabpanel">
-            <b-card-body>
-              <b-btn @click="exportUsersCsv()" class="mb-2" variant="primary">
-                <i class="material-icons" style="font-size: 18px; top: 4px;">import_export</i> Export CSV de tous les utilisateurs
-              </b-btn>
-              <div class="mb-3">
-                <b-form inline>
-                  <label for="nomFilter">Nom:</label>
-                  <b-input class="ml-2" id="nomFilter" v-model="nomFilter" placeholder="Nom" />
-                  <label class="ml-3" for="prenomFilter">Prénom:</label>
-                  <b-input class="ml-2" id="prenomFilter" v-model="prenomFilter" placeholder="Prénom"/>
-                  <label class="ml-3" for="inscriptionFilter">Validité Inscription :</label>
-                  <b-form-select
-                    class="ml-3"
-                    v-model="inscriptionFilter"
-                    :options="listeValidInscrip"
-                  />
-                </b-form>
-              </div>
-              <editable
-                v-if="filteredUtilisateurs.length > 0"
-                :columns="headers"
-                :data="filteredUtilisateurs"
-                :removable="false"
-                :creable="false"
-                :editable="false"
-                :loading="loading"
-                :defaultSortField="{ key: 'nom', order: 'asc' }">
-                <template slot-scope="props" slot="actions">
-                  <b-btn @click="getUser(props.data.item.id)" size="sm" class="mr-1" variant="primary">
-                    <i class="material-icons">edit</i>
-                  </b-btn>
-                </template>
-              </editable>
-              <p v-else>
-                Aucun résultat correspondant à votre recherche.
-              </p>
-            </b-card-body>
-          </b-collapse>
-        </b-card>
-        <!-- ACCORDEON -- DOCUMENTS PUBLIES -->
-        <b-card no-body class="mb-3">
-          <b-card-header header-tag="header" class="p-1" role="tab">
-            <b-form-row>
-              <!-- IMAGE RAYEE BANNER INTERVENTION -->
-              <b-img fluid :src="require('assets/banner_ray_blue.png')" blank-color="rgba(0,0,0,1)" />
-              <b-btn
-                class="accordionBtn"
-                block
-                href="#"
-                v-b-toggle.publication-document
-                variant="Dark link"
-              >
-                <h4>
-                  <i class="material-icons accordion-chevron">chevron_right</i>
-                  <i class="material-icons ml-2 mr-2">cloud_upload</i>
-                  Publication des documents
-                </h4>
-              </b-btn>
-            </b-form-row>
-          </b-card-header>
-          <b-collapse id="publication-document" accordion="publication-document" role="tabpanel">
-            <b-card-body>
-              <file-upload />
-            </b-card-body>
-          </b-collapse>
-        </b-card>
+      <b-col cols="3">
+        <Menu @displayDashboard="displayDashboard" />
+      </b-col>
+      <b-col cols="9" class="custom-box">
+        <b-collapse id="liste-compte-aaq" accordion="my-accordion" role="tabpanel">
+          <b-card-body>
+            <b-btn @click="exportUsersCsv()" class="mb-2" variant="primary">
+              <i class="material-icons" style="font-size: 18px; top: 4px;">import_export</i> Export CSV de tous les utilisateurs
+            </b-btn>
+            <div class="mb-3">
+              <b-form inline>
+                <label for="nomFilter">Nom:</label>
+                <b-input class="ml-2" id="nomFilter" v-model="nomFilter" placeholder="Nom" />
+                <label class="ml-3" for="prenomFilter">Prénom:</label>
+                <b-input class="ml-2" id="prenomFilter" v-model="prenomFilter" placeholder="Prénom"/>
+                <label class="ml-3" for="inscriptionFilter">Validité Inscription :</label>
+                <b-form-select
+                  class="ml-3"
+                  v-model="inscriptionFilter"
+                  :options="listeValidInscrip"
+                />
+              </b-form>
+            </div>
+            <editable
+              v-if="filteredUtilisateurs.length > 0"
+              :columns="headers"
+              :data="filteredUtilisateurs"
+              :removable="false"
+              :creable="false"
+              :editable="false"
+              :loading="loading"
+              :defaultSortField="{ key: 'nom', order: 'asc' }">
+              <template slot-scope="props" slot="actions">
+                <b-btn @click="getUser(props.data.item.id)" size="sm" class="mr-1" variant="primary">
+                  <i class="material-icons">edit</i>
+                </b-btn>
+              </template>
+            </editable>
+            <p v-else>
+              Aucun résultat correspondant à votre recherche.
+            </p>
+          </b-card-body>
+        </b-collapse>
+        <b-collapse id="publication-document" accordion="my-accordionv" role="tabpanel">
+          <b-card-body>
+            <file-upload />
+          </b-card-body>
+        </b-collapse>
+        <Dashboard v-if="showDashboard" />
       </b-col>
     </b-row>
     <modal name="editUser" height="auto" width="900px" :scrollabe="true">
@@ -103,8 +63,10 @@ import { mapState } from "vuex";
 import exportUsersCsv from '~/lib/mixins/exportUsersCsv'
 
 import Editable from "~/components/editable/index.vue";
+import Menu from "~/components/navigation/menu-admin.vue"
 import user from "~/components/user.vue";
 import fileUpload from "~/components/fileUpload.vue";
+import Dashboard from '../../components/dashboard/admin.vue';
 
 import logger from '~/plugins/logger'
 const log = logger('pages:admin')
@@ -113,12 +75,15 @@ export default {
   components: {
     Editable,
     user,
-    fileUpload
+    fileUpload,
+    Menu,
+    Dashboard
   },
   mixins: [exportUsersCsv],
   data() {
     return {
       loading: true,
+      showDashboard: true,
       headers: [
         { path: "id", title: "N° d'utilisateur", type: "text", sortable: true },
         { path: "nom", title: "Nom", type: "text", sortable: true },
@@ -161,8 +126,7 @@ export default {
         log.d('filteredUtilisateurs - Done', { isMatch })
         return isMatch;
       });
-    },
-
+    }
   },
   async mounted() {
     log.i('mounted - In')
@@ -186,11 +150,10 @@ export default {
           log.w('getUser - Une erreur est survenue lors de la récupération du détail de l\'utilisateur', { error })
           return this.$toast.error('Une erreur est survenue lors de la récupération du détail de l\'utilisateur')
         });
-    }
+    },
+    displayDashboard(bool) {
+      return this.showDashboard = bool
+    },
   }
 };
 </script>
-
-<style>
-</style>
-

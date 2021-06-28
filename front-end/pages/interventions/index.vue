@@ -178,8 +178,8 @@ import Intervention from "~/components/Intervention.vue";
 import Piscine from "~/components/element/piscine.vue";
 import Structure from "~/components/element/structure.vue";
 import Editable from "~/components/editable/index.vue";
-import Menu from "~/components/navigation/menu-left.vue"
-import Dashboard from "~/components/dashboard.vue"
+import Menu from "~/components/navigation/menu-interventions.vue"
+import Dashboard from "~/components/dashboard/mn.vue"
 
 import { mapState } from "vuex";
 import logger from '~/plugins/logger'
@@ -496,10 +496,6 @@ export default {
 </script>
 
 <style>
-.custom-box {
-    min-height: 66vh;
-    border-left: 1px solid rgba(173,173,173,0.5);
-}
 .accordionBtn {
   text-align: left;
 }

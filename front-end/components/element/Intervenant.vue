@@ -1,18 +1,14 @@
 <template>
   <b-container class="interventionModal">
-    <b-col cols="12" class="text-center">
-      <h2 class="mb-3 interventionTitle">
-        Ajout d'un intervenant
-        <br>
-         <br>
-      </h2>
-    </b-col>
     <b-row>
-      <div class="mb-3">
+      <b-col cols="12" class="text-center mb-5">
+        <h2>Ajout d'un intervenant</h2>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols="12" class="mb-3">
         <b-form inline>
-          <label for="nameFilter"
-            >Saissisez le début du nom d'un intervenant pour l'ajouter :</label
-          >
+          <label for="nameFilter">Saissisez le début du nom d'un intervenant pour l'ajouter :</label>
           <b-input
             class="ml-2"
             id="nameFilter"
@@ -20,35 +16,42 @@
             placeholder="Dupond"
           />
         </b-form>
-        <editable
-          :columns="headersEncadrants"
-          :data="filteredMN"
-          :removable="false"
-          :creable="false"
-          :editable="false"
-          :noDataLabel="''"
-          tableMaxHeight="none"
-        >
-          <template slot-scope="props" slot="actions">
-            <b-btn
-              @click="addMN(props.data.item)"
-              size="sm"
-              class="mr-1"
-              variant="primary"
-            >
-              <i class="material-icons">add</i>
-            </b-btn>
-          </template>
-        </editable>
-      </div>
+      </b-col>
+    </b-row>
+    <b-row>
+        <b-col cols="12">
+          <editable
+            :columns="headersEncadrants"
+            :data="filteredMN"
+            :removable="false"
+            :creable="false"
+            :editable="false"
+            :noDataLabel="''"
+            tableMaxHeight="none"
+          >
+            <template slot-scope="props" slot="actions">
+              <b-btn
+                @click="addMN(props.data.item)"
+                size="sm"
+                class="mr-1"
+                variant="primary">
+                <i class="material-icons">add</i>
+              </b-btn>
+            </template>
+          </editable>
+        </b-col>
     </b-row>
   </b-container>
 </template>
 <script>
-import Vue from "vue";
-import Editable from "~/components/editable/index.vue";
+import Editable from "~/components/editable/index.vue"
+import logger from '~/plugins/logger'
+const log = logger('components:element:intervenant')
 
 export default {
+  components: {
+    Editable,
+  },
   props: {
     intervention: {
       type: Object,
@@ -59,15 +62,10 @@ export default {
   },
   computed: {
     filteredMN: function () {
-      if (this.nameFilter.length > 2) {
+      if (this.nameFilter && this.nameFilter.length > 2) {
         return this.listeMaitreNageur.filter((mn) => {
-          // Suppression des interventions sans commentaire
           let isMatch = mn.nom;
-          if (this.nameFilter.length > 2) {
-            isMatch =
-              isMatch &&
-              mn.nom.toLowerCase().indexOf(this.nameFilter.toLowerCase()) > -1;
-          }
+          isMatch = isMatch && mn.nom.toLowerCase().indexOf(this.nameFilter.toLowerCase()) > -1;
           return isMatch;
         });
       } else {
@@ -75,21 +73,13 @@ export default {
       }
     },
   },
-  components: {
-    Editable,
-  },
   data() {
     return {
       headersEncadrants: [
         { path: "nom", title: "Nom", type: "text", sortable: true },
         { path: "prenom", title: "Prénom", type: "text", sortable: true },
         { path: "mail", title: "Courriel", type: "text", sortable: true },
-        {
-          path: "__slot:actions",
-          title: "Actions",
-          type: "__slot:actions",
-          sortable: false,
-        },
+        { path: "__slot:actions", title: "Actions", type: "__slot:actions", sortable: false },
       ],
       listeMaitreNageur: [],
       nameFilter: "",
@@ -97,36 +87,33 @@ export default {
   },
   methods: {
     addMN: function (mn) {
-      let absent = true;
-      for (const [key, user] of Object.entries(this.intervention.utilisateur)) {
-        if (user.id == mn.id) {
-          absent = false;
-        }
-      }
-      if (absent) {
+      const present = this.intervention.utilisateur.find(user => user.id == mn.id)
+      log.i('addMN - In', { present })
+      if (present) {
+        this.$toast.error(`l'intervenant ${mn.nom} est déjà présent dans la liste`)
+      } else {
         this.intervention.utilisateur.push(mn);
         this.$toast.success(`l'intervenant ${mn.nom} est ajouté à la liste`);
-      } else {
-        this.$toast.error(
-          `l'intervenant ${mn.nom} est déjà présent dans la liste`
-        );
       }
+      log.i('addMN - Done')
       this.nameFilter = "";
-      this.$modal.hide("editIntervenant")
+      return this.$modal.hide("editIntervenant")
     }
   },
   async mounted() {
+    log.i('mounted - In')
     const url = process.env.API_URL + "/user/encadrant";
-    console.info(url);
     await this.$axios({
       url: url,
       method: "GET",
     })
-      .then((response) => {
-        this.listeMaitreNageur = response.data.encadrants;
+      .then(response => {
+        log.i('mounted - Done')
+        return this.listeMaitreNageur = response.data.encadrants;
       })
-      .catch((err) => {
-        console.log("Erreur lors du téléchargement: " + err.message);
+      .catch(error => {
+        log.w('mounted - error', error)
+        return this.$toast.error('Une erreur est survenue lors du chargement des encadrants')
       });
   },
 };
@@ -135,27 +122,5 @@ export default {
 <style>
 .interventionModal {
   padding: 30px;
-}
-.modal-btns {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-}
-.interventionTitle {
-  color: #252195;
-}
-.input-group-display {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-.input-group-display span {
-  margin-top: 5px;
-}
-ul {
-  list-style-type: none;
-}
-.date-input-width {
-  width: 190px;
 }
 </style>

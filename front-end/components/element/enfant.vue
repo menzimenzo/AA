@@ -1,7 +1,7 @@
 <template>
   <b-container class="interventionModal">
     <b-col cols="12" class="text-center">
-      <h2 class="mb-3 interventionTitle">
+      <h2 class="mb-3">
         Mise à jour de l'enfant {{ enfant.enf_id }}
         <br />
       </h2>
@@ -92,8 +92,6 @@ export default {
   },
   methods: {
     putEnfant: async function (enf, id) {
-      //console.log('id enfant :'+this.enfant.enf_id)
-      //console.log(this.intervention.enfant)
       const url = process.env.API_URL + "/enfant/" + enf.enf_id;
       return await this.$axios
         .$put(url, { enf, id })
@@ -119,8 +117,5 @@ export default {
   position: absolute;
   bottom: 10px;
   right: 10px;
-}
-.interventionTitle {
-  color: #252195;
 }
 </style>

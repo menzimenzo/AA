@@ -92,10 +92,9 @@
         <span></span>
       </b-col>
       <b-col cols="6">
-        <span
-          >Adresse : {{ formIntervention.piscine.adresse }}
-          {{ formIntervention.piscine.cp }}</span
-        >
+        <span>Adresse : {{ formIntervention.piscine.adresse }}
+          {{ formIntervention.piscine.cp }}
+        </span>
       </b-col>
     </b-row>
     <b-row>
@@ -133,21 +132,28 @@
       </b-col>
     </b-row>
     <b-row>
-      <b-col cols="12">
-        <p>Subvention ANS</p>
+      <b-col cols="3">
+        <p>
+          Subvention ANS &nbsp;<i
+            class="material-icons"
+            :id="randomId"
+            style="cursor: pointer"
+            >info</i
+          >:
+          <b-popover :target="randomId" triggers="hover focus">
+            <span>Cette intervention s'inscrit dans le cadre d'un programme subventionné par l'ANS soit :<br>
+              - Pour une classe bleue ou un stage bleu<br>
+              - Pour la formation d’intervenants en Aisance Aquatique
+            </span>
+          </b-popover>
+        </p>
       </b-col>
-    </b-row>
-    <b-row>
-      <b-col cols="2">
-         <b-form-checkbox
-                    switch
-                    v-model="formIntervention.isSubventionnee"
-                    ></b-form-checkbox>
-      </b-col>
-      <b-col cols="10">
-       <span>Cette intervention s'inscrit dans le cadre d'un programme subventionné par l'ANS soit :<br>
-           - Pour une classe bleue ou un stage bleu<br>
-           - Pour la formation d’intervenants en Aisance Aquatique</span>
+      <b-col cols="9" >
+        <b-form-checkbox
+          switch
+          size="lg"
+          class="plainStacked"
+          v-model="formIntervention.isSubventionnee" />
       </b-col>
     </b-row>
     <b-row>
@@ -155,11 +161,11 @@
         <p>
           Cadre d'intervention &nbsp;<i
             class="material-icons"
-            :id="randomId"
+            :id="randomIdBis"
             style="cursor: pointer"
             >info</i
           >:
-          <b-popover :target="randomId" triggers="hover focus">
+          <b-popover :target="randomIdBis" triggers="hover focus">
             <b>Péri-scolaire</b> : concerne les activités organisées durant les
             jours d’école ainsi que le mercredi, qu’il y ait ou non école le
             matin.
@@ -174,8 +180,7 @@
           v-model="formIntervention.cai"
           :options="listecadreintervention"
           class="plainStacked"
-          name="plainStacked"
-        />
+          name="plainStacked"/>
       </b-col>
     </b-row>
     <b-row v-if="formIntervention.cai == 1">
@@ -189,8 +194,7 @@
           <option
             v-for="classe in listeclasse"
             :key="classe.text"
-            :value="classe.value"
-          >
+            :value="classe.value">
             {{ classe.text }}
           </option>
         </b-form-select>
@@ -464,6 +468,7 @@ export default {
       ],
       // Nécessaire pour le fonctionnement des popovers quand plusieurs composants intervention sont sur la page
       randomId: "popover-" + Math.floor(Math.random() * 100000),
+      randomIdBis: "popover-" + Math.floor(Math.random() * 100000),
     };
   },
   computed: {
@@ -697,7 +702,7 @@ export default {
               class: "toastLink",
             });
           }
-          var interventionLabel = serverIntervention.id
+          var interventionLabel = serverIntervention && serverIntervention.id
             ? "#" + serverIntervention.id
             : "";
           log.i("checkForm - Done");
@@ -732,8 +737,5 @@ ul {
 }
 p {
   font-size: 1.3em;
-}
-.plainStacked {
-  margin-top: 22px;
 }
 </style>

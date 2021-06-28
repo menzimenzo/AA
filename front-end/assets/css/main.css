@@ -186,6 +186,15 @@ ul li {
     padding: 0 !important;
 }
 
+.custom-box {
+    min-height: 66vh;
+    border-left: 1px solid rgba(173,173,173,0.5);
+}
+
+.plainStacked {
+    margin-top: 22px;
+  }
+
 /* !Formulaire */
 
 /* Mes interventions */

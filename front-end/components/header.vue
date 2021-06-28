@@ -1,8 +1,8 @@
 <template>
   <b-container fluid>
-    <b-row class="text-center main-header">
-      <b-col cols="2">
-        <nuxt-link to="/" title="Afficher la page d'accueil" style="text-decoration: none" >
+    <b-row class="main-header">
+      <b-col cols="2" class="text-center">
+        <nuxt-link :to="redirectAcc" title="Afficher la page d'accueil" style="text-decoration: none" >
           <b-img fluid :src="require('assets/Gouvernement_PiloteMS.jpg')" blank-color="rgba(0,0,0,0.5)" />
         </nuxt-link>
       </b-col>
@@ -48,7 +48,18 @@
 import { mapState } from 'vuex'
 
 export default {
-  computed: mapState(['utilisateurCourant']),
+  computed:{ 
+    ...mapState(['utilisateurCourant']),
+    redirectAcc() {
+      let path= '/'
+      if(this.utilisateurCourant && (this.utilisateurCourant.profilId == 3 || this.utilisateurCourant.profilId == 4)) {
+        path = '/interventions'
+      } else if(this.utilisateurCourant && this.utilisateurCourant.profilId == 2) {
+        path = '/partenaire'
+      }
+      return path
+    }
+  },
   methods: {
     logout() {
       return this.$axios.$get(process.env.API_URL + '/connexion/logout').then(async response => {

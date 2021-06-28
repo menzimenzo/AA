@@ -1,84 +1,60 @@
 <template>
-  <b-container class="interventions">
+  <b-container class="formateurs">
     <b-row>
       <b-col cols="12">
-        <!--  ACCORDEON -- GESTION USER  -->
-        <b-card no-body class="mb-3">
-          <b-card-header header-tag="header" class="p-1" role="tab">
-            <b-form-row>
-              <b-col>
-                <!-- IMAGE RAYEE BANNER INTERVENTION -->
-                <b-img
-                  fluid
-                  :src="require('assets/banner_ray_blue.png')"
-                  blank-color="rgba(0,0,0,0.5)"
-                />
-                <b-btn
-                  class="accordionBtn"
-                  block
-                  href="#"
-                  v-b-toggle.liste-compte-aaq
-                  variant="Dark link"
-                >
-                  <h4>
-                    <i class="material-icons accordion-chevron">chevron_right</i>
-                    <i class="material-icons ml-2 mr-2">people</i>
-                    Liste des comptes "Aisance Aquatique" à valider ({{ this.nbdemandeaaq }})
-                  </h4>
-                </b-btn>
-              </b-col>
-            </b-form-row>
-          </b-card-header>
-          <b-collapse id="liste-compte-aaq" accordion="liste-compte-aaq" role="tabpanel">
-            <b-card-body>
-              <b-btn @click="exportUsersCsv()" class="mb-2" variant="primary">
-                <i class="material-icons" style="font-size: 18px; top: 4px;">import_export</i> Export CSV de toutes les demandes
-              </b-btn>
-              <div class="mb-3">
-                <b-form inline>
-                  <label for="nomFilter">Nom:</label>
-                  <b-input 
-                    class="ml-2"
-                    id="nomFilter" 
-                    v-model="nomFilter" 
-                    placeholder="Nom" />
-                  <label class="ml-3" for="prenomFilter">Prénom:</label>
-                  <b-input
-                    class="ml-2"
-                    id="prenomFilter"
-                    v-model="prenomFilter"
-                    placeholder="Prénom"
-                  />
-                  <label class="ml-3">Rôle :</label>
-                  <b-form-select
-                    class="ml-3"
-                    v-model="roleFilter"
-                    :options="listeRole"
-                  />
-                </b-form>
-              </div>
-              <editable
-                v-if="filteredUtilisateurs.length > 0"
-                :columns="headers"
-                :data="filteredUtilisateurs"
-                :removable="false"
-                :creable="false"
-                :editable="false"
-                :loading="loading"
-                :defaultSortField="{ key: 'nom', order: 'asc' }"
-              >
-                <template slot-scope="props" slot="actions">
-                  <b-btn @click="editUser(props.data.item.id)" size="sm" class="mr-1" variant="primary">
-                    <i class="material-icons">edit</i>
-                  </b-btn>
-                </template>
-              </editable>
-              <p v-else>
-                Aucun résultat correspondant à votre recherche.
-              </p>
-            </b-card-body>
-          </b-collapse>
-        </b-card>
+        <h2>
+          <i class="material-icons ml-2 mr-2 h2">people</i>
+          Liste des comptes "Aisance Aquatique" à valider ({{ this.nbdemandeaaq }})
+        </h2>
+      </b-col>
+    </b-row>
+    <b-row class="mb-3">
+      <b-col cols="12">
+        <b-btn @click="exportUsersCsv()" class="mb-2" variant="primary">
+          <i class="material-icons" style="font-size: 18px; top: 4px;">import_export</i> Export CSV de toutes les demandes
+        </b-btn>
+        <div class="mb-3">
+          <b-form inline>
+            <label for="nomFilter">Nom:</label>
+            <b-input 
+              class="ml-2"
+              id="nomFilter" 
+              v-model="nomFilter" 
+              placeholder="Nom" />
+            <label class="ml-3" for="prenomFilter">Prénom:</label>
+            <b-input
+              class="ml-2"
+              id="prenomFilter"
+              v-model="prenomFilter"
+              placeholder="Prénom"
+            />
+            <label class="ml-3">Rôle :</label>
+            <b-form-select
+              class="ml-3"
+              v-model="roleFilter"
+              :options="listeRole"
+            />
+          </b-form>
+        </div>
+        <editable
+          v-if="filteredUtilisateurs.length > 0"
+          :columns="headers"
+          :data="filteredUtilisateurs"
+          :removable="false"
+          :creable="false"
+          :editable="false"
+          :loading="loading"
+          :defaultSortField="{ key: 'nom', order: 'asc' }"
+        >
+          <template slot-scope="props" slot="actions">
+            <b-btn @click="editUser(props.data.item.id)" size="sm" class="mr-1" variant="primary">
+              <i class="material-icons">edit</i>
+            </b-btn>
+          </template>
+        </editable>
+        <p v-else>
+          Aucun résultat correspondant à votre recherche.
+        </p>
       </b-col>
     </b-row>
     <modal name="editUser" height="auto" width="900px" :scrollabe="true">

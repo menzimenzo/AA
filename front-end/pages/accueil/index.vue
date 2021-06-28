@@ -1,68 +1,51 @@
 <template>
   <b-container class="accueil">
-    <b-row style="margin-top:1%">
+    <b-row class="mt-1" >
       <b-col  class="col-12 col-md-4">
         <b-img :src="require('assets/MainAisAqua.png')" width="365%"/>
       </b-col>
       <b-col  class="col-12 col-md-8" v-if="!loading">
         <b-card class="mb-3" v-if="!maDemande">
           <b-form>
-            Vous êtes connecté avec un rôle "Maître Nageur"<br><br>
-            Vous suivez ou avez suivi une formation pour les encadrants de l’ Aisance Aquatique :<br><br>
-            Vous avez la possibilité de valoriser cette formation,<br>
-            en recevant le label « Maitre-nageur AAQ ».<br><br>
-            Pour ce faire, précisez la structure ou l’instructeur AAQ qui vous forme ou vous a formé<br>
-            <b-form-group 
-                label-for="lststructureref" 
-                require
-                >
-                  <b-form-select 
-                    class="liste-deroulante"
-                    v-model="structurerefid"
-                    name="lststructureref"
-                    aria-describedby="lststructurerefFeedback">
-                  
-                    <option :value="null">-- Choix de la structure de référence --</option>
-                    <option
-                      v-for="structureref in listestructureref"
-                      :key="structureref.id"
-                      :value="structureref.id"
-                    >{{ structureref.libellecourt }} | {{ structureref.courriel }}</option>
-                  </b-form-select>
-                <b-button variant="success" v-on:click="validerStrutureRef()">Valider</b-button>
+            <p>Vous êtes connecté avec un rôle "Maître Nageur"</p>
+            <p>Vous suivez ou avez suivi une formation pour les encadrants de l’ Aisance Aquatique :</p>
+            <p>Vous avez la possibilité de valoriser cette formation, en recevant le label « Maitre-nageur AAQ ».<br>
+            Pour ce faire, précisez la structure ou l’instructeur AAQ qui vous forme ou vous a formé.</p>
+            <b-form-group label-for="lststructureref" required >
+              <b-form-select 
+                v-model="structurerefid"
+                name="lststructureref"
+                aria-describedby="lststructurerefFeedback">
+                <option :value="null">-- Choix de la structure de référence --</option>
+                <option
+                  v-for="structureref in listestructureref"
+                  :key="structureref.id"
+                  :value="structureref.id"
+                >{{ structureref.libellecourt }} | {{ structureref.courriel }}</option>
+              </b-form-select>
+              <b-button variant="success" v-on:click="validerStrutureRef()">Valider</b-button>
             </b-form-group>   
-            OU<br><br>
-
-            <b-form-group 
-                label-for="lstformateur" 
-                require
-                >
-                  <b-form-select 
-                    class="liste-deroulante"
-                    v-model="formateurid"
-                    name="lstformateur"
-                    aria-describedby="lstformateurFeedback">
-                  
-                    <option :value="null">-- Choix de l’instructeur --</option>
-                    <option
-                      v-for="formateur in listeformateur"
-                      :key="formateur.id"
-                      :value="formateur.id"
-                    >{{ formateur.nom }} {{ formateur.prenom }} | {{ formateur.mail }}</option>
-                  </b-form-select>
-                <b-button variant="success" v-on:click="validerFormateur()">Valider</b-button>
+            <p class="mb-4">OU</p>
+            <b-form-group label-for="lstformateur" required>
+              <b-form-select 
+                v-model="formateurid"
+                name="lstformateur"
+                aria-describedby="lstformateurFeedback">
+                <option :value="null">-- Choix de l’instructeur --</option>
+                <option
+                  v-for="formateur in listeformateur"
+                  :key="formateur.id"
+                  :value="formateur.id"
+                >{{ formateur.nom }} {{ formateur.prenom }} | {{ formateur.mail }}</option>
+              </b-form-select>
+              <b-button variant="success" v-on:click="validerFormateur()">Valider</b-button>
             </b-form-group>    
-             
-                        
           </b-form>
         </b-card>            
         <b-card class="mb-3" v-else>
-          <b-form> 
-            
-            Vous êtes connecté avec un rôle "Maître Nageur"<br><br>
-            Vous avez une demande en cours pour passer en "Maître Nageur Aisance Aquatique".
-            Demande effectuée le {{ this.maDemande.datedemandeaaq}} auprès de {{ this.maDemande.sre_libellecourt}} {{ this.maDemande.uti_prenom}} {{ this.maDemande.uti_nom}} ({{this.maDemande.sre_courriel}} {{ this.maDemande.uti_mail}})<br><br>
-          </b-form>
+          <p>Vous êtes connecté avec un rôle "Maître Nageur"</p>
+          <p>Vous avez une demande en cours pour passer en "Maître Nageur Aisance Aquatique".<br>
+          Demande effectuée le {{ this.maDemande.datedemandeaaq}} auprès de {{ this.maDemande.sre_libellecourt}} {{ this.maDemande.uti_prenom}} {{ this.maDemande.uti_nom}} ({{this.maDemande.sre_courriel}} {{ this.maDemande.uti_mail}})</p>
         </b-card>            
       </b-col>
       <b-col class="col-12 col-md-8" v-else>
@@ -108,20 +91,6 @@ export default {
   },
   computed: mapState(["utilisateurCourant", "demandeaaq" ]),
   methods: {
-    getFormateurs: function() {
-      log.i('getFormateurs - In')
-      const url = process.env.API_URL + "/user/liste/3"
-      return this.$axios.$get(url)
-        .then(response => {
-          const formateurs = response && response.users
-          log.i('getFormateurs - Done', formateurs.length)
-          return this.listeformateur = formateurs;
-        })
-        .catch(error => {
-          log.w('getFormateurs - Error', error)
-          return this.$toast.error('Une erreur est survenue lors de la récupération des formateurs.')
-        });
-    },
     rechercheformateur: function() {
       log.i('rechercheformateur - In')
       const url = process.env.API_URL + "/user/liste/3"
@@ -169,35 +138,8 @@ export default {
           return this.$toast.error('Une erreur est survenue lors de la récupération de la demande.')      
         })
     },
-    postDemandeAaq: function() {
-      log.i('postDemandeAaq - In', this.formateurid)
-      if (!this.formateurid) {
-        return this.$toast.error('Veuillez sélectionner un formateur dans la liste déroulante.')
-      }
-
-      const url = process.env.API_URL + '/demandeaaq/'
-      const body = {
-        formateurId: this.formateurid,
-        demandeurId: this.utilisateurCourant.id
-      }
-
-      log.d('postDemandeAaq - Post', { url, body })
-      return this.$axios.$post(url, body)
-        .then(demande => {
-          log.d('postDemandeAaq - Server responded')
-          this.$toast.success('Votre demande a été soumise.')   
-          return this.maDemande = demande;
-        }).catch(error => {
-          log.w('postDemandeAaq - Server responded', error)
-          return this.$toast.error('Une erreur est survenue lors du dépot de votre demande.')
-        })
-        .catch(err => {
-          console.log(JSON.stringify(err));
-          this.$toasted.error("Erreur lors du téléchargement: " + err.message);
-        });
-    },
     validerFormateur: function() {
-      console.log('Formateur choisi' + this.formateurid)
+      log.i('validerFormateur - In', this.formateurId)
       if (this.formateurid) {
         const url = process.env.API_URL + '/demandeaaq/'
         const body = {
@@ -205,25 +147,20 @@ export default {
           demandeurId: this.utilisateurCourant.id
         }
         return this.$axios.$post(url, body)
-          .then(async response => {
-              this.$toast.success('Votre demande a été envoyée.')
-              
-          if (response && response.maDemande) {
-            this.maDemande = response.maDemande;
-            //console.log("Une créée: " + this.maDemande.demandeurId)
-            // J'ai fait l'inverse de ce que Glenn a dit, je refais un appel serveur
-            // TODO : Récupérer les valeur du Post ... et non refaire un appel serveur
-            this.chargedemande()
-
-          }
-          }).catch(error => {
-            console.log(error)
-            this.$toast.error(error)
+          .then(({ maDemande }) => {
+            log.i('validerFormateur - Done', { maDemande })
+            this.maDemande = maDemande
+            this.$toast.success('Votre demande a été envoyée.')
+            return this.chargedemande()
+          })
+          .catch(error => {
+            log.w('validerFormateur - Error', error)
+            return this.$toast.error('Une erreur est survenue lors du dépot de la demande')
           })      
       }
     },
     validerStrutureRef: function() {
-      console.log('Structure de référence choisie' + this.structurerefid)
+      log.i('validerStrutureRef - In', this.structurerefid)
       if (this.structurerefid) {
         const url = process.env.API_URL + '/demandeaaq/'
         const body = {
@@ -231,21 +168,16 @@ export default {
           demandeurId: this.utilisateurCourant.id
         }
         return this.$axios.$post(url, body)
-          .then(async response => {
-              this.$toast.success('Votre demande a été envoyée à la structure')
-              
-          if (response && response.maDemande) {
-            this.maDemande = response.maDemande;
-            //console.log("Une créée: " + this.maDemande.demandeurId)
-            // J'ai fait l'inverse de ce que Glenn a dit, je refais un appel serveur
-            // TODO : Récupérer les valeur du Post ... et non refaire un appel serveur
-            this.chargedemande()
-
-          }
-          }).catch(error => {
-            console.log(error)
-            this.$toast.error(error)
-          })      
+          .then(({ maDemande }) => {
+            log.i('validerStrutureRef - Done', { maDemande })
+            this.maDemande = maDemande
+            this.$toast.success('Votre demande a été envoyée.')
+            return this.chargedemande()
+          })
+          .catch(error => {
+            log.w('validerStrutureRef - Error', error)
+            return this.$toast.error('Une erreur est survenue lors du dépot de la demande')
+          })     
       }
     }
   },
@@ -263,3 +195,8 @@ export default {
 };
 </script>
 
+<style scoped>
+select {
+  width: 80%;
+}
+</style>

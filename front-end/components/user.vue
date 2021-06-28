@@ -93,23 +93,6 @@
             </b-form-select>
             <b-form-invalid-feedback id="lstinstructeurFeedback">Un instructeur doit être sélectionné.</b-form-invalid-feedback>
         </b-form-group>
-        <!--
-        <div v-if="isAdmin()">
-          <b-form-group 
-            label=" Statut utilisateur :"
-            class="mb-3 mt-3"> 
-            <b-form-select v-model="formUser.statut" :options="liststatus" />
-          </b-form-group>
-          <div class="mb-3 mt-3">
-            <b-form-checkbox
-              switch
-              v-model="formUser.validated"
-              name="check-button">
-              Utilisateur validé
-            </b-form-checkbox>
-          </div>
-        </div>
-        -->
       </b-col>
       <b-col cols="4">
         <b-form-group label="Site Web de contact :" class="mb-3 mt-3">
@@ -262,7 +245,6 @@ export default {
             mail: null
         },
       ],
-      //instructeurid: null,
       disabledInstructeur: false,
       listestructureref: [
         {
@@ -273,175 +255,86 @@ export default {
           courriel: null
         },
       ],
-
     };
+  },
+  watch: {
+      cp() {
+        log.i('cp - saisie du CP')
+        this.formUser.cp = this.cp;
+        return this.rechercheCommune();
+      },
+      role() {
+        log.i('role - Changement de Profil')
+        this.formUser.role = this.role;
+        this.renseignerinstructeur();
+    }
+  },
+  computed: { 
+    ...mapState(["utilisateurCourant"]) 
   },
   methods: {
     checkform() {
-      log.i("Validation du formulaire");
-      this.erreurformulaire = [];
-      var formOK = true;
+      log.i("checkform - In")
+      const erreurformulaire = []
+      let formOK = true;
 
       if (!this.formUser.nom) {
-        this.erreurformulaire.push("Le nom");
+        erreurformulaire.push("Le nom");
         formOK = false;
       }
       if (!this.formUser.prenom) {
-        this.erreurformulaire.push("Le prénom");
+        erreurformulaire.push("Le prénom");
         formOK = false;
       }
       if (!this.formUser.mail) {
-        this.erreurformulaire.push("Le mail");
+        erreurformulaire.push("Le mail");
         formOK = false;
       }
-/*
-// On vérifie si c'est une structure de réféence et qu'elle passe le rôle à MNAAQ 
-        // qu'il y avait bien une demande pour cet utiliteur.
-        // Si oui alors on vérifique que l'instructeur a bien été renseigné.
 
-      if(this.formUser.role =="4") {
-        if(this.$store.state.utilisateurCourant.profilId=="6" || this.$store.state.utilisateurCourant.profilId=="3") {
-          const url = process.env.API_URL + "/demandeaaq?demandeurid=" + this.formUser.id
-          console.debug(url);
-          this.$axios
-            .$get(url)
-            .then( response => {
-              if(response && response.demandeaaq) {
-                console.debug("Une demande en cours: " + response.demandeaaq.dem_id)
-                var demandeaaq = response.demandeaaq
-                const url = process.env.API_URL + '/demandeaaq/accord'
-
-                // Lorsque c'est une structure référente qui fait la modification, alors l'id du formateur est mis à jour
-                // Sinon le formateur avait été choisi par le 
-                if (this.$store.state.utilisateurCourant.profilId=="6") {
-                  //demandeaaq['dem_uti_formateur_id'] = this.instructeurid
-                  demandeaaq['dem_uti_formateur_id'] = this.formUser.formateurid
-                }
-                return this.$axios.$put(url, {demandeaaq})
-                  .then(async demandeaaq => {
-                    // Route pour les Maîtres nagueurs MN
-                    //this.$router.push('/interventions')
-                    console.debug("Mise à jour de la demande AAQ")
-                  }).catch(error => {
-                    const err = error.response.data.message || error.message
-                    this.$toast.error(err)
-                    return
-                  })
-              }
-              else
-              {
-                console.debug("Aucune demande en cours")
-              }
-            })
-            .catch(error => {
-              console.error(
-                "Une erreur est survenue lors de la vérification de la présence d'une demande AAQ",
-                error);
-              return;
-            });
-        }
-      }
-  */
-      if(this.$store.state.utilisateurCourant.profilId=="6" && this.formUser.role =="4") {
-        //if (!this.instructeurid) {
+      if(this.utilisateurCourant.profilId=="6" && this.formUser.role =="4") {
         if (!this.formUser.formateurid) {
-          this.erreurformulaire.push("Nom de l'instructeur obligatoire");
+          erreurformulaire.push("Nom de l'instructeur obligatoire");
           formOK = false;
         }
       }
       // Si on est Admin et que l'on change le profil de l'utilisateur pour le
       // passer en Instructeur AAQ, alors on oblige la saisie de la structure
       // de rattachement
-      if((this.formUser.role =="3" || this.formUser.role =="6") && (this.$store.state.utilisateurCourant.profilId=="1")) {
+      if(this.utilisateurCourant.profilId=="1" && (this.formUser.role =="3" || this.formUser.role =="6")) {
         if(!this.formUser.structurerefid) {
-          this.erreurformulaire.push("Structure de dépendance obligatoire");
+          erreurformulaire.push("Structure de dépendance obligatoire");
           formOK = false;        
         }
       }
-      // Le formulaire n'est pas valide, affiche les erreurs à corriger
-      // TODO : Evolution : Ne pas faire des toast, utiliser les v-validate
+      
       if (!formOK) {
-        log.d("Formulaire invalide KO ", this.erreurformulaire);
-        // Affichage de l'erreur formulaire
-        this.$toast.error(this.erreurformulaire)
-        return;
+        log.d("Formulaire invalide KO ", erreurformulaire);
+        return this.$toast.error(erreurformulaire)
+      } else {
+        return this.editUtilisateur()
       }
-      return this.editutilisateur()
-/*
-      return this.$store
-        .dispatch("put_user", this.formUser)
-        .then((message) => {
-          console.info(message);
-          this.$toast.success(
-            `Utilisateur ${this.formUser.prenom} ${this.formUser.nom} mis à jour`,
-            []
-          );
-          this.$store.dispatch("get_users");
-
-          this.$modal.hide("editUser");
-        })
-        .catch((error) => {
-          console.error(
-            "Une erreur est survenue lors de la mise à jour de l'utilisateur",
-            error
-          );
-        });
-        */
     },
-
-    editutilisateur() {
-      log.i('editUtilisateur - In')
-      // SI c'est un enregistrement en profil MN AAQ ALORS 
-      // On vérifie si c'est une structure de réféence et qu'elle passe le rôle à MNAAQ 
-      // qu'il y avait bien une demande pour cet utiliteur.
-      // Si oui alors on met à jour l'instrucateur dans la demande
-      //console.log('editUtilisateur - this.formUser.role',this.formUser.role)
+    editUtilisateur() {
+      log.i('editUtilisateur - In', { role: this.formUser.role, disabledInstructeur: this.disabledInstructeur })
       if(this.formUser.role === "4" && !this.disabledInstructeur) {
-        //console.log('editUtilisateur - this.$store.state.utilisateurCourant.profilId',this.$store.state.utilisateurCourant.profilId)
-        if(this.$store.state.utilisateurCourant.profilId=="6" || this.$store.state.utilisateurCourant.profilId=="3") {
+        if(this.utilisateurCourant.profilId=="6" || this.utilisateurCourant.profilId=="3") {
           const url = process.env.API_URL + "/demandeaaq?demandeurid=" + this.formUser.id
-          //console.log(url);
-          this.$axios
-            .$get(url)
-            .then( response => {
-              //console.log("Demande AAQ: ", response.demandesAaq)
-              if(response && response.demandesAaq) {
-                //console.log("Une demande en cours: " + response.demandesAaq.dem_id)
-                log.d("Une demande en cours: " + response.demandesAaq.dem_id)
-                var demandeaaq = response.demandesAaq[0]
-                const url = process.env.API_URL + '/demandeaaq/accord'
-
-                // Lorsque c'est une structure référente qui fait la modification, alors l'id du formateur est mis à jour
-                // Sinon le formateur avait été choisi par le Maitre Nageur lors de la demande
-                console.log ("utilisateurCourant.profilId : ", this.$store.state.utilisateurCourant.profilId)
-                if (this.$store.state.utilisateurCourant.profilId=="6") {
-                  //console.log('editUtilisateur - this.instructeurid',this.instructeurid)
-                  //demandeaaq['dem_uti_formateur_id'] = this.instructeurid
+          this.$axios.$get(url)
+            .then( ({ demandesAaq }) => {
+                log.d('editUtilisateur - response for demande', demandesAaq)
+                let demandeaaq = demandesAaq[0]
+                if(demandesAaq && this.utilisateurCourant.profilId=="6") {
+                  log.d('editUtilisateur - need to update demand for user')
+                  // Lorsque c'est une structure référente qui fait la modification, alors l'id du formateur est mis à jour
+                  // Sinon le formateur avait été choisi par le Maitre Nageur lors de la demande
                   demandeaaq['dem_uti_formateur_id'] = this.formUser.formateurid
+                  const url = process.env.API_URL + '/demandeaaq/accord'
+                  return this.$axios.$put(url, {demandeaaq})
                 }
-                //console.log ("url accord : ", url)
-                //console.log('::user.vue - In', {demandeaaq})
-                return this.$axios.$put(url, {demandeaaq})
-                  .then(async demandeaaq => {
-                    // Route pour les Maîtres nagueurs MN
-                    //this.$router.push('/interventions')
-                    log.d("Mise à jour de la demande AAQ")
-                  }).catch(error => {
-                    const err = error.response.data.message || error.message
-                    this.$toast.error(err)
-                    return
-                  })
-              }
-              else
-              {
-                //console.log("editUtilisateur - Aucune demande en cours")
-                log.d("Aucune demande en cours")
-              }
             })
             .catch(error => {
               log.d("Une erreur est survenue lors de la vérification de la présence d'une demande AAQ",error);
               return this.$toast.error("Une erreur est survenue lors de la vérification de la présence d'une demande AAQ")
-              return;
             });
         }
       }
@@ -469,7 +362,7 @@ export default {
     }, 
     rechercheinstructeurs() {
       log.i('rechercheinstructeurs - In')
-      if(this.$store.state.utilisateurCourant.profilId=="1" || this.$store.state.utilisateurCourant.profilId=="6") {
+      if(this.utilisateurCourant.profilId=="1" || this.utilisateurCourant.profilId=="6") {
         // Lance la recherche sur la liste des formateurs 
         const url = process.env.API_URL + "/user/liste/3"
         return this.$axios.$get(url)
@@ -499,23 +392,8 @@ export default {
     },  
     isProfilModifiable() {
       // Une fois passé en MN AAQ, l'instructeur ou la structure n'a plus possibilité de retiré l'information
-      return Boolean((this.$store.state.utilisateurCourant.profilId == "1" || this.$store.state.utilisateurCourant.profilId == "3" || this.$store.state.utilisateurCourant.profilId == "6") && this.formUser.role == "4");
+      return Boolean((this.utilisateurCourant.profilId == "1" || this.utilisateurCourant.profilId == "3" || this.utilisateurCourant.profilId == "6") && this.formUser.role == "4");
     },     
-  },
-  watch: {
-      cp() {
-        log.i('cp - saisie du CP')
-        this.formUser.cp = this.cp;
-        return this.rechercheCommune();
-      },
-      role() {
-        log.i('role - Changement de Profil')
-        this.formUser.role = this.role;
-        this.renseignerinstructeur();
-    }
-  },
-  computed: { 
-    ...mapState(["utilisateurCourant"]) 
   },
   async mounted() {
     log.i('mounted - In')
@@ -523,7 +401,6 @@ export default {
     if (this.formUser.role == 4) {
       this.disabledInstructeur = true
     }
-
     await this.rechercheinstructeurs();
     // Chargement de la liste des structures de référence
     await this.recherchestructureref() 
@@ -555,10 +432,6 @@ export default {
   bottom: 10px;
   right: 10px;
 }
-.interventionTitle {
-  color: #252195;
-}
-
 .hr {
   margin-top: 1rem;
   margin-bottom: 1rem;

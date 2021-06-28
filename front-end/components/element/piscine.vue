@@ -1,7 +1,7 @@
 <template>
   <b-container class="piscineModal p-5">
-    <b-col cols="12" class="text-center">
-      <h2 class="mb-3">Sélection d'une piscine</h2>
+    <b-col cols="12" class="text-center mb-3">
+      <h2>Sélection d'une piscine</h2>
     </b-col>
     <b-row>
       <b-col cols="12">
@@ -36,6 +36,8 @@
   </b-container>
 </template>
 <script>
+import logger from '~/plugins/logger'
+const log = logger('components:element:piscine')
 
 export default {
   props: {
@@ -65,15 +67,15 @@ export default {
   methods: {
     recherchepiscine: function () {
       if (this.cp.length === 5) {
-        console.info("Recherche de la piscine");
-        // Le code postal fait bien 5 caractères
+        log.i('recherchepiscine - In')
         const url = process.env.API_URL + "/piscine?codepostal=" + this.cp;
         return this.$axios.$get(url)
-          .then((response) => {
+          .then(response => {
+            log.i('recherchepiscine - Done')
             return this.listepiscine = response.piscines;
           })
-          .catch((error) => {
-            console.error("Une erreur est survenue lors de la récupération des piscines", error)
+          .catch(error => {
+            log.w('recherchepiscine - error', error)
             return this.$toast.error("Une erreur est survenue lors de la récupération des piscines")
           });
       } else {
@@ -83,19 +85,21 @@ export default {
       }
     },
     addPiscine: function () {
+      log.i('addPiscine - In')
       if (this.selectedPiscine) {
         return this.$store.dispatch("post_maPiscine", this.selectedPiscine)
-          .then(async (piscine) => {
+          .then(async piscine => {
+            log.i('addPiscine - Done', { piscine })
             await this.$store.dispatch("get_mesPiscines");
             await this.$store.dispatch("get_maPiscine",this.selectedPiscine.id);
-            this.$toast.success(`${this.selectedPiscine.nom} ajoutée aux piscines favorites`)
-            if (this.dansInt) {      
+            if (this.dansInt) {
               this.intervention.piscine = this.$store.state.maPiscine
             } 
             this.$modal.hide("editPiscine");
+            return this.$toast.success(`${this.selectedPiscine.nom} ajoutée aux piscines favorites`)
           })
           .catch((error) => {
-            console.error("Une erreur est survenue lors de l'ajout de la piscine", error)
+            log.w('addPiscine - Error', error)
             return this.$toast.error(`${this.selectedPiscine.nom} n'a pas pu être ajoutée aux piscines favorites`)
           });
       } else {

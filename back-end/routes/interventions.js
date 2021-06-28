@@ -26,7 +26,7 @@ router.get('/', async function (req, res) {
 
     const user = req.session.user
     const utilisateurId = user.uti_id
-    var whereClause = ""
+    let whereClause = ""
 
     if (user.rol_id == 3 || user.rol_id == 4) {
         whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
@@ -39,10 +39,10 @@ router.get('/', async function (req, res) {
     } else if (user.rol_id == 2) {
             whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
             LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
-             LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
-             LEFT JOIN structure str on str.str_id = int.str_id \
-             LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
-             where str.str_id=${user.structureId}`
+            LEFT JOIN piscine pis on int.pis_id = pis.pis_id \
+            LEFT JOIN structure str on str.str_id = int.str_id \
+            LEFT JOIN commune com on com.cpi_codeinsee = pis.cpi_codeinsee \
+            where str.str_id=${user.stu_id}`
     } else {
         whereClause += `LEFT JOIN uti_int ui ON ui.int_id = int.int_id  \
         LEFT JOIN utilisateur uti ON ui.uti_id = uti.uti_id \
@@ -87,7 +87,7 @@ router.get('/csv/:utilisateurId', async function (req, res) {
     log.i('::csv - In', { utilisateurId, stru })
 
     /* Pour un profil Admin, on exporte toutes les interventions */
-    var whereClause = ""
+    let whereClause = ""
     /* Pour un profil Intervenant on exporte que ces interventions */
     // Modification des profils.
     if (user.pro_id == 4 || user.pro_id == 3) {

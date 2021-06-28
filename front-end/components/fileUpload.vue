@@ -2,21 +2,17 @@
     <b-container>
       <b-row>
         <b-col cols="12">
-
           <h5>Ajouter un document: </h5> 
         </b-col>
       </b-row>
       <b-row>
         <b-col cols="5">
-            <b-form-group
-                label="Libellé:">
-
+            <b-form-group label="Libellé:">
                 <b-form-input type="text" v-model="libelle" />
             </b-form-group>
         </b-col>
         <b-col cols="5">
-            <b-form-group
-                label="Fichier:">
+            <b-form-group label="Fichier:">
               <b-form-file v-model="file" placeholder="Choisissez un fichier..." :browse-text="'Parcourir'"/>
             </b-form-group>
         </b-col>
@@ -34,60 +30,61 @@
               <b-button variant="danger" class="ml-3" @click="deleteFile(doc.doc_id)" size="sm"><i class="material-icons">delete</i></b-button>
             </li>
           </ul>
-          <div v-if="documents.length == 0">Aucun document disponible</div>
+          <div v-else>Aucun document disponible</div>
         </b-col>
       </b-row>
     </b-container>
-
-
 </template>
 <script>
 import { mapState } from 'vuex'
 
-export default {
-  props: {
+import logger from '~/plugins/logger'
+const log = logger('components:fileUpload')
 
-  },
-  computed: {
-    ...mapState(['documents'])
-  },
+export default {
   data() {
     return {
       file: null,
       libelle: ""
-
     };
+  },
+  computed: {
+    ...mapState(['documents'])
   },
   methods: {
     uploadFile: function() {
-      console.info( 'uploadFile' )
-      var formData = new FormData();
+      log.i('uploadFile - In')
+      let formData = new FormData()
       formData.append('file', this.file)
       formData.append('libelle', this.libelle)
-      return this.$axios.post(process.env.API_URL + '/documents', formData).then(res => {
-          console.log(res)
-          this.$store.dispatch('get_documents')
-      }).catch(err => {
-          console.log(err)
-      })
-      
+      return this.$axios.post(process.env.API_URL + '/documents', formData)
+        .then(res => {
+          log.i('uploadFile - Done')
+          return this.$store.dispatch('get_documents')
+        }).catch(error => {
+          log.w('uploadFile - error', error)
+          return this.$toast.error('Une erreur est survenue lors du dépot de votre document.')
+          })
     },
     deleteFile: function(id) {
-      console.info( 'deleteFile' )
-      return this.$axios.delete(process.env.API_URL + '/documents/' + id).then(res => {
-          console.log(res)
-          this.$store.dispatch('get_documents')
-      }).catch(err => {
-          console.log(err)
-      })
+      log.i('deleteFile - In')
+      return this.$axios.delete(process.env.API_URL + '/documents/' + id)
+        .then(res => {
+          log.i('deleteFile - Done', res)
+          return this.$store.dispatch('get_documents')
+        }).catch(err => {
+            log.w('deleteFile - error', error)
+            return this.$toast.error('Une erreur est survenue lors de la suppression du document.')
+        })
     },
     downloadDoc: function(doc) {
+      log.i('downloadDoc - In')
       this.$axios({
         url: process.env.API_URL + '/documents/'+doc.doc_id,
         method: 'GET',
         responseType: 'blob'
       }).then((response) => {
-          // https://gist.github.com/javilobo8/097c30a233786be52070986d8cdb1743
+          log.d('downloadDoc - Response from the server')
            // Crée un objet blob avec le contenue du CSV et un lien associé
           const url = window.URL.createObjectURL(new Blob([response.data]))
           // Crée un lien caché pour télécharger le fichier
@@ -98,10 +95,10 @@ export default {
           // Télécharge le fichier
           link.click()
           link.remove()
-          console.log('Done - Download', {fileName})
+          log.i('downloadDoc - Done')
       }).catch(err => {
-          console.log(JSON.stringify(err))
-          this.$toasted.error('Erreur lors du téléchargement: ' + err.message )
+          log.w('deleteFile - error', error)
+          return this.$toast.error('Une erreur est survenue lors du téléchargement du document.')
       })
     },
   },
@@ -110,9 +107,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.custom-file-input ~ .custom-file-label::after {
-  content: 'Parcourir';
-}
-</style>

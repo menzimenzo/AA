@@ -74,11 +74,7 @@ export default {
             }
           })
           .catch((error) => {
-            this.$toast.error(`L\'enfant ${this.idEnfant} n\'a pu être trouvé`);
-            console.error(
-              "Une erreur est survenue lors de la récupération des données de l'enfant",
-              error
-            );
+            return this.$toast.error(`L\'enfant ${this.idEnfant} n\'a pu être trouvé`);
           });
       }
     },
@@ -94,8 +90,5 @@ export default {
   position: absolute;
   bottom: 10px;
   right: 10px;
-}
-.interventionTitle {
-  color: #252195;
 }
 </style>
