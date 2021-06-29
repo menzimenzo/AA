@@ -8,9 +8,9 @@
         <b-row >
           <p class="aa-bouton-connexion"  @click="SeLoguer(1)">▷ Je suis maître nageur<sup>(1)</sup><br>Je m’identifie et renseigne mes données<br><br></p>
         </b-row>
-        <b-row >
+        <!--<b-row >
           <p class="aa-bouton-connexion" @click="SeLoguer(2)">▷ J'appartiens à une structure actrice du dispositif AAQ<br><br></p>
-        </b-row>
+        </b-row>-->
       </b-col>
     </b-row>
     <div v-if="connexionType">
