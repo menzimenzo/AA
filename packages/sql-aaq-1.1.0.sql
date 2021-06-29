@@ -209,9 +209,47 @@ BEGIN
       /*==============================================================*/
       /* Table : MAJ INTERVENTION                                     */
       /*==============================================================*/
-      alter table INTERVENTION ADD COLUMN INT_ISSUBVENTIONNEE BOOLEAN not null ;
+      ALTER TABLE INTERVENTION DROP COLUMN UTI_ID;
+      ALTER TABLE INTERVENTION DROP COLUMN INT_DATEINTERVENTION;
+      ALTER TABLE INTERVENTION DROP COLUMN INT_DATECREATION;
+      ALTER TABLE INTERVENTION DROP COLUMN INT_DATEMAJ;
+      ALTER TABLE INTERVENTION DROP COLUMN INT_COMMENTAIRE;
+
+      ALTER TABLE INTERVENTION ADD COLUMN INT_DATEDEBUTINTERVENTION DATE            not null;
+      ALTER TABLE INTERVENTION ADD COLUMN INT_DATEFININTERVENTION DATE              not null;
+      ALTER TABLE INTERVENTION ADD COLUMN INT_NBSESSION        BIGINT               not null;
+      ALTER TABLE INTERVENTION ADD COLUMN INT_CAI              BIGINT               not null;
+      ALTER TABLE INTERVENTION ADD COLUMN INT_AGE              BIGINT               null;
+      ALTER TABLE INTERVENTION ADD COLUMN INT_DATECREATION     timestamp            not null;
+      ALTER TABLE INTERVENTION ADD COLUMN INT_DATEMAJ          timestamp            null;
+      ALTER TABLE INTERVENTION ADD COLUMN INT_COMMENTAIRE      TEXT                 null;
+      ALTER TABLE INTERVENTION ADD COLUMN INT_ISSUBVENTIONNEE BOOLEAN not null ;
+
+      /*==============================================================*/
+      /* Table : UTI_INT */
+      /*==============================================================*/
+      create table UTI_INT (
+         INT_ID SERIAL not null,
+         UTI_ID BIGINT not null
+      );
+
+      /*==============================================================*/
+      /* Table : MAJ INT_ENF */
+      /*==============================================================*/
+      ALTER TABLE INT_ENF ADD COLUMN  NIV_INI BIGINT null;
+      ALTER TABLE INT_ENF ADD COLUMN  NIV_FIN BIGINT null;
 
 
+      alter table UTI_INT
+      add constraint FK_INTERVEN_REFERENCE_UTILISAT foreign key (UTI_ID)
+      references UTILISATEUR (UTI_ID)
+      on delete restrict on update restrict;
+
+      alter table UTI_INT
+      add constraint FK_INTERVEN_REFERENCE_INTERVENTION foreign key (INT_ID)
+      references INTERVENTION (INT_ID)
+      on delete CASCADE;
+      
       -- Déploiement du Schéma effectué
       call AAQ_VersionDeployee('1.1.0','schema');
 		raise notice '%','Mise à jour du schéma effectué';

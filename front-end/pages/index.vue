@@ -49,6 +49,7 @@
             
         </b-col>
       </b-row>
+      <!-- DOUBLON
       <div v-if="fc">
         <b-row class="text-center">
           <b-col cols="12">
@@ -67,6 +68,7 @@
           </b-col>
         </b-row>
       </div>
+      -->
     </div>
     <!-- DOUBLON
     <b-row class="text-center" >
