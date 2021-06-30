@@ -34,10 +34,10 @@ router.get('/', function (req, res) {
     FROM demande_aaq dem \
     LEFT JOIN utilisateur AS uti ON uti.uti_id = dem.dem_uti_formateur_id \
     LEFT JOIN structure_ref as sre on sre.sre_id = dem.dem_sre_id \         
-    where ${whereClause}${id}`
+    WHERE ${whereClause}${id}`
 
     log.i('::list - requête', { requete })    
-    pgPool.query(requete,(err, result) => {
+    return pgPool.query(requete,(err, result) => {
         if (err) {
             log.w('::list - error', err)
             return res.status(400).json({ message: 'erreur sur la requete de recherche demande aaq' });
@@ -61,26 +61,24 @@ router.post('/', function (req, res) {
     const datecreation = now.getFullYear() + "-" + eval(now.getMonth() + 1) + "-" + now.getDate()
     const requete = `INSERT INTO demande_aaq (dem_uti_demandeur_id,dem_uti_formateur_id,dem_sre_id,dem_tockendemandeaccord,dem_tockendemanderefus,dem_datedemande,dem_dms_id) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`;
     log.d('::post - requete', { requete });
-    pgPool.query(requete, [demandeurId, formateurId, structurerefid, tockendemandeaccord, tockendemanderefus, datecreation, 1 ], 
+    return pgPool.query(requete, [demandeurId, formateurId, structurerefid, tockendemandeaccord, tockendemanderefus, datecreation, 1 ], 
         (err, result) => {  
             if (err) {
                 log.w('::post - Erreur lors de la requête.', err.stack);
-                return res.status(400).json('erreur lors de la sauvegarde de la la demande au formateur');
+                return res.status(400).json({message: 'erreur lors de la sauvegarde de la la demande au formateur'});
             }
             else {
-                log.d("result.rows : " + result.rows)
                 log.i('::post - Done', result);
                 const demandeclient =  formatDemandeAAQ( result.rows[0])
                 var nomInstructeur
                 var courrielInstructeur
                 if (formateurId) {
-                    const requete = `select uti_mail,uti_prenom from utilisateur where uti_id = ${formateurId}`
-
-                    log.d(requete)
+                    log.d('::post - get formateur')
+                    const requete = `SELECT uti_mail,uti_prenom FROM utilisateur WHERE uti_id = ${formateurId}`
                     // Recherche de l'instructuer demandé pour la demande aaq
                     pgPool.query(requete,(err, result) => {
                         if (err) {
-                            console.log(err);
+                            log.w('::post - Erreur sur le get du formateur', err)
                             return res.status(400).json({ message: 'erreur sur la requete de recherche du mail du formateur' });
                         }
                         else 
@@ -92,12 +90,12 @@ router.post('/', function (req, res) {
                     })
                 }
                 if (structurerefid) {
-                    const requete = `select sre_courriel from structure_ref where sre_id = ${structurerefid}`
-                    log.d(requete)
+                    log.d('::post - get Structureref')
+                    const requete = `SELECT sre_courriel FROM structure_ref WHERE sre_id = ${structurerefid}`
                     // Recherche de la structure de référence demandé pour la demande aaq
                     pgPool.query(requete,(err, result) => {
                         if (err) {
-                            console.log(err);
+                            log.w('::post - Erreur sur le get de la structure de référence', err)
                             return res.status(400).json({ message: 'erreur sur la requete de recherche du mail du formateur' });
                         }
                         else 
@@ -108,6 +106,7 @@ router.post('/', function (req, res) {
                         }
                     })
                 }
+                log.d('::post - sending mail', { courrielInstructeur })
                 sendEmail({
                     to: courrielInstructeur,
                     subject: 'Demande de compte Aisance Aquatique',
@@ -116,13 +115,14 @@ router.post('/', function (req, res) {
                         Nous vous invitons à vous rendre sur le site « Aisance Aquatique » pour changer le profil du demandeur.<br/>
                         Rappel du site <a href="${config.franceConnect.FS_URL}">SI Aisance Aquatique.<br/></p>`
                     })
-                    
+                log.i(':: post - Done')    
                 return res.status(200).json({ maDemande: demandeclient });
             }
         })
 })
 
 router.post('/delete/', async function (req, res) {
+    log.i('::delete - In')
     const maDemande = req.body.demandeaaq
     const requete = `DELETE FROM  demandeaaq 
             WHERE dem_id = $1 
@@ -132,7 +132,7 @@ router.post('/delete/', async function (req, res) {
     pgPool.query(requete, [maDemande.dem_id], (err, result) => {
         if (err) {
             log.w('::delete - Erreur survenue lors de la suppression de la demande.', { requete, err: err.stack })
-            return res.status(400).json('erreur lors de la suppression de la demande AAQ ' + id);
+            return res.status(400).json({message: 'erreur lors de la suppression de la demande AAQ ' + id});
         }
         else {
             log.i('::delete - Done')
@@ -155,9 +155,7 @@ router.put('/accord', async (req,res) => {
     var nomDemandeur = null
     var prenomDemandeur = null
     var mailDemandeur = null
-
     log.i('::accords - In', {demandeaaq , formateurid})
-
 
     if (structurerefid) {
         // Si la demande est confirmée, on envoie un mail à l'instructeur si cela a été validé par la structure de référence
@@ -168,13 +166,12 @@ router.put('/accord', async (req,res) => {
             throw erruser
         })
         // Trouvé, on envoie le mail à l'instructeur
-        log.i('::accords - Nb utilisateur trouvé : ', userQuery.rowCount)
-        log.i('::accords - userQuery: ', {userQuery})
+        log.d('::accords - Nb utilisateur trouvé : ', userQuery.rowCount)
         if(userQuery.rowCount == "1") {
             envoyerMailInstructeur = true
             nomInstructeur = userQuery.rows[0].uti_prenom
             mailInstructeur = userQuery.rows[0].uti_mail
-            log.i('::accords - envoyerMailInstructeur : ', envoyerMailInstructeur)
+            log.d('::accords - envoyerMailInstructeur : ', envoyerMailInstructeur)
         }
     }
 
@@ -186,8 +183,7 @@ router.put('/accord', async (req,res) => {
         throw errdemandeur
     })
     // Trouvé, on envoie le mail à l'instructeur
-    log.i('::accords - Nb utilisateur trouvé : ', userDemQuery.rowCount)
-    log.i('::accords - userQuery: ', {userDemQuery})
+    log.d('::accords - Nb utilisateur trouvé : ', userDemQuery.rowCount)
     if(userDemQuery.rowCount == "1") {
         nomDemandeur = userDemQuery.rows[0].uti_prenom
         prenomDemandeur = userDemQuery.rows[0].uti_prenom
@@ -213,7 +209,6 @@ router.put('/accord', async (req,res) => {
 
     if (envoyerMailInstructeur) {
         log.i('::accords - Envoie du mail à  : ', nomInstructeur)
-
         sendEmail({
             to: mailInstructeur,
             subject: 'Aisance Aquatique : Validation par votre structure',
@@ -222,8 +217,6 @@ router.put('/accord', async (req,res) => {
                 Le profil « Maître Nageur Aisance Aquatique » lui a été attribué. Un courriel a été envoyé à l'intéressé.<br/><br/>
                 Ce mail vous a été envoyé automatiquement à partir du site  <a href="${config.franceConnect.FS_URL}">SI Aisance Aquatique.<br/></p>`
             })
-        log.i('::accords - Mail envoyé  : ')
-
     }        
     return res.send(updatedDemandeaaq)
 })
@@ -249,7 +242,7 @@ router.put('/refus/:id', async function (req, res) {
     pgPool.query(requete, [id], (err, result) => {
             if (err) {
                 log.w('::update pour refus - erreur lors de la sauvegarde accord demande_aqq', { requete, erreur: err.stack })
-                return res.status(400).json('erreur lors de la sauvegarde de  accord demande_aqq');
+                return res.status(400).json({message: 'erreur lors de la sauvegarde de  accord demande_aqq'});
             }
             else {
                 log.i('::update pour refus - Done')
@@ -262,7 +255,7 @@ router.get('/accord/:tockenaccord/demande/:id', async function(req, res) {
     const id = req.params.id
     log.i('::enable-mail with tockenaccord - In', { id })
     if(!id) {
-        return res.status(400).json('Aucun ID fournit pour  identifier l\'utilisateur.');
+        return res.status(400).json({message: 'Aucun ID fournit pour  identifier l\'utilisateur.'});
     }
 
     const userQuery = await pgPool.query(`SELECT * FROM utilisateur WHERE uti_id='${id}'`).catch(err => {
@@ -284,7 +277,7 @@ router.get('/accord/:tockenaccord/demande/:id', async function(req, res) {
     return pgPool.query(requete,[true, id], (err, result) => {
         if (err) {
             log.w('::enable-mail with tockenaccord - erreur lors de l\'update', {requete, erreur: err.stack});
-            return res.status(400).json('erreur lors de la sauvegarde de l\'utilisateur');
+            return res.status(400).json({message: 'erreur lors de la sauvegarde de l\'utilisateur'});
         }
         else {
             log.i('::enable-mail with tockenaccord - Done, pwd has been validated.')

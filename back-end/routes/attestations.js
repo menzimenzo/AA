@@ -101,7 +101,7 @@ router.get('/pdf/:id', async function (req, res) {
             if (err) {
                 console.log(err.stack);
                 client.end();
-                return res.status(400).json('erreur lors de l\'insertion du document');
+                return res.status(400).json({message: 'erreur lors de l\'insertion du document'});
             }
             else {
                 client.end();
@@ -135,7 +135,7 @@ res.json({ message: 'Le document a été uploadé'});
             if (err) {
                 console.log(err.stack);
                 client.end();
-                return res.status(400).json('erreur lors de la récupération de l\'intervention');
+                return res.status(400).json({message: 'erreur lors de la récupération de l\'intervention'});
             }
             else {
                 client.end();
@@ -175,11 +175,11 @@ router.post('/', function (req, res) {
     pgPool.query(requete, (err, result) => {
         if (err) {
             log.w(err.stack)
-            return res.status(400).json('erreur lors de la sauvegarde de l\'intervention')
+            return res.status(400).json({message: 'erreur lors de la sauvegarde de l\'intervention'})
         }
         else {
             log.i('::post - Done')
-            return res.status(200).json('OK')
+            return res.status(200).json({message: 'OK'})
         }
     })
 })

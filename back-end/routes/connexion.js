@@ -1,8 +1,6 @@
 const express = require('express');
 const crypto = require('crypto');
 const router = express.Router();
-var moment = require('moment');
-moment().format();
 
 const logger = require('../utils/logger')
 const log = logger(module.filename)
@@ -103,7 +101,7 @@ router.post('/verify', async (req,res) => {
     const bddUserRes = await pgPool.query("UPDATE utilisateur SET  uti_mail = lower($1), uti_nom = $2, uti_prenom = $3, uti_validated = true, \
     uti_eaps = $4, uti_publicontact = $5, uti_mailcontact = lower($7), uti_sitewebcontact = $8, uti_adrcontact = $9, uti_compadrcontact = $10, uti_telephonecontact = $11,  uti_com_codeinseecontact = $12, uti_com_cp_contact = $13 WHERE uti_id = $6 RETURNING *", 
     [user.uti_mail, user.uti_nom, user.uti_prenom, user.uti_eaps,Boolean(user.uti_publicontact), user.uti_id, user.uti_mailcontact,user.uti_sitewebcontact,user.uti_adrcontact, user.uti_compadrcontact,user.uti_telephonecontact , user.uti_com_codeinseecontact, user.uti_com_cp_contact]).catch(err => {
-        console.log(err)
+        log.w(':: verify - error on update user', err)
         throw err
     })
     
@@ -272,7 +270,7 @@ router.put('/edit-mon-compte/:id', async function (req, res) {
     log.i('::edit-mon-compte - In', { id, profil })
 
     if(!id) {
-        return res.status(400).json('Aucun ID fournit pour  identifier l\'utilisateur.');
+        return res.status(400).json({message: 'Aucun ID fournit pour  identifier l\'utilisateur.'});
     }
     const requete = `UPDATE utilisateur SET  
                     uti_mail = lower($1), 
@@ -296,7 +294,7 @@ router.put('/edit-mon-compte/:id', async function (req, res) {
     pgPool.query(requete,[profil.mail, profil.nom, profil.prenom, profil.eaps,Boolean(profil.publicontact), profil.id, profil.mailcontact,profil.sitewebcontact,profil.adrcontact, profil.compadrcontact,profil.telephonecontact , profil.cpi_codeinsee, profil.cp], (err, result) => {
         if (err) {
             log.w('::edit-mon-compte - erreur lors de l\'update', {requete, erreur: err.stack});
-            return res.status(400).json('erreur lors de la sauvegarde de l\'utilisateur');
+            return res.status(400).json({message: 'erreur lors de la sauvegarde de l\'utilisateur'});
         }
         else {
             log.i('::edit-mon-compte - Done')
@@ -313,7 +311,7 @@ router.get('/enable-mail/:pwd/user/:id', async function(req, res) {
     const { id, pwd } = req.params
     log.i('::enable-mail - In', { id })
     if(!id) {
-        return res.status(400).json('Aucun ID fournit pour  identifier l\'utilisateur.');
+        return res.status(400).json({ message: 'Aucun ID fournit pour  identifier l\'utilisateur.'});
     }
 
     const userQuery = await pgPool.query(`SELECT * FROM utilisateur WHERE uti_id='${id}'`).catch(err => {
@@ -336,7 +334,7 @@ router.get('/enable-mail/:pwd/user/:id', async function(req, res) {
         pgPool.query(requete,[true, id], (err, result) => {
             if (err) {
                 log.w('::enable-mail - erreur lors de l\'update', {requete, erreur: err.stack});
-                return res.status(400).json('erreur lors de la sauvegarde de l\'utilisateur');
+                return res.status(400).json({message: 'erreur lors de la sauvegarde de l\'utilisateur'});
             }
             else {
                 log.i('::enable-mail - Done, pwd has been validated.')
@@ -348,7 +346,7 @@ router.get('/enable-mail/:pwd/user/:id', async function(req, res) {
         })
     } else {
         log.w('::enable-mail - erreur concernant le user à valider.')
-        return res.status(400).json('L\'utilisateur a déjà validé son mot de passe ou le mot de passe fournit est incorrecte.');
+        return res.status(400).json({message: 'L\'utilisateur a déjà validé son mot de passe ou le mot de passe fournit est incorrecte.'});
     }    
 })
 
@@ -366,7 +364,7 @@ router.post('/forgot-password/:mail', async function(req, res) {
             log.i('::forgot-password - Done', encryption)
             return sendResetPasswordMail(encryption)
                 .then(() => {
-                    return res.status(200).json('ok')
+                    return res.status(200).json({message: 'ok'})
                 })
         }).catch(error => {
             log.w('::forgot-password - erreur', error)
@@ -402,11 +400,11 @@ router.post('/reset-password', async function(req, res) {
     return pgPool.query(updateRequete,[ newPwd, user.uti_id],(err) => {
         if (err) {
             log.w('::reset-password - erreur lors de l\'update', {erreur: err.stack});
-            return res.status(400).json('erreur lors de la sauvegarde du nouveau mot de passe.');
+            return res.status(400).json({message: 'erreur lors de la sauvegarde du nouveau mot de passe.'});
         }
         else {
             log.i('::reset-password - Done, nouveau mot de passe enregistré.')
-            return res.status(200).json('ok');
+            return res.status(200).json({message: 'ok'});
         }
     })
 })

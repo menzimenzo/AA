@@ -22,7 +22,7 @@ module.exports = async function(req, res) {
     pgPool.query(requete, (err, result) => {
         if (err) { 
             log.w(err.stack);
-            return res.status(400).json('erreur lors de la récupération de l\'utilisateur');
+            return res.status(400).json({message: 'erreur lors de la récupération de l\'utilisateur'});
         }
         else {
             log.d('Getting user')
@@ -43,17 +43,15 @@ module.exports = async function(req, res) {
                 // cas du partenaire, on ajoute en session la structureId 
                 if (user.rol_id == 2) {
                     const structure = `SELECT str_id FROM uti_str WHERE uti_id=${user.uti_id}`;
-                    console.log(structure)
                     pgPool.query(structure, (err, result) => {
                         if (err) { 
                             log.w(err.stack);
-                            return res.status(400).json('erreur lors de la récupération de l\'utilisateur');
+                            return res.status(400).json({message: 'erreur lors de la récupération de l\'utilisateur'});
                         }
                         else {
                             log.d('Getting structure')
                             const str = result.rowCount === 1 && result.rows[0].str_id
                             user.structureId = str
-                            console.log(user)
                         }
                     })
                 }
@@ -61,7 +59,7 @@ module.exports = async function(req, res) {
                 req.accessToken = crypted;
                 req.session.accessToken = crypted;
                 log.i('Done', { user })            
-                    return res.json({ user: formatUtilisateur(user) });
+                return res.json({ user: formatUtilisateur(user) });
                 
             } else {
                 return res.status(404).json({ message: 'Mail ou mot de passe incorrect' });

@@ -72,7 +72,7 @@ router.post('/', upload.single("file"), (req, res) => {
     return pgPool.query(requete, [file.mimetype, file.originalname, libelle, file.buffer], (err, result) => {
         if (err) {
             log.w('::post - Erreur',{ requete, erreur: err.stack});
-            return res.status(400).json('erreur lors de la sauvegarde du fichier');
+            return res.status(400).json({ message: 'erreur lors de la sauvegarde du fichier'});
         }
         else {
             log.i('::post - Done', { rows: result.rows })

@@ -49,7 +49,7 @@ router.get('/liste/', async function (req, res) {
     pgPool.query(requete, (err, result) => {
         if (err) {
             log.w('::list - erreur lors de la récupération des structures référentes.',err.stack);
-            return res.status(400).json('erreur lors de la récupération des structures référentes actives');
+            return res.status(400).json({message: 'erreur lors de la récupération des structures référentes actives'});
         }
         else {
             log.i('::list - Done')

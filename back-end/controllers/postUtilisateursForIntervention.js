@@ -1,25 +1,29 @@
 const pgPool = require('../pgpool').getPool()
-//const { formatUtilisateur } = require('../utils/utils')
 
 const logger = require('../utils/logger')
 const log = logger(module.filename)
 
 module.exports = async (req, res) => {
-    const user = req[0]
-    const id = req[1]
+    const users = req[0]
+    const InterventionId = req[1]
+    log.i('::post - In', { users, InterventionId })
 
-    var insert =  async us => {
-        const insertUs = `insert into uti_int(uti_id,int_id) values ($1,${id}) returning *`
-        await pgPool.query(insertUs, [us.id])
-        .then(res => {
-            log.d('::post - insert Utilisateur - int N°' + id + ' dans uti_int pour ' + us.id + ' Done');
-            console.log(res.rows[0])
-        }) 
-        .catch(err => console.error('Error executing query', err.stack))
-        
+    const insertion =  async user => {
+        await pgPool.query('INSERT INTO uti_int(uti_id,int_id) VALUES ($1, $2) returning *', [user.id, InterventionId])
+            .then(res => {
+                log.d('::post - insert Utilisateur - int N°' + InterventionId + ' dans uti_int pour ' + user.id + ' Done');
+            }) 
+            .catch(err => {
+                log.w(`::post - erreur sur l\'instertion du user ${user.id} pour l'intervention ${InterventionId}` )
+                return err
+            })   
     }
-    var actions = user.map(insert)
+
+    const actions = users.map(insertion)
     await Promise.all(actions)
-    .then(() => {console.log('fin insertion users')})
-    .catch(err => console.error('Error executing query', err.stack))
+        .then(() => log.i('::post - Done'))
+        .catch(err => {
+            log.w('::post - erreur sur la query finale' )
+            throw err
+        })
 }

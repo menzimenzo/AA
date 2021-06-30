@@ -65,13 +65,13 @@ router.get('/', async function (req, res) {
                 intervention.enfant = values[1];
             }).catch(error => {
                 log.w('::list - error on getting enfants and utilisateurs', error)
-                return res.status(400).json('Une erreur est survenue lors de la récupérations des enfants et des utilisateurs pour la liste des interventions.')
+                return res.status(400).json({message: 'Une erreur est survenue lors de la récupérations des enfants et des utilisateurs pour la liste des interventions.'})
             })
         })
         log.i('::list - Done')
         return res.status(200).json({ interventions })
     } else {
-        return res.status(200).json('Aucune intervention trouvée.')
+        return res.status(200).json({message: 'Aucune intervention trouvée.'})
     }
 })
 
@@ -108,7 +108,7 @@ router.get('/csv/:utilisateurId', async function (req, res) {
     return pgPool.query(requete, (err, result) => {
         if (err) {
             log.w('::csv - erreur lors de la requête.', err.stack);
-            return res.status(400).json('erreur lors de la récupération de l\'intervention');
+            return res.status(400).json({message: 'erreur lors de la récupération de l\'intervention'});
         }
         else {
             let interventions = result.rows;
@@ -179,7 +179,7 @@ router.put('/:id', async function (req, res) {
         int_nbsession = $6,
         int_cai =$7,
         int_age = $8,
-        itn_isSubventionnee = $9,
+        int_isSubventionnee = $9,
         int_datemaj = now()
         WHERE int_id = ${id}
         RETURNING *;`
@@ -197,7 +197,7 @@ router.put('/:id', async function (req, res) {
     ], (err, result) => {
         if (err) {
             log.w('::update - erreur lors de la sauvegarde', { requete, erreur: err.stack })
-            return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
+            return res.status(400).json({message: 'erreur lors de la sauvegarde de l\'intervention'});
         }
         else {
             log.i('::update - Done')
@@ -216,7 +216,7 @@ router.put('/:id', async function (req, res) {
                 })
             }).catch( error => {
                 log.w('::update - erreur lors de la mise à jour des utilisateurs ou des enfants pour une intervention.', error)
-                return res.status(400).json('Erreur lors de la mise à jour des utilisateurs ou des enfants pour une intervention')
+                return res.status(400).json({message: 'Erreur lors de la mise à jour des utilisateurs ou des enfants pour une intervention'})
             })
         }
     })
@@ -244,7 +244,7 @@ router.post('/', function (req, res) {
     intervention.isSubventionnee], (err, result) => {
         if (err) {
             log.w('::post - erreur lors de l\'insertion dans la table des interventions', { requete, erreur: err.stack })
-            return res.status(400).json('erreur lors de la sauvegarde de l\'intervention');
+            return res.status(400).json({ message: 'Erreur lors de la sauvegarde de l\'intervention'});
         }
         else {
             log.d('::post - insert dans intervention Done');
@@ -259,8 +259,8 @@ router.post('/', function (req, res) {
                 log.i('::post - Done')
                 return res.status(200).json({ intervention: inter[0] })
             }).catch( error => {
-                log.w('::post - erreur lors des suppresions des utilisateurs ou des enfants pour une intervention.', error)
-                return res.status(400).json('Erreur lors des ajouts des utilisateurs ou des enfants pour votre intervention')
+                log.w('::post - erreur lors des ajouts des utilisateurs ou des enfants pour une intervention.', error)
+                return res.status(400).json({ message: 'Erreur lors des ajouts des utilisateurs ou des enfants pour votre intervention'})
             })
         }
     })
@@ -275,12 +275,12 @@ router.get('/delete/:id', async function (req, res) {
     return pgPool.query(requete, [id], (err, result) => {
         if (err) {
             log.w('::delete - Erreur survenue lors de la suppression.', { requete, err: err.stack })
-            return res.status(400).json('erreur lors de la suppression de l\'intervention ' + id);
+            return res.status(400).json({message: 'erreur lors de la suppression de l\'intervention ' + id});
         }
         else {
             log.i('::delete - Done')
             // Suppression effectuée avec succès
-            return res.status(200).json('Intervention supprimée avec succès.');
+            return res.status(200).json({message: 'Intervention supprimée avec succès.'});
         }
     })
 })

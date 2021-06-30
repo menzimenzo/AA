@@ -1,19 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const pgPool = require('../pgpool').getPool();
 const axios = require('axios');
-var moment = require('moment');
-const { response } = require('express');
-moment().format();
 
-
+const logger = require('../utils/logger');
+const log = logger(module.filename)
 
 router.get('/uai/:id', async function (req, res) {
   const uai = req.params.id
-  console.log('recherche UAI :' + uai)
+  log.i('::get - uai - In', uai)
   try {
     // Request access token.
-    const reponse = await axios.get('https://data.education.gouv.fr/api/records/1.0/search/?dataset=fr-en-adresse-et-geolocalisation-etablissements-premier-et-second-degre&q=(etat_etablissement_libe:"OUVERT" AND numero_uai:' + uai + ')');
+    const reponse = await axios.get('https://data.education.gouv.fr/api/records/1.0/search/?dataset=fr-en-adresse-et-geolocalisation-etablissements-premier-et-second-degre&q=(etat_etablissement_libe:"OUVERT" AND numero_uai:' + uai + ')')
     if (reponse) {
       const etablissement = reponse.data.records[0].fields
       const nom = etablissement.appellation_officielle
@@ -34,26 +31,25 @@ router.get('/uai/:id', async function (req, res) {
         cp: cp,
         commune: commune
       }
+      log.i('::get - uai - Done')
       return res.status(200).json({ ecole: ecole })
     }
   }
   catch (error) {
-    console.log(error)
+    log.w('::get - uai - Error', error)
+    return res.status(400).json({ message: 'Une erreur est survenue lors de la récupération des écoles.' })
   }
 })
 
 router.get('/cp/:id', async function (req, res) {
-
   const cp = req.params.id
-  console.log('recherche Ecole par CP :' + cp)
+  log.i('::get - cp - In', cp)
   try {
     // Request access token.
     const reponse = await axios.get('https://data.education.gouv.fr/api/records/1.0/search/?dataset=fr-en-adresse-et-geolocalisation-etablissements-premier-et-second-degre&q=(code_postal_uai:' + cp + ' AND nature_uai=151 AND etat_etablissement_libe:"OUVERT")&rows=100');
     const etablissements = reponse.data.records
-    //console.log(etablissements)
     let etablissementsFormate = []
     etablissements.forEach(element => {
-      //console.log(element.fields)
       const nom = element.fields.appellation_officielle
       const uai_retour = element.fields.numero_uai
       const adresse = element.fields.adresse_uai
@@ -74,11 +70,12 @@ router.get('/cp/:id', async function (req, res) {
       }
       etablissementsFormate.push(ecole)
     });
-    //console.log(etablissementsFormate)
+    log.i('::get - cp - Done')
     return res.status(200).json({ etablissements: etablissementsFormate })
   }
   catch (error) {
-    console.log(error)
+    log.w('::get - cp - Error', error)
+    return res.status(400).json({ message: 'Une erreur est survenue lors de la récupération des écoles.' })
   }
 })
 

@@ -14,7 +14,7 @@
             </b-col>
             <b-col cols="4">
                 <div class="statCard">
-                    <p>instructeurs AAQ: {{ totalInstAaq }}</p>
+                    <p>Instructeurs AAQ: {{ totalInstAaq }}</p>
                 </div>
             </b-col>
         </b-row>

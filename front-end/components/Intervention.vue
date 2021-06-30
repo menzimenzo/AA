@@ -702,9 +702,7 @@ export default {
               class: "toastLink",
             });
           }
-          var interventionLabel = serverIntervention && serverIntervention.id
-            ? "#" + serverIntervention.id
-            : "";
+          const interventionLabel = serverIntervention && serverIntervention.id ? "#" + serverIntervention.id : ""
           log.i("checkForm - Done");
           this.$toast.success(`Intervention ${interventionLabel} enregistrée`);
           if (!this.formIntervention.id) {
@@ -712,13 +710,7 @@ export default {
           }
         })
         .catch((error) => {
-          log.w(
-            "Une erreur est survenue lors de la sauvegarde de l'intervention",
-            error
-          );
-          this.$toast.error(
-            `Erreur lors de la sauvegarde de l'intervention ${interventionLabel}`
-          );
+          log.w("Une erreur est survenue lors de la sauvegarde de l'intervention", error)
         });
     },
   },

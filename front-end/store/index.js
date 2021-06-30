@@ -147,7 +147,10 @@ export const actions = {
       return intervention
     })
     .catch(error => {
-      log.w("actions::post_intervention - erreur", error);
+      log.w("actions::post_intervention - erreur", error)
+      const message = parseErrorMessage(get(error, 'response.data.message')) || error.message
+      this.$toast.error(message)
+      throw new Error(message)
     })
   },
   put_intervention({ commit, state }, intervention) {
@@ -159,7 +162,10 @@ export const actions = {
       return intervention
     })
     .catch(error => {
-      log.w("actions::put_intervention - erreur", error);
+      log.w("actions::put_intervention - erreur", error)
+      const message = parseErrorMessage(get(error, 'response.data.message')) || error.message
+      this.$toast.error(message)
+      throw new Error(message)
     })
   },
   get_mesPiscines({ commit, state }) {

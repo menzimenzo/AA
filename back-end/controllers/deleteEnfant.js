@@ -15,7 +15,7 @@ module.exports = async function (req, res) {
 
     const titi = await pgPool.query(requete, [id, enfant]).catch(err => {
         log.w('::put - Erreur survenue lors de la supression de l\'enfant.', { requete, err: err.stack })
-        return res.status(400).json('erreur lors de la suppression de l\'enfant' + enfant.enf_id);
+        return res.status(400).json({ message: 'erreur lors de la suppression de l\'enfant' + enfant.enf_id });
     })
     if (titi) {
         log.i('::delete - mise à jour table enfant - Done')

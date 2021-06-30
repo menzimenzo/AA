@@ -15,7 +15,6 @@ const log = logger(module.filename)
 router.get('/', async function (req, res) {
     log.i('::export - In')
 
-    //var startTime = new Date();
     var requete = "";
 
     log.d('::export - Recherche des données : ' + requete);
@@ -32,15 +31,13 @@ router.get('/', async function (req, res) {
     pgPool.query(requete, (err, result) => {
         if (err) {
             log.w('::csvopendatasoft - Erreur lors de la requête.', { requete, erreur: err.stack});
-            //logTrace('aaq-csvods',1,startTime);
-            return res.status(400).json('erreur lors de la récupération des utilisateurs');
+            return res.status(400).json({message: 'erreur lors de la récupération des utilisateurs'});
         }
         else {
             const csv = result.rows;
             log.d(csv)
             if (!csv || !csv.length) {
                 log.w('::csvopendatasoft - Résultat vide.')
-                //logTrace('aaq-csvods',2,startTime);
                 return res.status(400).json({ message: 'Aucun résultat renvoyé par la requête' });
             }
             stringify(csv, {
@@ -50,7 +47,6 @@ router.get('/', async function (req, res) {
             }, (err, csvContent) => {
                 if(err){
                     log.w('::csv - erreur',err)
-                    //logTrace('aaq-csvods',3,startTime);
                     return res.status(500)
                 } else {
                     log.d(csvContent)
@@ -130,7 +126,7 @@ router.get('/mailrelance', async function (req, res) {
         if (err) {
             log.w('::mailrelance - erreur lors de la requete',{ requete, erreur: err.stack});
             logTrace('aaq-mailrelance',2,startTime);
-            return res.status(400).json('[BATCH-RELANCEMAIL] erreur lors de la récupération des interventions');
+            return res.status(400).json({message: '[BATCH-RELANCEMAIL] erreur lors de la récupération des interventions'});
         }
         else {
             log.d('::mailrelance - rows: ',result.rows.length);
@@ -251,7 +247,7 @@ STATE_DEPENDENT=4
                 if (err) {
                     log.w('::mailrelance - erreur lors de la mise à jour',{requete, erreur: err.stack});
                     logTrace('aaq-mailrelance',1,startTime);
-                    return res.status(400).json('[BATCH-RELANCEMAIL] erreur lors de la mise à jour de la relance mail');
+                    return res.status(400).json({message: '[BATCH-RELANCEMAIL] erreur lors de la mise à jour de la relance mail'});
                 }
             })
             logTrace('aaq-mailrelance',0,startTime);

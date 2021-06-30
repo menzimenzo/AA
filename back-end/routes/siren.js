@@ -4,11 +4,15 @@ const axios = require('axios');
 var moment = require('moment');
 moment().format();
 
+const logger = require('../utils/logger')
+const log = logger(module.filename)
+
+const token = '7feea564-6173-3350-8aa6-bee62bd01c7b'
+
 router.get('/siret/:id', async function (req, res) {
-  const token = '7feea564-6173-3350-8aa6-bee62bd01c7b'
   const now = moment(new Date()).format('YYYY-MM-DD')
   const idsiret = req.params.id
-  console.log('recherche SIRET :' + idsiret)
+  log.i('::siret - Get - In', idSiret)
   try {
     // Request access token.
     const reponse = await axios.get('https://api.insee.fr/entreprises/sirene/V3/siret/' + idsiret + '?date=' + now, { headers: { "Authorization": `Bearer ${token}` } });
@@ -45,24 +49,24 @@ router.get('/siret/:id', async function (req, res) {
       commune: commune,
       activite: type
     }
-    //console.log(structure)
+    log.i('::siret - Get - Done')
     return res.status(200).json({ structure: structure })
   }
   catch (error) {
-    console.log(error)
+    log.w('::siret - Get - Error', error)
     return res.status(404).json({ error })
   }
 })
 
 router.get('/siren/:id', async function (req, res) {
-  const token = '7feea564-6173-3350-8aa6-bee62bd01c7b'
   const siren = req.params.id
-  console.log('recherche SIREN :' + siren)
+  log.i('::siren - Get - In', siren)
+
   try {
     // Request access token.
     const reponse = await axios.get('https://api.insee.fr/entreprises/sirene/V3/siret?q=(siren:' + siren + ' AND periode(etatAdministratifEtablissement:A))', { headers: { "Authorization": `Bearer ${token}` } });
+    
     const etablissements = reponse.data.etablissements
-    //console.log(etablissements)
     let etablissementsFormate = []
     etablissements.forEach(element => {
       const siren = element.siren
@@ -97,13 +101,14 @@ router.get('/siren/:id', async function (req, res) {
         commune: commune,
         activite: type
       }
-      //console.log(etablissement)
       etablissementsFormate.push(etablissement)
     });
+    log.i('::siren - Get - Done')
     return res.status(200).json({ etablissements: etablissementsFormate })
   }
   catch (error) {
-    console.log(error)
+    log.w('::siren - Get - Error', error)
+    return res.status(404).json({ error })
   }
 })
 

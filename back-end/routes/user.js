@@ -53,7 +53,7 @@ router.get('/liste/:roleid', async function (req, res) {
     pgPool.query(requete, (err, result) => {
         if (err) {
             log.w('::list-roleid - erreur lors de la récupération.',err.stack);
-            return res.status(400).json('erreur lors de la récupération des utilisateurs par role');
+            return res.status(400).json({message: 'erreur lors de la récupération des utilisateurs par role'});
         }
         else {
             log.i('::list-roleid - Done')
@@ -120,7 +120,7 @@ router.get('/csv', async function (req, res) {
     pgPool.query(requete, (err, result) => {
         if (err) {
             log.w('::csv - Erreur lors de la requête.', { requete, erreur: err.stack});
-            return res.status(400).json('erreur lors de la récupération des utilisateurs');
+            return res.status(400).json({message: 'erreur lors de la récupération des utilisateurs'});
         }
         else {
             const users = result.rows;//.map(formatUser);
@@ -160,7 +160,7 @@ router.get('/encadrant', async function (req, res) {
     pgPool.query(requete, (err, result) => {
         if (err) {
             log.w('::encadrant - Erreur lors de la requête.', { requete, erreur: err.stack});
-            return res.status(400).json('erreur lors de la récupération des encadrants');
+            return res.status(400).json({message: 'erreur lors de la récupération des encadrants'});
         }
         else {
             const encadrants = result.rows;
@@ -188,7 +188,7 @@ router.get('/:id', async function (req, res) {
         pgPool.query(requete, (err, result) => {
             if (err) { 
                 log.w('::get - Erreur lors de la requête', err.stack)
-                return res.status(400).json('erreur lors de la récupération de l\'utilisateur');
+                return res.status(400).json({message: 'erreur lors de la récupération de l\'utilisateur'});
             }
             else {
                 const user = result.rows && result.rows.length && result.rows[0];
@@ -241,7 +241,7 @@ router.get('/', async function (req, res) {
     pgPool.query(requete, (err, result) => {
         if (err) {
             log.w('::list - erreur lors de la récupération.',err.stack);
-            return res.status(400).json('erreur lors de la récupération des utilisateurs');
+            return res.status(400).json({message: 'erreur lors de la récupération des utilisateurs'});
         }
         else {
             log.i('::list - Done')
@@ -319,7 +319,7 @@ router.put('/:id', async function (req, res) {
         telephonecontact], (err, result) => {
         if (err) {
             log.w('::update - erreur lors de l\'update', {requete, erreur: err.stack});
-            return res.status(400).json('erreur lors de la sauvegarde de l\'utilisateur');
+            return res.status(400).json({message: 'erreur lors de la sauvegarde de l\'utilisateur'});
         }
         else {
             log.i('::update - Done')

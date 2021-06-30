@@ -11,7 +11,7 @@ module.exports = async function (req, res) {
     const requete = 'delete from int_enf where int_id=$1'
     const deleteIntEnf = await pgPool.query(requete, [id]).catch(err => {
         log.w('::delete - Erreur survenue lors de la la suppression dans la table int_enf.', { requete, err: err.stack })
-        return res.status(400).json('Erreur survenue lors de la la suppression de la liaison intervention - enfant');
+        return res.status(400).json({ message: 'Erreur survenue lors de la la suppression de la liaison intervention - enfant' });
     })
     if (deleteIntEnf) {
         log.d('::delete int_enf - int N°' + id + ' Done');
