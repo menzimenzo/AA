@@ -211,24 +211,6 @@ BEGIN
       /*==============================================================*/
       alter table INTERVENTION ADD COLUMN INT_ISSUBVENTIONNEE BOOLEAN not null ;
 
-      /*==============================================================*/
-      /* Table : UTI_INT */
-      /*==============================================================*/
-      create table UTI_INT (
-         INT_ID SERIAL not null,
-         UTI_ID BIGINT not null
-      );
-
-      alter table UTI_INT
-      add constraint FK_INTERVEN_REFERENCE_UTILISAT foreign key (UTI_ID)
-      references UTILISATEUR (UTI_ID)
-      on delete restrict on update restrict;
-
-      alter table UTI_INT
-      add constraint FK_INTERVEN_REFERENCE_INTERVENTION foreign key (INT_ID)
-      references INTERVENTION (INT_ID)
-      on delete CASCADE;
-
       -- Déploiement du Schéma effectué
       call AAQ_VersionDeployee('1.1.0','schema');
 		raise notice '%','Mise à jour du schéma effectué';
