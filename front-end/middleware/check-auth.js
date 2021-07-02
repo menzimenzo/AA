@@ -49,7 +49,9 @@ export default async function({ env, route, store, req, res, redirect, app, isSe
                 return redirect('/admin')
             }
             // Ici traiter le cas du profil "Structure"
-            // TODO
+            if (store.state.utilisateurCourant.profilId == 2) {
+                return redirect('/partenaire')
+            }
 
             // Formateur ou MN AAQ On redirige vers interventions
             if (store.state.utilisateurCourant.profilId == 3 || store.state.utilisateurCourant.profilId == 4 || store.state.utilisateurCourant.profilId == 6) {

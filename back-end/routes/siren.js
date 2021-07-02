@@ -12,7 +12,8 @@ const token = '7feea564-6173-3350-8aa6-bee62bd01c7b'
 router.get('/siret/:id', async function (req, res) {
   const now = moment(new Date()).format('YYYY-MM-DD')
   const idsiret = req.params.id
-  log.i('::siret - Get - In', idSiret)
+  log.i('::siret - Get - In', idsiret)
+
   try {
     // Request access token.
     const reponse = await axios.get('https://api.insee.fr/entreprises/sirene/V3/siret/' + idsiret + '?date=' + now, { headers: { "Authorization": `Bearer ${token}` } });

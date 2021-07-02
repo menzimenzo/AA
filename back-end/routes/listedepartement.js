@@ -21,4 +21,21 @@ router.get('/', function (req, res) {
             });
     });
 
+    router.get('/:id', function (req, res) {
+        const id = req.params.id
+        log.i('::Get- In', { id })
+        pgPool.query(`SELECT dep_num, dep_libelle FROM departement where dep_num=$1`,[id],
+            (err, result) => {
+                if (err) {
+                    log.w('::Get - Erreur', err)
+                    return res.statusCode(400).json({ message: 'erreur sur la requete de listedepartement' });
+                }
+                else {
+                    log.i('::get - Done', { count: result.rowCount })
+                    const departement = result.rows;
+                    return res.status(200).json({ departement });
+                }
+            });
+    });
+
 module.exports = router;

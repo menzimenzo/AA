@@ -16,7 +16,6 @@ export const state = () => ({
   documents: [],
   statStructure: [],
   enfants: [],
-  statStructure: []
 });
 
 export const mutations = {

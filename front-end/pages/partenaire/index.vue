@@ -293,7 +293,6 @@ export default {
       return this.$store
         .dispatch("get_intervention", idIntervention)
         .then(() => {
-          //console.log(this.$store.state.interventionCourrante)
           this.$modal.show("editIntervention");
         })
         .catch((error) => {
@@ -339,7 +338,6 @@ export default {
     },
     deletePiscine: function (piscine) {
       this.loading = true;
-      console.log(piscine)
       const url = process.env.API_URL + "/piscine/delete/";
       piscine.uti_id = this.$store.state.utilisateurCourant.id;
       return this.$axios
@@ -362,9 +360,7 @@ export default {
     },
     deleteStructure: function (structure) {
       this.loading = true;
-      console.log(structure)
       const url = process.env.API_URL + "/structures/delete";
-      console.log(url)
       return this.$axios
         .$post(url, { structure })
         .then((response) => {
@@ -401,7 +397,6 @@ export default {
           idformate = "0" + idformate;
         }
         idformate = "AAQ_Attestation-" + idformate;
-        console.log(idformate);
         link.setAttribute("download", `${idformate}.pdf`); //or any other extension
         document.body.appendChild(link);
         // Télécharge le fichier
@@ -436,6 +431,13 @@ export default {
     },
     clearIntervention() {
       this.$store.commit("reset_interventions");
+    },
+    displayDashboard(bool) {
+      return this.showDashboard = bool
+    },
+    resetIntervention() {
+      this.$store.commit("CLEAN", { key: 'enfants', isArray: true});
+      return this.$store.commit("CLEAN", { key: 'interventionCourrante'});
     },
     exportCsv() {
       this.$axios({
@@ -474,7 +476,7 @@ export default {
     this.$store.dispatch("get_mesPiscines"),
     this.$store.dispatch("get_interventions")
     this.$store.dispatch("get_structureByUser", this.$store.state.utilisateurCourant.id)
-    this.$store.commit("clean_enfants");
+    this.$store.commit("CLEAN", { key: 'enfants', isArray: true });
     
   },
 };
