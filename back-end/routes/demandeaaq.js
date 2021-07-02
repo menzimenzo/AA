@@ -253,7 +253,7 @@ router.put('/accord', async (req,res) => {
     // Trouvé, on envoie le mail à l'instructeur
     log.d('::accords - Nb utilisateur trouvé : ', userDemQuery.rowCount)
     if(userDemQuery.rowCount == "1") {
-        nomDemandeur = userDemQuery.rows[0].uti_prenom
+        nomDemandeur = userDemQuery.rows[0].uti_nom
         prenomDemandeur = userDemQuery.rows[0].uti_prenom
         mailDemandeur = userDemQuery.rows[0].uti_mail
         sendEmail({
