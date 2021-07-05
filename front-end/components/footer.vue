@@ -3,7 +3,7 @@
     <b-container>
       <b-row>
           <b-col cols="12 text-center">
-            SI Aisance Aquatique - Version 1.1.0
+            SI Aisance Aquatique - Version 1.1.1
             <br>
             Support :<i class="material-icons ml-2 mr-1" >mail</i>appli-aisance-aquatique@sports.gouv.fr
             <br>
