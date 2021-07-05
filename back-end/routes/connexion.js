@@ -33,43 +33,6 @@ router.post('/verify', async (req,res) => {
     const tokenFc = req.body.tokenFc
     let user = formatUtilisateur(req.body, false)
 
-    if (user.str_id == 99999) {
-        // La structure spécifiée n'existe peut être pas encore
-        const selectStructureRes = await pgPool.query("SELECT str_id from structure where str_typecollectivite is not null and str_libelle = $1",
-            [user.libelleCollectivite]).catch(err => {
-                log.w(err)
-                throw err
-            })
-
-        let libelleCourt = ''
-        if (!selectStructureRes.rows[0]) {
-            // Si la structure n'existe pas on la créé
-            log.d('::verify - structure a créer')
-            if (user.typeCollectivite == 1) {
-                libelleCourt = 'COM'
-            }
-            if (user.typeCollectivite == 2) {
-                libelleCourt = 'DEP'
-            }
-            if (user.typeCollectivite == 3) {
-                libelleCourt = 'EPCI'
-            }
-            const insertStructure = await pgPool.query("INSERT INTO structure (str_libellecourt,str_libelle,str_actif,str_federation,str_typecollectivite) \
-         VALUES ($1,$2,'true','false',$3) RETURNING *",
-                [libelleCourt,user.libelleCollectivite, user.typeCollectivite]).catch(err => {
-                    log.w(err)
-                    throw err
-                })
-                user.str_id = insertStructure.rows[0].str_id
-            log.d('::verify - structure créée. Str_id : '+user.str_id );
-        }
-        else {
-            user.str_id = selectStructureRes.rows[0].str_id
-            log.d('::verify - structure déjà existante. Str_id : '+ user.str_id );
-        }
-        user.uti_structurelocale = user.libelleCollectivite
-    }
-
     // Vérifier si l'email est déjà utilisé en base.
     const mailExistenceQuery = await pgPool.query(`SELECT lower(uti_mail) uti_mail,uti_pwd, uti_tockenfranceconnect FROM utilisateur WHERE lower(uti_mail)=lower('${user.uti_mail}')`).catch(err => {
         log.w(err)
@@ -84,6 +47,7 @@ router.post('/verify', async (req,res) => {
     // Pour un maitre nageur, vérifier si le numéro EAPS est présent dans la table ref_eaps
     // Exception pour l'admin, le partenaire
     if (user.rol_id != 1 && user.rol_id != 2 ) {
+
         if (user.eaps != '') {
             log.d('::verify - Recherche numéro EAPS') 
             const eapslExistenceQuery = await pgPool.query(`SELECT eap_numero FROM ref_eaps WHERE eap_numero='${user.uti_eaps}'`).catch(err => {
@@ -106,7 +70,7 @@ router.post('/verify', async (req,res) => {
     })
     
     // Envoie de l'email de confirmation
-    if(!wasValidated){
+    if(!wasValidated && user.rol_id != 1 && user.rol_id != 2){
         log.d('::verify - Mail de confirmation envoyé.')
         sendEmail({
             to: user.uti_mail,

@@ -182,15 +182,17 @@ export default {
     }
   },
   async created() {
-   log.i('created - In')
-   this.loading = true;
-   // Chargement de la liste des formateurs
-   await this.rechercheformateur()   
-   // Chargement de la liste des structures de référence
-   await this.recherchestructureref()   
-   // Chargement de la demande
-   await this.chargedemande() 
-   this.loading = false;
+  if (this.utilisateurCourant.profilId != 2) {
+    log.i('created - In')
+    this.loading = true;
+    // Chargement de la liste des formateurs
+    await this.rechercheformateur()   
+    // Chargement de la liste des structures de référence
+    await this.recherchestructureref()   
+    // Chargement de la demande
+    await this.chargedemande() 
+    this.loading = false;
+    }
   }
 };
 </script>
