@@ -147,7 +147,7 @@ export default {
           demandeurId: this.utilisateurCourant.id
         }
         return this.$axios.$post(url, body)
-          .then(async ({ maDemande }) => {
+          .then(({ maDemande }) => {
             log.i('validerFormateur - Done', { maDemande })
             this.maDemande = maDemande
             this.$toast.success('Votre demande a été envoyée.')
@@ -168,7 +168,7 @@ export default {
           demandeurId: this.utilisateurCourant.id
         }
         return this.$axios.$post(url, body)
-          .then(async ({ maDemande }) => {
+          .then(({ maDemande }) => {
             log.i('validerStrutureRef - Done', { maDemande })
             this.maDemande = maDemande
             this.$toast.success('Votre demande a été envoyée.')

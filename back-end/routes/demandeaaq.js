@@ -57,14 +57,9 @@ router.post('/', async function (req, res) {
    // gérération des tocken de refus et d'accord pour l'envoie par mail.
     let tockendemanderefus = null
     let tockendemandeaccord = null
-
-
-
-
     var nomInstructeur
     var courrielInstructeur
-    log.d('::post - formateurId : ', formateurId)
-    log.d('::post - structurerefid : ', structurerefid)
+    log.d('::post - Params : ', { formateurId, structurerefid })
     if (formateurId) {
         log.d('::post - get formateur')
         const requete = `SELECT uti_mail,uti_prenom FROM utilisateur WHERE uti_id = ${formateurId}`
@@ -78,13 +73,10 @@ router.post('/', async function (req, res) {
             }
             else 
             {
-                log.d('::post - Récupération info formateur : ', requete)
                 const formateuraaq = result.rows && result.rows[0];
-                log.d('::post - formateuraaq : ', {formateuraaq})
+                log.d('::post - formateuraaq : ', { formateuraaq })
                 courrielInstructeur = formateuraaq.uti_mail
-                log.d('::post - courrielInstructeur : ', courrielInstructeur)
                 nomInstructeur = " "+formateuraaq.uti_prenom;
-                log.d('::post - nomInstructeur : ', nomInstructeur)
             }
         })
     }
@@ -100,21 +92,18 @@ router.post('/', async function (req, res) {
             else 
             {
                 const structurerefaaq = result.rows && result.rows[0];
+                log.d('::post - structurerefaaq : ', { structurerefaaq })
                 courrielInstructeur = structurerefaaq.sre_courriel
                 nomInstructeur = ""
             }
         })
     }
 
-
-
-
-
     const now = new Date()
     const datecreation = now.getFullYear() + "-" + eval(now.getMonth() + 1) + "-" + now.getDate()
     const requete = `INSERT INTO demande_aaq (dem_uti_demandeur_id,dem_uti_formateur_id,dem_sre_id,dem_tockendemandeaccord,dem_tockendemanderefus,dem_datedemande,dem_dms_id) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`;
     log.d('::post - requete', { requete });
-    return await pgPool.query(requete, [demandeurId, formateurId, structurerefid, tockendemandeaccord, tockendemanderefus, datecreation, 1 ], 
+    return pgPool.query(requete, [demandeurId, formateurId, structurerefid, tockendemandeaccord, tockendemanderefus, datecreation, 1 ], 
         (err, result) => {  
             if (err) {
                 log.w('::post - Erreur lors de la requête.', err.stack);
@@ -123,54 +112,6 @@ router.post('/', async function (req, res) {
             else {
                 log.i('::post - Done', result);
                 const demandeclient =  formatDemandeAAQ( result.rows[0])
-                /*
-                var nomInstructeur
-                var courrielInstructeur
-                log.d('::post - formateurId : ', formateurId)
-                log.d('::post - structurerefid : ', structurerefid)
-                if (formateurId) {
-                    log.d('::post - get formateur')
-                    const requete = `SELECT uti_mail,uti_prenom FROM utilisateur WHERE uti_id = ${formateurId}`
-                    log.d('::post - requete / formateurId : ', requete)
-
-                    // Recherche de l'instructuer demandé pour la demande aaq
-                    const formateuraaq = await pgPool.query(requete,(err, result) => {
-                        if (err) {
-                            log.w('::post - Erreur sur le get du formateur', err)
-                            return res.status(400).json({ message: 'erreur sur la requete de recherche du mail du formateur' });
-                        }
-                        else 
-                        {
-                            log.d('::post - Récupération info formateur : ', requete)
-                            //const formateuraaq = result.rows && result.rows[0];
-                            log.d('::post - formateuraaq : ', {formateuraaq})
-                            courrielInstructeur = formateuraaq.uti_mail
-                            log.d('::post - courrielInstructeur : ', courrielInstructeur)
-                            nomInstructeur = " "+formateuraaq.uti_prenom;
-                            log.d('::post - nomInstructeur : ', nomInstructeur)
-                        }
-                    })
-                }
-                if (structurerefid) {
-                    log.d('::post - get Structureref')
-                    const requete = `SELECT sre_courriel FROM structure_ref WHERE sre_id = ${structurerefid}`
-                    // Recherche de la structure de référence demandé pour la demande aaq
-                    const structurerefaaq = await pgPool.query(requete,(err, result) => {
-                        if (err) {
-                            log.w('::post - Erreur sur le get de la structure de référence', err)
-                            return res.status(400).json({ message: 'erreur sur la requete de recherche du mail du formateur' });
-                        }
-                        else 
-                        {
-                            // const structurerefaaq = result.rows && result.rows[0];
-                            courrielInstructeur = structurerefaaq.sre_courriel
-                            nomInstructeur = ""
-                        }
-                    })
-                }
-                log.d('::post - AVANT ENVOIE MAIL courrielInstructeur : ', courrielInstructeur)
-                log.d('::post -  AVANT ENVOIE MAIL nomInstructeur : ', nomInstructeur)
-                */
                 log.d('::post - sending mail', { courrielInstructeur })
                 sendEmail({
                     to: courrielInstructeur,
@@ -180,11 +121,9 @@ router.post('/', async function (req, res) {
                         Nous vous invitons à vous rendre sur le site « Aisance Aquatique » pour changer le profil du demandeur.<br/>
                         Rappel du site <a href="${config.franceConnect.FS_URL}">SI Aisance Aquatique.<br/></p>`
                     })
+
                 log.i(':: post - Done')    
-                
                 return res.status(200).json({ maDemande: demandeclient });
-
-
             }
         })
 })
