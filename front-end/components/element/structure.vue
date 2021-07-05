@@ -321,7 +321,7 @@ export default {
       if (this.siret && this.siret.length === 14) {
         log.d('recherchesiret - Search on siret')
         this.boolSiren = false;
-        const url = process.env.API_URL + "/siren/siret/" + this.siret;
+        const url = process.env.API_URL + "/insee/siret/" + this.siret;
         return this.$axios.$get(url)
           .then(({ structure }) => {
             log.i('recherchesiret - siret - Done')
@@ -336,7 +336,7 @@ export default {
       if (this.siret && this.siret.length === 9) {
         log.d('recherchesiret - Search on siren')
         this.boolSiret = false;
-        const url = process.env.API_URL + "/siren/siren/" + this.siret;
+        const url = process.env.API_URL + "/insee/siren/" + this.siret;
         return this.$axios.$get(url)
           .then((response) => {
             log.i('recherchesiret - siren - Done')
