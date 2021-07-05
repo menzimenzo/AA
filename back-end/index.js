@@ -61,7 +61,7 @@ const documents     = require('./routes/documents');
 const parametres         = require('./routes/parametres');
 const exp         = require('./routes/export');
 const demandeaaq         = require('./routes/demandeaaq');
-const siren     = require('./routes/siren');
+const insee     = require('./routes/insee');
 const ecole     = require('./routes/ecole');
 const structureref         = require('./routes/structureref');
 
@@ -90,7 +90,7 @@ app.use(config.URL_PREFIX + '/ecole', ecole);
 
 app.use(config.URL_PREFIX + '/documents', documents);
 
-app.use(config.URL_PREFIX + '/siren', siren);
+app.use(config.URL_PREFIX + '/insee', insee);
 
 app.use(config.URL_PREFIX + '/pdf', pdf);
 

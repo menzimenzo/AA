@@ -13,5 +13,6 @@ module.exports = {
     putEnfant: require('./putEnfant'),
     deleteEnfant: require('./deleteEnfant'),
     deleteEnfantsFromIntervention: require('./deleteEnfantsFromIntervention'),
-    getEnfant: require('./getEnfant')
+    getEnfant: require('./getEnfant'),
+    getApiInseeToken: require('./getApiInseeToken') 
 }

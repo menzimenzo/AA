@@ -2,12 +2,11 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 var moment = require('moment');
+const { getApiInseeToken } = require('../controllers/index.js')
 moment().format();
 
 const logger = require('../utils/logger')
 const log = logger(module.filename)
-
-const token = '7feea564-6173-3350-8aa6-bee62bd01c7b'
 
 router.get('/siret/:id', async function (req, res) {
   const now = moment(new Date()).format('YYYY-MM-DD')
@@ -16,6 +15,7 @@ router.get('/siret/:id', async function (req, res) {
 
   try {
     // Request access token.
+    const token = await getApiInseeToken()
     const reponse = await axios.get('https://api.insee.fr/entreprises/sirene/V3/siret/' + idsiret + '?date=' + now, { headers: { "Authorization": `Bearer ${token}` } });
     
     const siren = reponse.data.etablissement.siren
@@ -65,6 +65,7 @@ router.get('/siren/:id', async function (req, res) {
 
   try {
     // Request access token.
+    const token = await getApiInseeToken()
     const reponse = await axios.get('https://api.insee.fr/entreprises/sirene/V3/siret?q=(siren:' + siren + ' AND periode(etatAdministratifEtablissement:A))', { headers: { "Authorization": `Bearer ${token}` } });
     
     const etablissements = reponse.data.etablissements
