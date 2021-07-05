@@ -108,7 +108,6 @@ router.post('/verify', async (req,res) => {
     
     // Envoie de l'email de confirmation
     if(!wasValidated && user.rol_id != 1 && user.rol_id != 2){
-        console.log(user)
         log.d('::verify - Mail de confirmation envoyé.')
         sendEmail({
             to: user.uti_mail,
