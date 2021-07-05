@@ -618,6 +618,8 @@ export default {
           break;
       }
     }
+    // Chargement du CP enregistré (utile pour l'utilisation dans "Mon Compte")
+    this.cp = this.user.cp;
   },
   computed: {
     mail: {

@@ -36,48 +36,16 @@
         </b-col>
       </b-row>
     </div>
-    
-
     <div>
-
       <b-row class="text-center" >
         <b-col cols="12">
           <br>
           <span class="renvoiBasDePage">
             (1) un maitre-nageur est un éducateur sportif professionnel détenteur d’une carte professionnelle, qualifié pour encadrer contre rémunération l’apprentissage de la natation (ex : BPJEPS AAn, DEJEPS Triathlon, Licence staps entrainement sportif « natation » ...)
           </span>
-            
         </b-col>
       </b-row>
-      <div v-if="fc">
-        <b-row class="text-center">
-          <b-col cols="12">
-            <span class="otherConnexion">Ou</span>
-          </b-col>
-        </b-row>
-        <b-row class="text-center">
-          <b-col cols="12">
-            <b-img class="fcBtn" @click="connexionutilisateur()"  fluid  :src="require('assets/FCboutons-10.png')" border="0" style="size: 100%;" />
-            <br>
-            <a
-              href="https://franceconnect.gouv.fr/"
-              target="_blank"
-              style="text-align:center;" 
-              >A propos de FranceConnect</a>
-          </b-col>
-        </b-row>
-      </div>
     </div>
-    <!-- DOUBLON
-    <b-row class="text-center" >
-      <b-col cols="12">
-        <br>
-        <span class="renvoiBasDePage">
-          (1) un maitre-nageur est un éducateur sportif professionnel détenteur d’une carte professionnelle, qualifié pour encadrer contre rémunération l’apprentissage de la natation (ex : BPJEPS AAn, DEJEPS Triathlon, Licence staps entrainement sportif « natation » ...)
-        </span>          
-      </b-col>
-    </b-row>
-    -->
   </b-container>
 </template>
 

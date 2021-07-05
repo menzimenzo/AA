@@ -52,7 +52,7 @@
         </editable>
       </b-col>
     </b-row>
-    <modal name="editUser" height="auto" width="900px" :scrollabe="true">
+    <modal name="editUser" @closed="closeModalUser" height="auto" width="900px" :scrollabe="true">
       <user />
     </modal>
   </b-container>
@@ -112,8 +112,8 @@ export default {
         if (this.prenomFilter) {
           isMatch = isMatch && user.prenom.toLowerCase().indexOf(this.prenomFilter.toLowerCase()) > -1
         }
-        if (this.inscriptionFilter != "Tous") {
-          isMatch = isMatch && user.inscription.indexOf(this.inscriptionFilter) > -1;
+        if (this.roleFilter != "Tous" && this.roleFilter != undefined && this.roleFilter != "") {
+              isMatch = isMatch && (user.rolLibelle == this.roleFilter)
         }
         log.d('filteredUtilisateurs - Done', { isMatch })
         return isMatch;
@@ -142,6 +142,14 @@ export default {
           log.w('editUser - error', error)
           return this.$toast.error('Une erreur est survenue lors de la récupération du détail de l\'user')
         });
+
+    },
+    closeModalUser: function() {
+      // Repositionnement du compteur au retour de l'Edit du user 
+      // Mais uniquement si on revient d'un compte MN sinon on ne fait pas de mise à jour.
+      if (this.roleFilter=="MaitreNageur") {
+        this.nbdemandeaaq = this.filteredUtilisateurs.length;
+      }
     }
   }
 };

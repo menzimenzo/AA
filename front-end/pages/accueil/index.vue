@@ -139,7 +139,7 @@ export default {
         })
     },
     validerFormateur: function() {
-      log.i('validerFormateur - In', this.formateurId)
+      log.i('validerFormateur - In', this.formateurid)
       if (this.formateurid) {
         const url = process.env.API_URL + '/demandeaaq/'
         const body = {

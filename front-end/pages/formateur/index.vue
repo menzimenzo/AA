@@ -57,7 +57,7 @@
         </p>
       </b-col>
     </b-row>
-    <modal name="editUser" height="auto" width="900px" :scrollabe="true">
+    <modal name="editUser" @closed="closeModalUser" height="auto" width="900px" :scrollabe="true">
       <user />
     </modal>
   </b-container>
@@ -144,6 +144,13 @@ export default {
           log.w('getUser - Une erreur est survenue lors de la récupération du détail de l\'utilisateur', { error })
           return this.$toast.error('Une erreur est survenue lors de la récupération du détail de l\'utilisateur')
         })
+    },
+    closeModalUser: function() {
+      // Repositionnement du compteur au retour de l'Edit du user 
+      // Mais uniquement si on revient d'un compte MN sinon on ne fait pas de mise à jour.
+      if (this.roleFilter=="MaitreNageur") {
+        this.nbdemandeaaq = this.filteredUtilisateurs.length;
+      }
     }
   }
 }
