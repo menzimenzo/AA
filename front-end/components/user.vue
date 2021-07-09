@@ -328,8 +328,10 @@ export default {
                   // Lorsque c'est une structure référente qui fait la modification, alors l'id du formateur est mis à jour
                   // Sinon le formateur avait été choisi par le Maitre Nageur lors de la demande
                   demandeaaq['dem_uti_formateur_id'] = this.formUser.formateurid
+                }
+                if(demandesAaq) {
                   const url = process.env.API_URL + '/demandeaaq/accord'
-                  return this.$axios.$put(url, {demandeaaq})
+                  return this.$axios.$put(url, {demandeaaq})                
                 }
             })
             .catch(error => {
