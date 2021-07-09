@@ -114,10 +114,10 @@ export default {
       log.i('filteredUtilisateurs - In')
       return this.users.filter(user => {
         var isMatch = true;
-        if (this.nomFilter) {
+        if (this.nomFilter != "") {
           isMatch = isMatch && user.nom.toLowerCase().indexOf(this.nomFilter.toLowerCase()) > -1
         }
-        if (this.prenomFilter) {
+        if (this.prenomFilter != "") {
           isMatch = isMatch && user.prenom.toLowerCase().indexOf(this.prenomFilter.toLowerCase()) > -1
         }
         if (this.inscriptionFilter != "Tous") {

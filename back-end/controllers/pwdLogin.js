@@ -33,7 +33,9 @@ module.exports = async function(req, res) {
             }
 
             if(user.uti_pwd && user.uti_pwd === crypted) {
-                if(!user.uti_eaps && user.profild > 2) {
+                log.d("user.uti_eaps",user.uti_eaps)
+                log.d("user.rol_id",user.rol_id)
+                if(!user.uti_eaps && user.rol_id > 2) {
                     return res.status(200).json({message:'Veuillez terminer votre inscription', redirect:'/connexion/inscription', user: formatUtilisateur(user)})
                 }
                 if(!user.pwd_validated) {
