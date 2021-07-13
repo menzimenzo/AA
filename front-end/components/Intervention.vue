@@ -87,7 +87,7 @@
         </b-btn>
       </b-col>
     </b-row>
-    <b-row v-if="formIntervention.piscine.nom" class="mt-2">
+    <b-row v-if="formIntervention.piscine && formIntervention.piscine.nom" class="mt-2">
       <b-col cols="6">
         <span></span>
       </b-col>
@@ -355,7 +355,7 @@ const loadFormIntervention = function (intervention, user) {
   const dateFinIntervention = moment(intervention.dateFinIntervention);
   formIntervention.dateFinIntervention =
     dateFinIntervention.format("YYYY-MM-DD");
-  if (!formIntervention.id) {
+  if (!formIntervention.id &&(user.profilId == 3 || user.profilId == 4)) {
     formIntervention.utilisateur.push(user);
   }
 
