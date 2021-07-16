@@ -1,0 +1,1 @@
+INSERT INTO utilisateur (rol_id,stu_id,uti_validated,uti_mail,uti_nom,uti_prenom) VALUES (3,1,true,'inconnu@aaq.fr','inconnu','inconnu');  

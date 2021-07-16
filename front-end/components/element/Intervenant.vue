@@ -6,7 +6,7 @@
       </b-col>
     </b-row>
     <b-row>
-      <b-col cols="12" class="mb-3">
+      <b-col cols="6" class="mb-3">
         <b-form inline>
           <label for="nameFilter">Saissisez le début du nom d'un intervenant pour l'ajouter :</label>
           <b-input
@@ -16,6 +16,16 @@
             placeholder="Dupond"
           />
         </b-form>
+       </b-col>
+        <b-col cols="6" class="mb-3">
+        <b-row>
+          <span>Intervenant non référencé dans l'application ou inconnu :</span>
+        </b-row>
+        <b-row>
+          <b-button @click="addMN({nom:'inconnu',prenom:'inconnu',mail:'inconnu@aaq.fr'})">
+          Ajouter intervenant inconnu
+          </b-button>
+        </b-row>
       </b-col>
     </b-row>
     <b-row>
