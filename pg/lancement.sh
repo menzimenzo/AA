@@ -24,3 +24,13 @@ psql -d aaq_dev -U u_aaq_dev -f /docker-entrypoint-initdb.d/scripts/04-SQL_MAJBa
 echo '04-SQL_V1.1.0 : mises à jours de la version 1.1.0'
 psql -d aaq_dev -U u_aaq_dev -f /docker-entrypoint-initdb.d/scripts/04-SQL_V1.1.0.sql
 
+#VERSION 1.1.1
+# Pas de script
+
+#VERSION 1.1.2
+# Pas de script
+
+#VERSION 1.1.3 - Version en cours
+echo '05-SQL_V1.1.3 : mises à jours de la version 1.1.3'
+psql -d aaq_dev -U u_aaq_dev -f /docker-entrypoint-initdb.d/scripts/05-SQL_V1.1.3.sql
+
