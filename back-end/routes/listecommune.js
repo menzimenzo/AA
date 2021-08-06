@@ -7,7 +7,11 @@ const log = logger(module.filename)
 
 router.get('/', function (req, res) {
     log.i('::listCommunes - In')
-    const v_codepostal = parseInt(req.query.codepostal)
+    // Mantis 86660
+    // const v_codepostal = parseInt(req.query.codepostal)
+    // Il ne faut pas parser en Int sinon on perd le 0 devant et les
+    // communes des départements 01 à 09 ne sont pas trouvés.
+    const v_codepostal = req.query.codepostal
     // Recherche des communes correspondant au codepostal
     return pgPool.query(`SELECT com.*, dep.reg_num
                 FROM commune com  
