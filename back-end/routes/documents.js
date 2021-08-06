@@ -67,7 +67,11 @@ router.post('/', upload.single("file"), (req, res) => {
     const requete = `INSERT INTO document 
     (doc_type, doc_filename, doc_libelle, doc_contenu) 
     VALUES($1,$2,$3,$4)`;
-    const file = file
+    // Mantis 86371
+    // Correction de l'impossibilité de charger un document
+    // Oubli du req. devant file lors de l'audit de code.
+    // const file = file
+    const file = req.file
     const { libelle } = req.body
     return pgPool.query(requete, [file.mimetype, file.originalname, libelle, file.buffer], (err, result) => {
         if (err) {
@@ -80,5 +84,6 @@ router.post('/', upload.single("file"), (req, res) => {
         }
     })
 })
+
 
 module.exports = router;
