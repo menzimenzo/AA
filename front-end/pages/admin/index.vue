@@ -44,7 +44,7 @@
             </p>
           </b-card-body>
         </b-collapse>
-        <b-collapse id="publication-document" accordion="my-accordionv" role="tabpanel">
+        <b-collapse id="publication-document" accordion="my-accordion" role="tabpanel">
           <b-card-body>
             <file-upload />
           </b-card-body>
