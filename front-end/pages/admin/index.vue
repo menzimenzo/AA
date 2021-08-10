@@ -115,10 +115,10 @@ export default {
       return this.users.filter(user => {
         var isMatch = true;
         if (this.nomFilter != "") {
-          isMatch = isMatch && user.nom.toLowerCase().indexOf(this.nomFilter.toLowerCase()) > -1
+          isMatch = isMatch &&  user.nom && user.nom.toLowerCase().indexOf(this.nomFilter.toLowerCase()) > -1
         }
         if (this.prenomFilter != "") {
-          isMatch = isMatch && user.prenom.toLowerCase().indexOf(this.prenomFilter.toLowerCase()) > -1
+          isMatch = isMatch && user.prenom && user.prenom.toLowerCase().indexOf(this.prenomFilter.toLowerCase()) > -1
         }
         if (this.inscriptionFilter != "Tous") {
           isMatch = isMatch && user.inscription.indexOf(this.inscriptionFilter) > -1;
