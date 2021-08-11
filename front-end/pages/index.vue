@@ -8,7 +8,7 @@
         <b-row >
           <p class="aa-bouton-connexion"  @click="SeLoguer(1)">▷ Je suis maître nageur<sup>(1)</sup><br>Je m’identifie et renseigne mes données<br><br></p>
         </b-row>
-        <b-row >
+        <b-row v-if="this.bt_structureactif">
           <p class="aa-bouton-connexion" @click="SeLoguer(2)">▷ J'appartiens à une structure actrice du dispositif AAQ<br><br></p>
         </b-row>
       </b-col>
@@ -60,7 +60,8 @@ export default {
   data() {
     return {
       connexionType: null,
-      fc: false
+      fc: false,
+      bt_structureactif: false,
     };
   },
   methods: {
@@ -117,15 +118,32 @@ export default {
   },
   async mounted() {
     log.i("mounted home - In");
-    const url = process.env.API_URL + '/parametres/fcactif'
+    // Affiche ou pas le bouton france connect
+    const url = process.env.API_URL + '/parametres?code=CONNEXION_FC'
       this.$axios.$get(url)
       .then(response => {
-        if (response) {
+        if (response.par_valeur === "1") {
           log.d("mounted home - France Connect Actif", response)
           this.fc = true
         } else {
           log.d("mounted home - France Connect Inactif")
           this.fc = false
+        }
+        log.i("mounted home - done")
+      }).catch(err => {
+        log.w("mounted home - Error on mounted", err);
+      })
+
+    // Affiche ou pas le bouton structure
+    const urlstruc = process.env.API_URL + '/parametres?code=CONNEXION_STRUCTURE'
+      this.$axios.$get(urlstruc)
+      .then(response => {
+        if (response.par_valeur === "1" ) {
+          log.d("mounted home - bt_structureactif Actif", response)
+          this.bt_structureactif = true
+        } else {
+          log.d("mounted home - bt_structureactif Inactif", response)
+          this.bt_structureactif = false
         }
         log.i("mounted home - done")
       }).catch(err => {
