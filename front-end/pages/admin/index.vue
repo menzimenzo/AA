@@ -44,6 +44,33 @@
             </p>
           </b-card-body>
         </b-collapse>
+        <b-collapse id="tableaux-de-bord" accordion="my-accordion" role="tabpanel">
+          <b-card-body v-if="!loading">
+              <h5>
+                <i class="material-icons ml-2 mr-1">attribution</i> Nombre de demandes MNS AAQ non traitées<br>
+              </h5>
+              <table class="table table-striped">
+                <thead  >
+                  <tr >
+                    <th scope="col">Structure</th>
+                    <th scope="col">En attente (%)</th>
+                    <th scope="col">Nb en attente</th>
+                    <th scope="col">Nb validées</th>
+                    <th scope="col">Nb total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr  v-for="suiviDemande in suiviDemandes" :key="suiviDemande.sre_libellecourt">
+                    <td><b>{{suiviDemande.sre_libellecourt}}</b></td>
+                    <td><b>{{Math.trunc(isNaN(suiviDemande.dem_en_attente*100/suiviDemande.dem_total) ? 0 : suiviDemande.dem_en_attente*100/suiviDemande.dem_total)}} %</b></td>
+                    <td><b>{{suiviDemande.dem_en_attente}}</b></td>
+                    <td><b>{{suiviDemande.dem_validee}}</b></td>
+                    <td><b>{{suiviDemande.dem_total}}</b></td>
+                  </tr>
+                </tbody>
+              </table>
+          </b-card-body>
+        </b-collapse>
         <b-collapse id="publication-document" accordion="my-accordion" role="tabpanel">
           <b-card-body>
             <file-upload />
@@ -62,13 +89,17 @@
 import { mapState } from "vuex";
 import exportUsersCsv from '~/lib/mixins/exportUsersCsv'
 
+import { Bar } from 'vue-chartjs'
+import BarChart from "~/components/stat/histogramme.vue";
 import Editable from "~/components/editable/index.vue";
 import Menu from "~/components/navigation/menu-admin.vue"
 import user from "~/components/user.vue";
 import fileUpload from "~/components/fileUpload.vue";
 import Dashboard from '../../components/dashboard/admin.vue';
+import stat from "~/lib/mixins/stat";
 
 import logger from '~/plugins/logger'
+
 const log = logger('pages:admin')
 
 export default {
@@ -105,13 +136,27 @@ export default {
         { text: "Validée", value: "Validée" },
         { text: "Non validée", value: "Non validée" },
         { text: "Tous", value: "Tous" }
+      ],
+      optionsHisto: null,
+      data1: null,
+      bars: [
+          { variant: 'success', value: 25 },
+          { variant: 'info', value: 75 },
+          { variant: 'warning', value: 75 },
+          { variant: 'danger', value: 75 },
+          { variant: 'primary', value: 75 },
+          { variant: 'secondary', value: 75 },
+          { variant: 'dark', value: 75 }
+        ],
+      suiviDemandes: [
+
       ]
     };
   },
   computed: {
     ...mapState(["users"]),
     filteredUtilisateurs: function() {
-      log.i('filteredUtilisateurs - In')
+      //log.i('filteredUtilisateurs - In')
       return this.users.filter(user => {
         var isMatch = true;
         if (this.nomFilter != "") {
@@ -123,7 +168,7 @@ export default {
         if (this.inscriptionFilter != "Tous") {
           isMatch = isMatch && user.inscription.indexOf(this.inscriptionFilter) > -1;
         }
-        log.d('filteredUtilisateurs - Done', { isMatch })
+        //log.d('filteredUtilisateurs - Done', { isMatch })
         return isMatch;
       });
     }
@@ -135,8 +180,13 @@ export default {
         log.w('mounted - Error', error)
         return this.$toast.error('Une erreur est survenue lors de la récupération des users')
     })
+
+    // Chargements des indicateurs demandes
+    this.indicateursDemandesAaq();
+    
     log.i('mounted - Done')
     this.loading = false;
+
   },
   methods: {
     getUser: function(id) {
@@ -153,6 +203,18 @@ export default {
     },
     displayDashboard(bool) {
       return this.showDashboard = bool
+    },
+    indicateursDemandesAaq(){
+      const url = process.env.API_URL + "/demandeaaq/liste";
+      return this.$axios.$get(url)
+      .then(({suiviDemandes }) => {
+          log.i('suiviDemandes -Done')
+          return this.suiviDemandes = suiviDemandes;
+      })
+      .catch(error => {
+          log.i('suiviDemandes -Error', error)
+          return this.$toast.error("Une erreur est survenue lors de la récupération des indicateurs de demande")
+      })
     },
   }
 };

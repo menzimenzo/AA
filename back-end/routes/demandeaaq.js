@@ -51,6 +51,52 @@ router.get('/', function (req, res) {
         
 })
 
+
+router.get('/liste/', function (req, res) {
+    log.i('::list - In')    
+    const requete = `select sre.sre_libellecourt, 
+                                (SELECT count(*) 
+                                    from demande_aaq 
+                                    where sre.sre_id = dem_sre_id 
+                                    and dem_dms_id = 1) dem_en_attente, 
+                                (SELECT count(*) from demande_aaq 
+                                    where sre.sre_id = dem_sre_id 
+                                    and dem_dms_id = 2) dem_validee, 
+                                (SELECT count(*) 
+                                    from demande_aaq  
+                                    where sre.sre_id = dem_sre_id) dem_total
+                            from structure_ref sre
+                            where sre_id <> 1
+                            union
+                            select 'Indépendants', 
+                                (SELECT count(*) from demande_aaq 
+                                    where dem_uti_formateur_id is not null 
+                                    and  dem_sre_id is null 
+                                    and dem_dms_id = 1) dem_en_attente, 
+                                (SELECT count(*) from demande_aaq 
+                                    where dem_uti_formateur_id is not null 
+                                    and  dem_sre_id is null 
+                                    and dem_dms_id = 2) dem_validee, 
+                                (SELECT count(*) from demande_aaq dem_total 
+                                    where dem_uti_formateur_id is not null 
+                                    and  dem_sre_id is null) dem_total
+                            order by 1`
+
+    log.i('::list - requête', { requete })    
+    return pgPool.query(requete,(err, result) => {
+        if (err) {
+            log.w('::list - error', err)
+            return res.status(400).json({ message: 'erreur sur la requete de recherche de la liste demande aaq' });
+        }
+        else {
+            log.i('::list - Done')    
+            const suiviDemandes = result.rows;
+            return res.status(200).json({ suiviDemandes });
+        }
+    });
+        
+})
+
 router.post('/', async function (req, res) {
     const { demandeurId, formateurId, structurerefid } = req.body
 

@@ -13,11 +13,22 @@
         </b-btn>
         <b-btn
           block
-          v-b-toggle.publication-document
+          v-b-toggle.tableaux-de-bord
           href="#"
           variant="Dark link"
           @click.prevent="switchTab(1)"
           :class="activeTab === 1 ? 'activeBg accordionBtn': 'accordionBtn'">
+          <h4>
+            <i class="material-icons ml-2 mr-1">leaderboard</i> Tableaux de bord
+          </h4>
+        </b-btn>        
+        <b-btn
+          block
+          v-b-toggle.publication-document
+          href="#"
+          variant="Dark link"
+          @click.prevent="switchTab(2)"
+          :class="activeTab === 2 ? 'activeBg accordionBtn': 'accordionBtn'">
           <h4>
             <i class="material-icons ml-2 mr-1">cloud_upload</i> Publication des documents
           </h4>
