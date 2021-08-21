@@ -641,7 +641,9 @@ export default {
     submit: function () {
       log.i("submit - In");
       this.$validator.validateAll().then((isValid) => {
-        if (!this.accordHonneur) {
+        // Correction Mantis 86383
+        //if (!this.accordHonneur) {
+        if (this.accordHonneur!="true") {
           log.w("submit - Honor issue");
           this.user.cpi_codeinsee = null;
           return this.$toast.error(
